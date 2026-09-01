@@ -12,7 +12,6 @@
   />
 
   <style>
-
     * {
       box-sizing: border-box;
     }
@@ -143,7 +142,7 @@
     #map {
       margin-top: 20px;
       width: 100%;
-      height: 300px;
+      height: 330px;
       border-radius: 18px;
       border: 1px solid #30363d;
       overflow: hidden;
@@ -175,13 +174,6 @@
       min-height: 20px;
     }
 
-    .session {
-      text-align: center;
-      margin-top: 10px;
-      color: #c9d1d9;
-      font-size: 13px;
-    }
-
     .version {
       text-align: center;
       margin-top: 22px;
@@ -190,15 +182,12 @@
       letter-spacing: 2px;
     }
 
-    /* Leaflet etwas dunkler darstellen */
-
     .leaflet-tile-pane {
       filter:
-        grayscale(65%)
-        brightness(55%)
-        contrast(115%);
+        grayscale(75%)
+        brightness(42%)
+        contrast(120%);
     }
-
   </style>
 </head>
 
@@ -207,35 +196,21 @@
 <div class="app">
 
   <div class="topbar">
-
-    <div class="brand">
-      RAVEN
-    </div>
-
-    <div class="online">
-      ● ONLINE
-    </div>
-
+    <div class="brand">RAVEN</div>
+    <div class="online">● ONLINE</div>
   </div>
-
 
   <div class="card">
 
-    <div class="raven">
-      🐦‍⬛
-    </div>
+    <div class="raven">🐦‍⬛</div>
 
-    <h1>
-      RAVEN #0001
-    </h1>
+    <h1>RAVEN #0001</h1>
 
     <div class="generation">
       Generation 1
     </div>
 
-
     <div class="levelLine">
-
       <span>
         Level <strong id="level">1</strong>
       </span>
@@ -243,9 +218,7 @@
       <span>
         Nächstes Level
       </span>
-
     </div>
-
 
     <div class="xpbar">
       <div id="xpfill"></div>
@@ -255,11 +228,9 @@
       <span id="xp">0</span> / 100 XP
     </div>
 
-
     <div class="stats">
 
       <div class="stat">
-
         <div class="label">
           STRECKE
         </div>
@@ -267,12 +238,9 @@
         <div class="value">
           <span id="distance">0.00</span> km
         </div>
-
       </div>
 
-
       <div class="stat">
-
         <div class="label">
           SESSION
         </div>
@@ -280,25 +248,19 @@
         <div class="value">
           <span id="sessionDistance">0</span> m
         </div>
-
       </div>
 
-
       <div class="stat">
-
         <div class="label">
-          ALTER
+          ERKUNDETE PUNKTE
         </div>
 
-        <div class="value">
-          Tag 1
+        <div class="value" id="exploredCount">
+          0
         </div>
-
       </div>
 
-
       <div class="stat">
-
         <div class="label">
           STATUS
         </div>
@@ -306,14 +268,11 @@
         <div class="value" id="status">
           Bereit
         </div>
-
       </div>
 
     </div>
 
-
     <div id="map"></div>
-
 
     <button
       id="exploreButton"
@@ -321,7 +280,6 @@
     >
       Erkundung starten
     </button>
-
 
     <div
       class="message"
@@ -332,9 +290,8 @@
 
   </div>
 
-
   <div class="version">
-    RAVEN PROTOTYPE V0.3
+    RAVEN PROTOTYPE V0.4
   </div>
 
 </div>
@@ -357,6 +314,18 @@ let totalDistance =
   Number(localStorage.getItem("ravenDistance")) || 0;
 
 
+let exploredPoints =
+  JSON.parse(
+    localStorage.getItem("ravenExploredPoints")
+  ) || [];
+
+
+let travelHistory =
+  JSON.parse(
+    localStorage.getItem("ravenTravelHistory")
+  ) || [];
+
+
 let tracking = false;
 
 let watchId = null;
@@ -367,12 +336,12 @@ let sessionDistance = 0;
 
 let mapCentered = false;
 
-let routePoints = [];
+let sessionPoints = [];
 
 
-/* -------------------------
+/* =========================
    KARTE
-------------------------- */
+========================= */
 
 const map =
   L.map("map").setView(
@@ -390,28 +359,88 @@ L.tileLayer(
 ).addTo(map);
 
 
-const positionMarker =
-  L.circleMarker(
-    [51.1657, 10.4515],
-    {
-      radius: 8
-    }
-  );
+/* bisherige gesamte Route */
 
-
-const routeLine =
+const historyLine =
   L.polyline(
-    [],
+    travelHistory,
     {
-      weight: 5,
-      opacity: 0.9
+      weight: 3,
+      opacity: 0.45
     }
   ).addTo(map);
 
 
-/* -------------------------
+/* aktuelle Session */
+
+const sessionLine =
+  L.polyline(
+    [],
+    {
+      weight: 5,
+      opacity: 0.95
+    }
+  ).addTo(map);
+
+
+/* aktueller Standort */
+
+const positionMarker =
+  L.circleMarker(
+    [51.1657,10.4515],
+    {
+      radius: 8,
+      weight: 3,
+      fillOpacity: 1
+    }
+  );
+
+
+/* =========================
+   ERKUNDETE BEREICHE LADEN
+========================= */
+
+function drawExploredAreas() {
+
+  exploredPoints.forEach(point => {
+
+    L.circle(
+      [point.lat, point.lon],
+      {
+        radius: 35,
+        weight: 0,
+        fillOpacity: 0.20
+      }
+    ).addTo(map);
+
+  });
+
+}
+
+
+drawExploredAreas();
+
+
+/* Wenn schon Daten existieren:
+   Karte auf die letzte bekannte Gegend setzen */
+
+if (travelHistory.length > 0) {
+
+  const lastSavedPoint =
+    travelHistory[
+      travelHistory.length - 1
+    ];
+
+  map.setView(
+    lastSavedPoint,
+    16
+  );
+}
+
+
+/* =========================
    UI
-------------------------- */
+========================= */
 
 function updateUI() {
 
@@ -427,14 +456,17 @@ function updateUI() {
   document.getElementById("sessionDistance").textContent =
     Math.round(sessionDistance);
 
+  document.getElementById("exploredCount").textContent =
+    exploredPoints.length;
+
   document.getElementById("xpfill").style.width =
     Math.min(xp,100) + "%";
 }
 
 
-/* -------------------------
+/* =========================
    XP
-------------------------- */
+========================= */
 
 function addXP(amount) {
 
@@ -461,20 +493,20 @@ function addXP(amount) {
 }
 
 
-/* -------------------------
-   ERKUNDUNG
-------------------------- */
+/* =========================
+   ERKUNDUNG START / STOP
+========================= */
 
 function toggleExploration() {
 
   if (tracking) {
-
     stopExploration();
+  }
 
-  } else {
-
+  else {
     startExploration();
   }
+
 }
 
 
@@ -482,6 +514,7 @@ function startExploration() {
 
   const message =
     document.getElementById("message");
+
 
   if (!navigator.geolocation) {
 
@@ -498,9 +531,9 @@ function startExploration() {
 
   lastPosition = null;
 
-  routePoints = [];
+  sessionPoints = [];
 
-  routeLine.setLatLngs([]);
+  sessionLine.setLatLngs([]);
 
 
   document.getElementById("status").textContent =
@@ -526,12 +559,13 @@ function startExploration() {
         timeout: 20000
       }
     );
+
 }
 
 
-/* -------------------------
+/* =========================
    GPS POSITION
-------------------------- */
+========================= */
 
 function handlePosition(position) {
 
@@ -562,25 +596,16 @@ function handlePosition(position) {
   };
 
 
-  /*
-     Aktuelle Position
-     auf Karte anzeigen
-  */
-
   positionMarker.setLatLng(
     [lat,lon]
   );
+
 
   if (!map.hasLayer(positionMarker)) {
 
     positionMarker.addTo(map);
   }
 
-
-  /*
-     Beim ersten GPS-Fix
-     auf Raven zoomen
-  */
 
   if (!mapCentered) {
 
@@ -592,10 +617,6 @@ function handlePosition(position) {
     mapCentered = true;
   }
 
-
-  /*
-     Entfernung berechnen
-  */
 
   if (lastPosition) {
 
@@ -609,9 +630,10 @@ function handlePosition(position) {
 
 
     /*
-       Kleine GPS-Sprünge
-       und unrealistische Sprünge
-       ignorieren
+       3 Meter Mindestbewegung.
+
+       Über 150 Meter zwischen
+       zwei GPS-Messungen wird ignoriert.
     */
 
     if (
@@ -630,29 +652,70 @@ function handlePosition(position) {
       );
 
 
+      const newPoint =
+        [lat,lon];
+
+
+      sessionPoints.push(
+        newPoint
+      );
+
+
+      travelHistory.push(
+        newPoint
+      );
+
+
+      localStorage.setItem(
+        "ravenTravelHistory",
+        JSON.stringify(travelHistory)
+      );
+
+
+      sessionLine.setLatLngs(
+        sessionPoints
+      );
+
+
+      historyLine.setLatLngs(
+        travelHistory
+      );
+
+
       /*
-         Route erweitern
+         NEUES GEBIET PRÜFEN
       */
 
-      routePoints.push(
-        [lat,lon]
+      addExploredArea(
+        lat,
+        lon
       );
 
-      routeLine.setLatLngs(
-        routePoints
-      );
     }
+
   }
 
   else {
 
-    routePoints.push(
-      [lat,lon]
+    const firstPoint =
+      [lat,lon];
+
+
+    sessionPoints.push(
+      firstPoint
     );
 
-    routeLine.setLatLngs(
-      routePoints
+
+    sessionLine.setLatLngs(
+      sessionPoints
     );
+
+
+    addExploredArea(
+      lat,
+      lon
+    );
+
   }
 
 
@@ -669,16 +732,95 @@ function handlePosition(position) {
 }
 
 
-/* -------------------------
+/* =========================
+   NEUES GEBIET
+========================= */
+
+function addExploredArea(
+  lat,
+  lon
+) {
+
+  /*
+     Nicht jeden GPS-Punkt speichern.
+
+     Neuer Erkundungspunkt erst,
+     wenn mindestens ca. 20 Meter
+     Abstand zum letzten liegt.
+  */
+
+  if (exploredPoints.length > 0) {
+
+    const lastExplored =
+      exploredPoints[
+        exploredPoints.length - 1
+      ];
+
+
+    const distance =
+      calculateDistance(
+        lastExplored.lat,
+        lastExplored.lon,
+        lat,
+        lon
+      );
+
+
+    if (distance < 20) {
+      return;
+    }
+
+  }
+
+
+  const point = {
+    lat: lat,
+    lon: lon
+  };
+
+
+  exploredPoints.push(
+    point
+  );
+
+
+  localStorage.setItem(
+    "ravenExploredPoints",
+    JSON.stringify(exploredPoints)
+  );
+
+
+  /*
+     Sichtbarer erkundeter Bereich
+     um diesen Punkt
+  */
+
+  L.circle(
+    [lat,lon],
+    {
+      radius: 35,
+      weight: 0,
+      fillOpacity: 0.20
+    }
+  ).addTo(map);
+
+
+  updateUI();
+}
+
+
+/* =========================
    GPS FEHLER
-------------------------- */
+========================= */
 
 function handleGPSError(error) {
 
   tracking = false;
 
+
   document.getElementById("status").textContent =
     "Bereit";
+
 
   document.getElementById("exploreButton").textContent =
     "Erkundung starten";
@@ -702,13 +844,15 @@ function handleGPSError(error) {
 
     document.getElementById("message").textContent =
       "GPS-Zeitüberschreitung.";
+
   }
+
 }
 
 
-/* -------------------------
-   STOP
-------------------------- */
+/* =========================
+   ERKUNDUNG BEENDEN
+========================= */
 
 function stopExploration() {
 
@@ -717,6 +861,7 @@ function stopExploration() {
     navigator.geolocation.clearWatch(
       watchId
     );
+
   }
 
 
@@ -726,6 +871,12 @@ function stopExploration() {
 
   lastPosition = null;
 
+
+  /*
+     TEST-LEVELSYSTEM:
+
+     10 Meter = 1 XP
+  */
 
   const earnedXP =
     Math.floor(
@@ -738,11 +889,13 @@ function stopExploration() {
     addXP(
       earnedXP
     );
+
   }
 
 
   document.getElementById("status").textContent =
     "Bereit";
+
 
   document.getElementById("exploreButton").textContent =
     "Erkundung starten";
@@ -760,9 +913,9 @@ function stopExploration() {
 }
 
 
-/* -------------------------
-   DISTANZ
-------------------------- */
+/* =========================
+   DISTANZBERECHNUNG
+========================= */
 
 function calculateDistance(
   lat1,
@@ -785,6 +938,7 @@ function calculateDistance(
   const deltaPhi =
     (lat2-lat1) *
     Math.PI / 180;
+
 
   const deltaLambda =
     (lon2-lon1) *
