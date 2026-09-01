@@ -237,7 +237,7 @@
 
       <div class="stat">
         <div class="label">STRECKE</div>
-        <div class="value"><span id="distance">0.0</span> km</div>
+        <div class="value"><span id="distance">0.00</span> km</div>
       </div>
 
       <div class="stat">
@@ -252,14 +252,14 @@
 
       <div class="stat">
         <div class="label">STATUS</div>
-        <div class="value">Bereit</div>
+        <div class="value" id="statusText">Bereit</div>
       </div>
 
     </div>
 
     <div class="map"></div>
 
-    <button onclick="startExploration()">
+    <button id="exploreButton" onclick="startExploration()">
       Erkundung starten
     </button>
 
@@ -274,7 +274,7 @@
   </div>
 
   <div class="version">
-    RAVEN PROTOTYPE V0.1
+    RAVEN PROTOTYPE V0.2
   </div>
 
 </div>
@@ -284,35 +284,49 @@
 
   let xp = Number(localStorage.getItem("ravenXP")) || 0;
   let level = Number(localStorage.getItem("ravenLevel")) || 1;
+  let totalDistance = Number(localStorage.getItem("ravenDistance")) || 0;
+
+  let tracking = false;
+  let watchId = null;
+  let lastPosition = null;
+  let sessionDistance = 0;
+
 
   function updateUI() {
 
     document.getElementById("xp").textContent = xp;
     document.getElementById("level").textContent = level;
 
-    const percentage = Math.min(xp, 100);
+    document.getElementById("distance").textContent =
+      (totalDistance / 1000).toFixed(2);
 
     document.getElementById("xpfill").style.width =
-      percentage + "%";
-
+      Math.min(xp, 100) + "%";
   }
 
-  function testXP() {
 
-    xp += 10;
+  function addXP(amount) {
 
-    if (xp >= 100) {
-      xp = xp - 100;
+    xp += amount;
+
+    while (xp >= 100) {
+      xp -= 100;
       level++;
     }
 
     localStorage.setItem("ravenXP", xp);
     localStorage.setItem("ravenLevel", level);
 
+    updateUI();
+  }
+
+
+  function testXP() {
+
+    addXP(10);
+
     document.getElementById("message").textContent =
       "+10 XP gesammelt.";
-
-    updateUI();
   }
 
 
@@ -321,48 +335,194 @@
     const message =
       document.getElementById("message");
 
-    if (!navigator.geolocation) {
+    const button =
+      document.getElementById("exploreButton");
 
-      message.textContent =
-        "GPS wird von diesem Gerät nicht unterstützt.";
+    const statusText =
+      document.getElementById("statusText");
 
+    if (tracking) {
+      stopExploration();
       return;
     }
 
+    if (!navigator.geolocation) {
+      message.textContent =
+        "GPS wird von diesem Gerät nicht unterstützt.";
+      return;
+    }
+
+    tracking = true;
+    sessionDistance = 0;
+    lastPosition = null;
+
+    button.textContent = "Erkundung beenden";
+    statusText.textContent = "Unterwegs";
+
     message.textContent =
-      "Standort wird gesucht...";
+      "GPS wird gestartet...";
 
-    navigator.geolocation.getCurrentPosition(
+    watchId = navigator.geolocation.watchPosition(
 
-      function(position) {
-
-        const latitude =
-          position.coords.latitude.toFixed(5);
-
-        const longitude =
-          position.coords.longitude.toFixed(5);
-
-        message.textContent =
-          "Erkundung gestartet ✓ GPS erkannt.";
-
-        console.log(
-          "Position:",
-          latitude,
-          longitude
-        );
-      },
+      handlePosition,
 
       function(error) {
 
         message.textContent =
-          "Standort konnte nicht abgerufen werden.";
+          "GPS-Fehler. Standortzugriff prüfen.";
+
+        tracking = false;
+        button.textContent = "Erkundung starten";
+        statusText.textContent = "Bereit";
       },
 
       {
         enableHighAccuracy: true,
-        timeout: 10000
+        maximumAge: 0,
+        timeout: 15000
       }
     );
+  }
+
+
+  function handlePosition(position) {
+
+    const message =
+      document.getElementById("message");
+
+    const currentPosition = {
+      lat: position.coords.latitude,
+      lon: position.coords.longitude,
+      accuracy: position.coords.accuracy
+    };
+
+    if (currentPosition.accuracy > 30) {
+
+      message.textContent =
+        "Warte auf genaueres GPS... Genauigkeit: " +
+        Math.round(currentPosition.accuracy) +
+        " m";
+
+      return;
+    }
+
+
+    if (lastPosition) {
+
+      const distance = calculateDistance(
+        lastPosition.lat,
+        lastPosition.lon,
+        currentPosition.lat,
+        currentPosition.lon
+      );
+
+
+      if (distance >= 3 && distance < 200) {
+
+        sessionDistance += distance;
+        totalDistance += distance;
+
+        localStorage.setItem(
+          "ravenDistance",
+          totalDistance
+        );
+
+        document.getElementById("distance").textContent =
+          (totalDistance / 1000).toFixed(2);
+      }
+    }
+
+
+    lastPosition = currentPosition;
+
+    message.textContent =
+      "Erkundung läuft • " +
+      Math.round(sessionDistance) +
+      " m";
+  }
+
+
+  function stopExploration() {
+
+    if (watchId !== null) {
+      navigator.geolocation.clearWatch(watchId);
+    }
+
+    tracking = false;
+    watchId = null;
+    lastPosition = null;
+
+    const button =
+      document.getElementById("exploreButton");
+
+    const statusText =
+      document.getElementById("statusText");
+
+    button.textContent =
+      "Erkundung starten";
+
+    statusText.textContent =
+      "Bereit";
+
+
+    const earnedXP =
+      Math.floor(sessionDistance / 10);
+
+    if (earnedXP > 0) {
+      addXP(earnedXP);
+    }
+
+
+    document.getElementById("message").textContent =
+      "Erkundung beendet • " +
+      Math.round(sessionDistance) +
+      " m • +" +
+      earnedXP +
+      " XP";
+
+    sessionDistance = 0;
+  }
+
+
+  function calculateDistance(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+  ) {
+
+    const R = 6371000;
+
+    const phi1 = lat1 * Math.PI / 180;
+    const phi2 = lat2 * Math.PI / 180;
+
+    const deltaPhi =
+      (lat2 - lat1) * Math.PI / 180;
+
+    const deltaLambda =
+      (lon2 - lon1) * Math.PI / 180;
+
+
+    const a =
+      Math.sin(deltaPhi / 2) *
+      Math.sin(deltaPhi / 2) +
+
+      Math.cos(phi1) *
+      Math.cos(phi2) *
+
+      Math.sin(deltaLambda / 2) *
+      Math.sin(deltaLambda / 2);
+
+
+    const c =
+      2 *
+      Math.atan2(
+        Math.sqrt(a),
+        Math.sqrt(1 - a)
+      );
+
+
+    return R * c;
   }
 
 
