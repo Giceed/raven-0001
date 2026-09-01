@@ -139,6 +139,31 @@
       font-weight: bold;
     }
 
+    .locationCard {
+      margin-top: 14px;
+      padding: 16px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 18px;
+    }
+
+    .locationTitle {
+      font-size: 12px;
+      color: #8b949e;
+      margin-bottom: 7px;
+    }
+
+    #currentPlace {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #currentRegion {
+      margin-top: 5px;
+      font-size: 12px;
+      color: #8b949e;
+    }
+
     #map {
       margin-top: 20px;
       width: 100%;
@@ -172,6 +197,34 @@
       color: #8b949e;
       font-size: 13px;
       min-height: 20px;
+    }
+
+    .discovery {
+      display: none;
+      margin-top: 16px;
+      padding: 18px;
+      border: 1px solid #7c3aed;
+      border-radius: 18px;
+      background: rgba(124,58,237,.12);
+      text-align: center;
+    }
+
+    .discoverySmall {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #a78bfa;
+    }
+
+    .discoveryName {
+      margin-top: 6px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .discoveryXP {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #c4b5fd;
     }
 
     .version {
@@ -228,51 +281,72 @@
       <span id="xp">0</span> / 100 XP
     </div>
 
+
     <div class="stats">
 
       <div class="stat">
-        <div class="label">
-          STRECKE
-        </div>
-
+        <div class="label">STRECKE</div>
         <div class="value">
           <span id="distance">0.00</span> km
         </div>
       </div>
 
       <div class="stat">
-        <div class="label">
-          SESSION
-        </div>
-
+        <div class="label">SESSION</div>
         <div class="value">
           <span id="sessionDistance">0</span> m
         </div>
       </div>
 
       <div class="stat">
-        <div class="label">
-          ERKUNDETE PUNKTE
-        </div>
-
-        <div class="value" id="exploredCount">
-          0
-        </div>
+        <div class="label">ORTE ENTDECKT</div>
+        <div class="value" id="placesCount">0</div>
       </div>
 
       <div class="stat">
-        <div class="label">
-          STATUS
-        </div>
-
-        <div class="value" id="status">
-          Bereit
-        </div>
+        <div class="label">ERKUNDUNGSPUNKTE</div>
+        <div class="value" id="exploredCount">0</div>
       </div>
 
     </div>
 
+
+    <div class="locationCard">
+
+      <div class="locationTitle">
+        AKTUELLER ORT
+      </div>
+
+      <div id="currentPlace">
+        Noch unbekannt
+      </div>
+
+      <div id="currentRegion">
+        Erkundung starten, um den Ort zu bestimmen.
+      </div>
+
+    </div>
+
+
+    <div class="discovery" id="discoveryBox">
+
+      <div class="discoverySmall">
+        🐦‍⬛ NEUER ORT ENTDECKT
+      </div>
+
+      <div class="discoveryName" id="discoveryName">
+        -
+      </div>
+
+      <div class="discoveryXP" id="discoveryXP">
+        +25 XP
+      </div>
+
+    </div>
+
+
     <div id="map"></div>
+
 
     <button
       id="exploreButton"
@@ -280,6 +354,7 @@
     >
       Erkundung starten
     </button>
+
 
     <div
       class="message"
@@ -290,8 +365,9 @@
 
   </div>
 
+
   <div class="version">
-    RAVEN PROTOTYPE V0.4
+    RAVEN PROTOTYPE V0.5
   </div>
 
 </div>
@@ -303,6 +379,10 @@
 
 
 <script>
+
+/* ===============================
+   RAVEN SPEICHER
+================================ */
 
 let xp =
   Number(localStorage.getItem("ravenXP")) || 0;
@@ -326,6 +406,16 @@ let travelHistory =
   ) || [];
 
 
+let discoveredPlaces =
+  JSON.parse(
+    localStorage.getItem("ravenDiscoveredPlaces")
+  ) || [];
+
+
+/* ===============================
+   SESSION
+================================ */
+
 let tracking = false;
 
 let watchId = null;
@@ -334,18 +424,28 @@ let lastPosition = null;
 
 let sessionDistance = 0;
 
-let mapCentered = false;
-
 let sessionPoints = [];
 
+let mapCentered = false;
 
-/* =========================
+
+/*
+  Geocoder nicht bei jedem
+  GPS-Punkt aufrufen.
+*/
+
+let lastGeocodeTime = 0;
+
+let lastGeocodePosition = null;
+
+
+/* ===============================
    KARTE
-========================= */
+================================ */
 
 const map =
   L.map("map").setView(
-    [51.1657, 10.4515],
+    [51.1657,10.4515],
     5
   );
 
@@ -359,14 +459,14 @@ L.tileLayer(
 ).addTo(map);
 
 
-/* bisherige gesamte Route */
+/* Historie */
 
 const historyLine =
   L.polyline(
     travelHistory,
     {
       weight: 3,
-      opacity: 0.45
+      opacity: 0.4
     }
   ).addTo(map);
 
@@ -383,7 +483,7 @@ const sessionLine =
   ).addTo(map);
 
 
-/* aktueller Standort */
+/* aktuelle Position */
 
 const positionMarker =
   L.circleMarker(
@@ -396,16 +496,16 @@ const positionMarker =
   );
 
 
-/* =========================
-   ERKUNDETE BEREICHE LADEN
-========================= */
+/* ===============================
+   BISHER ERKUNDETE BEREICHE
+================================ */
 
 function drawExploredAreas() {
 
   exploredPoints.forEach(point => {
 
     L.circle(
-      [point.lat, point.lon],
+      [point.lat,point.lon],
       {
         radius: 35,
         weight: 0,
@@ -417,30 +517,29 @@ function drawExploredAreas() {
 
 }
 
-
 drawExploredAreas();
 
 
-/* Wenn schon Daten existieren:
-   Karte auf die letzte bekannte Gegend setzen */
+/* Karte auf letzten bekannten Punkt */
 
 if (travelHistory.length > 0) {
 
-  const lastSavedPoint =
+  const last =
     travelHistory[
       travelHistory.length - 1
     ];
 
   map.setView(
-    lastSavedPoint,
+    last,
     16
   );
+
 }
 
 
-/* =========================
+/* ===============================
    UI
-========================= */
+================================ */
 
 function updateUI() {
 
@@ -459,14 +558,18 @@ function updateUI() {
   document.getElementById("exploredCount").textContent =
     exploredPoints.length;
 
+  document.getElementById("placesCount").textContent =
+    discoveredPlaces.length;
+
   document.getElementById("xpfill").style.width =
     Math.min(xp,100) + "%";
+
 }
 
 
-/* =========================
+/* ===============================
    XP
-========================= */
+================================ */
 
 function addXP(amount) {
 
@@ -477,6 +580,7 @@ function addXP(amount) {
     xp -= 100;
 
     level++;
+
   }
 
   localStorage.setItem(
@@ -490,12 +594,13 @@ function addXP(amount) {
   );
 
   updateUI();
+
 }
 
 
-/* =========================
-   ERKUNDUNG START / STOP
-========================= */
+/* ===============================
+   START / STOP
+================================ */
 
 function toggleExploration() {
 
@@ -522,6 +627,7 @@ function startExploration() {
       "GPS wird nicht unterstützt.";
 
     return;
+
   }
 
 
@@ -536,11 +642,11 @@ function startExploration() {
   sessionLine.setLatLngs([]);
 
 
-  document.getElementById("status").textContent =
-    "Unterwegs";
-
-  document.getElementById("exploreButton").textContent =
+  document.getElementById(
+    "exploreButton"
+  ).textContent =
     "Erkundung beenden";
+
 
   message.textContent =
     "GPS wird gestartet...";
@@ -558,14 +664,15 @@ function startExploration() {
         maximumAge: 0,
         timeout: 20000
       }
+
     );
 
 }
 
 
-/* =========================
-   GPS POSITION
-========================= */
+/* ===============================
+   GPS
+================================ */
 
 function handlePosition(position) {
 
@@ -581,12 +688,16 @@ function handlePosition(position) {
 
   if (accuracy > 35) {
 
-    document.getElementById("message").textContent =
+    document.getElementById(
+      "message"
+    ).textContent =
+
       "GPS wird genauer... ±" +
       Math.round(accuracy) +
       " m";
 
     return;
+
   }
 
 
@@ -596,6 +707,8 @@ function handlePosition(position) {
   };
 
 
+  /* Marker */
+
   positionMarker.setLatLng(
     [lat,lon]
   );
@@ -604,8 +717,11 @@ function handlePosition(position) {
   if (!map.hasLayer(positionMarker)) {
 
     positionMarker.addTo(map);
+
   }
 
+
+  /* Karte beim ersten Fix */
 
   if (!mapCentered) {
 
@@ -615,8 +731,19 @@ function handlePosition(position) {
     );
 
     mapCentered = true;
+
   }
 
+
+  /* Ort bestimmen */
+
+  maybeCheckLocation(
+    lat,
+    lon
+  );
+
+
+  /* Bewegung */
 
   if (lastPosition) {
 
@@ -628,13 +755,6 @@ function handlePosition(position) {
         lon
       );
 
-
-    /*
-       3 Meter Mindestbewegung.
-
-       Über 150 Meter zwischen
-       zwei GPS-Messungen wird ignoriert.
-    */
 
     if (
       moved >= 3 &&
@@ -682,10 +802,6 @@ function handlePosition(position) {
       );
 
 
-      /*
-         NEUES GEBIET PRÜFEN
-      */
-
       addExploredArea(
         lat,
         lon
@@ -719,35 +835,32 @@ function handlePosition(position) {
   }
 
 
-  lastPosition = current;
+  lastPosition =
+    current;
 
 
-  document.getElementById("message").textContent =
+  document.getElementById(
+    "message"
+  ).textContent =
+
     "Erkundung läuft • GPS ±" +
     Math.round(accuracy) +
     " m";
 
 
   updateUI();
+
 }
 
 
-/* =========================
-   NEUES GEBIET
-========================= */
+/* ===============================
+   ERKUNDUNGSFLÄCHE
+================================ */
 
 function addExploredArea(
   lat,
   lon
 ) {
-
-  /*
-     Nicht jeden GPS-Punkt speichern.
-
-     Neuer Erkundungspunkt erst,
-     wenn mindestens ca. 20 Meter
-     Abstand zum letzten liegt.
-  */
 
   if (exploredPoints.length > 0) {
 
@@ -790,11 +903,6 @@ function addExploredArea(
   );
 
 
-  /*
-     Sichtbarer erkundeter Bereich
-     um diesen Punkt
-  */
-
   L.circle(
     [lat,lon],
     {
@@ -806,43 +914,391 @@ function addExploredArea(
 
 
   updateUI();
+
 }
 
 
-/* =========================
+/* ===============================
+   ORT PRÜFEN
+================================ */
+
+function maybeCheckLocation(
+  lat,
+  lon
+) {
+
+  const now =
+    Date.now();
+
+
+  /*
+     Mindestens 60 Sekunden Abstand
+     zwischen Standort-Abfragen.
+  */
+
+  if (
+    now - lastGeocodeTime <
+    60000
+  ) {
+
+    return;
+
+  }
+
+
+  /*
+     Wenn wir schon einen Ort
+     geprüft haben:
+
+     erst wieder nach mindestens
+     ca. 100 Metern.
+  */
+
+  if (lastGeocodePosition) {
+
+    const moved =
+      calculateDistance(
+        lastGeocodePosition.lat,
+        lastGeocodePosition.lon,
+        lat,
+        lon
+      );
+
+
+    if (moved < 100) {
+      return;
+    }
+
+  }
+
+
+  lastGeocodeTime =
+    now;
+
+
+  lastGeocodePosition = {
+    lat: lat,
+    lon: lon
+  };
+
+
+  reverseGeocode(
+    lat,
+    lon
+  );
+
+}
+
+
+/* ===============================
+   REVERSE GEOCODING
+================================ */
+
+async function reverseGeocode(
+  lat,
+  lon
+) {
+
+  const url =
+
+    "https://api.bigdatacloud.net/data/reverse-geocode-client" +
+
+    "?latitude=" +
+    encodeURIComponent(lat) +
+
+    "&longitude=" +
+    encodeURIComponent(lon) +
+
+    "&localityLanguage=de";
+
+
+  try {
+
+    const response =
+      await fetch(url);
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        "Geocoding fehlgeschlagen"
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    /*
+       BigDataCloud kann je nach Ort
+       unterschiedliche Felder liefern.
+
+       Deshalb mehrere mögliche
+       Felder berücksichtigen.
+    */
+
+    const city =
+
+      data.city ||
+
+      data.locality ||
+
+      data.localityInfo
+        ?.informative
+        ?.find(
+          item =>
+            item.description === "city"
+        )
+        ?.name ||
+
+      "Unbekannter Ort";
+
+
+    const region =
+
+      data.principalSubdivision ||
+
+      "";
+
+
+    const country =
+
+      data.countryName ||
+
+      "";
+
+
+    document.getElementById(
+      "currentPlace"
+    ).textContent =
+      city;
+
+
+    document.getElementById(
+      "currentRegion"
+    ).textContent =
+
+      [region,country]
+        .filter(Boolean)
+        .join(" • ");
+
+
+    registerPlace(
+      city,
+      region,
+      country
+    );
+
+  }
+
+  catch(error) {
+
+    console.log(
+      "Ort konnte nicht ermittelt werden:",
+      error
+    );
+
+  }
+
+}
+
+
+/* ===============================
+   NEUEN ORT REGISTRIEREN
+================================ */
+
+function registerPlace(
+  city,
+  region,
+  country
+) {
+
+  if (
+    !city ||
+    city === "Unbekannter Ort"
+  ) {
+
+    return;
+
+  }
+
+
+  /*
+     eindeutiger Schlüssel
+  */
+
+  const placeKey =
+
+    (
+      country +
+      "|" +
+      region +
+      "|" +
+      city
+    )
+    .toLowerCase();
+
+
+  const alreadyDiscovered =
+    discoveredPlaces.some(
+      place =>
+        place.key === placeKey
+    );
+
+
+  if (alreadyDiscovered) {
+
+    return;
+
+  }
+
+
+  const newPlace = {
+
+    key:
+      placeKey,
+
+    name:
+      city,
+
+    region:
+      region,
+
+    country:
+      country,
+
+    discoveredAt:
+      new Date().toISOString()
+
+  };
+
+
+  discoveredPlaces.push(
+    newPlace
+  );
+
+
+  localStorage.setItem(
+    "ravenDiscoveredPlaces",
+    JSON.stringify(discoveredPlaces)
+  );
+
+
+  /*
+     Neue Stadt:
+     +25 XP
+  */
+
+  addXP(
+    25
+  );
+
+
+  showDiscovery(
+    city,
+    25
+  );
+
+
+  updateUI();
+
+}
+
+
+/* ===============================
+   ENTDECKUNGSANZEIGE
+================================ */
+
+function showDiscovery(
+  name,
+  reward
+) {
+
+  const box =
+    document.getElementById(
+      "discoveryBox"
+    );
+
+
+  document.getElementById(
+    "discoveryName"
+  ).textContent =
+    name;
+
+
+  document.getElementById(
+    "discoveryXP"
+  ).textContent =
+    "+" +
+    reward +
+    " Entdeckungs-XP";
+
+
+  box.style.display =
+    "block";
+
+
+  /*
+     Nach 8 Sekunden
+     wieder ausblenden
+  */
+
+  setTimeout(
+    () => {
+
+      box.style.display =
+        "none";
+
+    },
+    8000
+  );
+
+}
+
+
+/* ===============================
    GPS FEHLER
-========================= */
+================================ */
 
-function handleGPSError(error) {
+function handleGPSError(
+  error
+) {
 
-  tracking = false;
+  tracking =
+    false;
 
 
-  document.getElementById("status").textContent =
-    "Bereit";
-
-
-  document.getElementById("exploreButton").textContent =
+  document.getElementById(
+    "exploreButton"
+  ).textContent =
     "Erkundung starten";
 
 
   if (error.code === 1) {
 
-    document.getElementById("message").textContent =
+    document.getElementById(
+      "message"
+    ).textContent =
       "Standortzugriff wurde verweigert.";
 
   }
 
   else if (error.code === 2) {
 
-    document.getElementById("message").textContent =
+    document.getElementById(
+      "message"
+    ).textContent =
       "GPS-Position nicht verfügbar.";
 
   }
 
   else {
 
-    document.getElementById("message").textContent =
+    document.getElementById(
+      "message"
+    ).textContent =
       "GPS-Zeitüberschreitung.";
 
   }
@@ -850,9 +1306,9 @@ function handleGPSError(error) {
 }
 
 
-/* =========================
+/* ===============================
    ERKUNDUNG BEENDEN
-========================= */
+================================ */
 
 function stopExploration() {
 
@@ -865,15 +1321,19 @@ function stopExploration() {
   }
 
 
-  watchId = null;
+  watchId =
+    null;
 
-  tracking = false;
+  tracking =
+    false;
 
-  lastPosition = null;
+  lastPosition =
+    null;
 
 
   /*
-     TEST-LEVELSYSTEM:
+     aktuell weiterhin
+     Prototyp-Regel:
 
      10 Meter = 1 XP
   */
@@ -893,15 +1353,16 @@ function stopExploration() {
   }
 
 
-  document.getElementById("status").textContent =
-    "Bereit";
-
-
-  document.getElementById("exploreButton").textContent =
+  document.getElementById(
+    "exploreButton"
+  ).textContent =
     "Erkundung starten";
 
 
-  document.getElementById("message").textContent =
+  document.getElementById(
+    "message"
+  ).textContent =
+
     "Erkundung beendet • " +
     Math.round(sessionDistance) +
     " m • +" +
@@ -910,12 +1371,13 @@ function stopExploration() {
 
 
   updateUI();
+
 }
 
 
-/* =========================
-   DISTANZBERECHNUNG
-========================= */
+/* ===============================
+   DISTANZ
+================================ */
 
 function calculateDistance(
   lat1,
@@ -929,10 +1391,13 @@ function calculateDistance(
 
 
   const phi1 =
-    lat1 * Math.PI / 180;
+    lat1 *
+    Math.PI / 180;
+
 
   const phi2 =
-    lat2 * Math.PI / 180;
+    lat2 *
+    Math.PI / 180;
 
 
   const deltaPhi =
@@ -970,6 +1435,7 @@ function calculateDistance(
 
 
   return R * c;
+
 }
 
 
