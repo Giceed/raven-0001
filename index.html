@@ -3,9 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>RAVEN #0001</title>
 
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -16,7 +23,7 @@
       font-family: Arial, Helvetica, sans-serif;
       background:
         radial-gradient(circle at top, #1c2430 0%, #0d1117 45%, #050608 100%);
-      color: #ffffff;
+      color: white;
       display: flex;
       justify-content: center;
       padding: 24px 14px 50px;
@@ -40,17 +47,17 @@
       color: #8b949e;
     }
 
-    .status {
-      font-size: 12px;
+    .online {
       color: #56d364;
+      font-size: 12px;
     }
 
     .card {
-      background: rgba(22, 27, 34, 0.92);
+      background: rgba(22,27,34,.94);
       border: 1px solid #30363d;
       border-radius: 24px;
       padding: 24px;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
     }
 
     .raven {
@@ -62,16 +69,14 @@
       align-items: center;
       justify-content: center;
       font-size: 58px;
-      background: linear-gradient(145deg, #242c36, #090b0e);
+      background: linear-gradient(145deg,#242c36,#090b0e);
       border: 1px solid #3b4652;
-      box-shadow: inset 0 0 30px rgba(255,255,255,0.03);
     }
 
     h1 {
       margin: 0;
       text-align: center;
       font-size: 28px;
-      letter-spacing: 1px;
     }
 
     .generation {
@@ -81,34 +86,33 @@
       margin-bottom: 26px;
     }
 
-    .level-line {
+    .levelLine {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 8px;
       font-size: 14px;
+      margin-bottom: 8px;
     }
 
     .xpbar {
-      width: 100%;
       height: 14px;
       background: #0d1117;
+      border: 1px solid #30363d;
       border-radius: 999px;
       overflow: hidden;
-      border: 1px solid #30363d;
     }
 
-    .xpfill {
-      width: 0%;
+    #xpfill {
       height: 100%;
-      background: linear-gradient(90deg, #7c3aed, #a855f7);
-      transition: width 0.3s ease;
+      width: 0%;
+      background: linear-gradient(90deg,#7c3aed,#a855f7);
+      transition: .3s;
     }
 
-    .xptext {
-      margin-top: 7px;
+    .xpText {
       text-align: right;
-      font-size: 12px;
+      margin-top: 7px;
       color: #8b949e;
+      font-size: 12px;
     }
 
     .stats {
@@ -119,79 +123,63 @@
     }
 
     .stat {
-      padding: 16px;
-      border-radius: 18px;
       background: #0d1117;
       border: 1px solid #30363d;
+      padding: 16px;
+      border-radius: 18px;
     }
 
-    .stat .label {
-      font-size: 12px;
+    .label {
       color: #8b949e;
+      font-size: 12px;
       margin-bottom: 6px;
     }
 
-    .stat .value {
+    .value {
       font-size: 20px;
       font-weight: bold;
     }
 
-    .map {
+    #map {
       margin-top: 20px;
-      height: 175px;
+      width: 100%;
+      height: 300px;
       border-radius: 18px;
-      overflow: hidden;
       border: 1px solid #30363d;
-      background:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
-        #080a0d;
-      background-size: 28px 28px;
-      position: relative;
-    }
-
-    .map::after {
-      content: "NOCH NICHT ERKUNDET";
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #484f58;
-      font-size: 13px;
-      letter-spacing: 2px;
+      overflow: hidden;
+      background: #080a0d;
     }
 
     button {
-      margin-top: 20px;
       width: 100%;
+      margin-top: 20px;
       padding: 17px;
-      border: 0;
+      border: none;
       border-radius: 16px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      background: #ffffff;
+      background: white;
       color: #080a0d;
     }
 
     button:active {
-      transform: scale(0.98);
-    }
-
-    .secondary {
-      background: transparent;
-      border: 1px solid #30363d;
-      color: #c9d1d9;
-      margin-top: 10px;
+      transform: scale(.98);
     }
 
     .message {
-      margin-top: 14px;
+      margin-top: 15px;
       text-align: center;
-      min-height: 22px;
-      font-size: 13px;
       color: #8b949e;
+      font-size: 13px;
+      min-height: 20px;
+    }
+
+    .session {
+      text-align: center;
+      margin-top: 10px;
+      color: #c9d1d9;
+      font-size: 13px;
     }
 
     .version {
@@ -201,6 +189,16 @@
       font-size: 11px;
       letter-spacing: 2px;
     }
+
+    /* Leaflet etwas dunkler darstellen */
+
+    .leaflet-tile-pane {
+      filter:
+        grayscale(65%)
+        brightness(55%)
+        contrast(115%);
+    }
+
   </style>
 </head>
 
@@ -209,324 +207,619 @@
 <div class="app">
 
   <div class="topbar">
-    <div class="brand">RAVEN</div>
-    <div class="status">● ONLINE</div>
+
+    <div class="brand">
+      RAVEN
+    </div>
+
+    <div class="online">
+      ● ONLINE
+    </div>
+
   </div>
+
 
   <div class="card">
 
-    <div class="raven">🐦‍⬛</div>
-
-    <h1>RAVEN #0001</h1>
-    <div class="generation">Generation 1</div>
-
-    <div class="level-line">
-      <span>Level <strong id="level">1</strong></span>
-      <span>Nächstes Level</span>
+    <div class="raven">
+      🐦‍⬛
     </div>
+
+    <h1>
+      RAVEN #0001
+    </h1>
+
+    <div class="generation">
+      Generation 1
+    </div>
+
+
+    <div class="levelLine">
+
+      <span>
+        Level <strong id="level">1</strong>
+      </span>
+
+      <span>
+        Nächstes Level
+      </span>
+
+    </div>
+
 
     <div class="xpbar">
-      <div class="xpfill" id="xpfill"></div>
+      <div id="xpfill"></div>
     </div>
 
-    <div class="xptext">
+    <div class="xpText">
       <span id="xp">0</span> / 100 XP
     </div>
+
 
     <div class="stats">
 
       <div class="stat">
-        <div class="label">STRECKE</div>
-        <div class="value"><span id="distance">0.00</span> km</div>
+
+        <div class="label">
+          STRECKE
+        </div>
+
+        <div class="value">
+          <span id="distance">0.00</span> km
+        </div>
+
       </div>
 
-      <div class="stat">
-        <div class="label">ENTDECKTE GEBIETE</div>
-        <div class="value" id="areas">0</div>
-      </div>
 
       <div class="stat">
-        <div class="label">ALTER</div>
-        <div class="value">Tag 1</div>
+
+        <div class="label">
+          SESSION
+        </div>
+
+        <div class="value">
+          <span id="sessionDistance">0</span> m
+        </div>
+
       </div>
 
+
       <div class="stat">
-        <div class="label">STATUS</div>
-        <div class="value" id="statusText">Bereit</div>
+
+        <div class="label">
+          ALTER
+        </div>
+
+        <div class="value">
+          Tag 1
+        </div>
+
+      </div>
+
+
+      <div class="stat">
+
+        <div class="label">
+          STATUS
+        </div>
+
+        <div class="value" id="status">
+          Bereit
+        </div>
+
       </div>
 
     </div>
 
-    <div class="map"></div>
 
-    <button id="exploreButton" onclick="startExploration()">
+    <div id="map"></div>
+
+
+    <button
+      id="exploreButton"
+      onclick="toggleExploration()"
+    >
       Erkundung starten
     </button>
 
-    <button class="secondary" onclick="testXP()">
-      +10 XP Test
-    </button>
 
-    <div class="message" id="message">
-      Dein Raven wartet auf sein erstes Abenteuer.
+    <div
+      class="message"
+      id="message"
+    >
+      Dein Raven wartet auf sein nächstes Abenteuer.
     </div>
 
   </div>
 
+
   <div class="version">
-    RAVEN PROTOTYPE V0.2
+    RAVEN PROTOTYPE V0.3
   </div>
 
 </div>
 
 
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
 <script>
 
-  let xp = Number(localStorage.getItem("ravenXP")) || 0;
-  let level = Number(localStorage.getItem("ravenLevel")) || 1;
-  let totalDistance = Number(localStorage.getItem("ravenDistance")) || 0;
+let xp =
+  Number(localStorage.getItem("ravenXP")) || 0;
 
-  let tracking = false;
-  let watchId = null;
-  let lastPosition = null;
-  let sessionDistance = 0;
+let level =
+  Number(localStorage.getItem("ravenLevel")) || 1;
+
+let totalDistance =
+  Number(localStorage.getItem("ravenDistance")) || 0;
 
 
-  function updateUI() {
+let tracking = false;
 
-    document.getElementById("xp").textContent = xp;
-    document.getElementById("level").textContent = level;
+let watchId = null;
 
-    document.getElementById("distance").textContent =
-      (totalDistance / 1000).toFixed(2);
+let lastPosition = null;
 
-    document.getElementById("xpfill").style.width =
-      Math.min(xp, 100) + "%";
+let sessionDistance = 0;
+
+let mapCentered = false;
+
+let routePoints = [];
+
+
+/* -------------------------
+   KARTE
+------------------------- */
+
+const map =
+  L.map("map").setView(
+    [51.1657, 10.4515],
+    5
+  );
+
+
+L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    maxZoom: 19,
+    attribution: "© OpenStreetMap"
+  }
+).addTo(map);
+
+
+const positionMarker =
+  L.circleMarker(
+    [51.1657, 10.4515],
+    {
+      radius: 8
+    }
+  );
+
+
+const routeLine =
+  L.polyline(
+    [],
+    {
+      weight: 5,
+      opacity: 0.9
+    }
+  ).addTo(map);
+
+
+/* -------------------------
+   UI
+------------------------- */
+
+function updateUI() {
+
+  document.getElementById("xp").textContent =
+    xp;
+
+  document.getElementById("level").textContent =
+    level;
+
+  document.getElementById("distance").textContent =
+    (totalDistance / 1000).toFixed(2);
+
+  document.getElementById("sessionDistance").textContent =
+    Math.round(sessionDistance);
+
+  document.getElementById("xpfill").style.width =
+    Math.min(xp,100) + "%";
+}
+
+
+/* -------------------------
+   XP
+------------------------- */
+
+function addXP(amount) {
+
+  xp += amount;
+
+  while (xp >= 100) {
+
+    xp -= 100;
+
+    level++;
   }
 
+  localStorage.setItem(
+    "ravenXP",
+    xp
+  );
 
-  function addXP(amount) {
+  localStorage.setItem(
+    "ravenLevel",
+    level
+  );
 
-    xp += amount;
+  updateUI();
+}
 
-    while (xp >= 100) {
-      xp -= 100;
-      level++;
-    }
 
-    localStorage.setItem("ravenXP", xp);
-    localStorage.setItem("ravenLevel", level);
+/* -------------------------
+   ERKUNDUNG
+------------------------- */
 
-    updateUI();
+function toggleExploration() {
+
+  if (tracking) {
+
+    stopExploration();
+
+  } else {
+
+    startExploration();
   }
+}
 
 
-  function testXP() {
+function startExploration() {
 
-    addXP(10);
+  const message =
+    document.getElementById("message");
 
-    document.getElementById("message").textContent =
-      "+10 XP gesammelt.";
-  }
-
-
-  function startExploration() {
-
-    const message =
-      document.getElementById("message");
-
-    const button =
-      document.getElementById("exploreButton");
-
-    const statusText =
-      document.getElementById("statusText");
-
-    if (tracking) {
-      stopExploration();
-      return;
-    }
-
-    if (!navigator.geolocation) {
-      message.textContent =
-        "GPS wird von diesem Gerät nicht unterstützt.";
-      return;
-    }
-
-    tracking = true;
-    sessionDistance = 0;
-    lastPosition = null;
-
-    button.textContent = "Erkundung beenden";
-    statusText.textContent = "Unterwegs";
+  if (!navigator.geolocation) {
 
     message.textContent =
-      "GPS wird gestartet...";
+      "GPS wird nicht unterstützt.";
 
-    watchId = navigator.geolocation.watchPosition(
+    return;
+  }
+
+
+  tracking = true;
+
+  sessionDistance = 0;
+
+  lastPosition = null;
+
+  routePoints = [];
+
+  routeLine.setLatLngs([]);
+
+
+  document.getElementById("status").textContent =
+    "Unterwegs";
+
+  document.getElementById("exploreButton").textContent =
+    "Erkundung beenden";
+
+  message.textContent =
+    "GPS wird gestartet...";
+
+
+  watchId =
+    navigator.geolocation.watchPosition(
 
       handlePosition,
 
-      function(error) {
-
-        message.textContent =
-          "GPS-Fehler. Standortzugriff prüfen.";
-
-        tracking = false;
-        button.textContent = "Erkundung starten";
-        statusText.textContent = "Bereit";
-      },
+      handleGPSError,
 
       {
         enableHighAccuracy: true,
         maximumAge: 0,
-        timeout: 15000
+        timeout: 20000
       }
+    );
+}
+
+
+/* -------------------------
+   GPS POSITION
+------------------------- */
+
+function handlePosition(position) {
+
+  const lat =
+    position.coords.latitude;
+
+  const lon =
+    position.coords.longitude;
+
+  const accuracy =
+    position.coords.accuracy;
+
+
+  if (accuracy > 35) {
+
+    document.getElementById("message").textContent =
+      "GPS wird genauer... ±" +
+      Math.round(accuracy) +
+      " m";
+
+    return;
+  }
+
+
+  const current = {
+    lat: lat,
+    lon: lon
+  };
+
+
+  /*
+     Aktuelle Position
+     auf Karte anzeigen
+  */
+
+  positionMarker.setLatLng(
+    [lat,lon]
+  );
+
+  if (!map.hasLayer(positionMarker)) {
+
+    positionMarker.addTo(map);
+  }
+
+
+  /*
+     Beim ersten GPS-Fix
+     auf Raven zoomen
+  */
+
+  if (!mapCentered) {
+
+    map.setView(
+      [lat,lon],
+      17
+    );
+
+    mapCentered = true;
+  }
+
+
+  /*
+     Entfernung berechnen
+  */
+
+  if (lastPosition) {
+
+    const moved =
+      calculateDistance(
+        lastPosition.lat,
+        lastPosition.lon,
+        lat,
+        lon
+      );
+
+
+    /*
+       Kleine GPS-Sprünge
+       und unrealistische Sprünge
+       ignorieren
+    */
+
+    if (
+      moved >= 3 &&
+      moved < 150
+    ) {
+
+      sessionDistance += moved;
+
+      totalDistance += moved;
+
+
+      localStorage.setItem(
+        "ravenDistance",
+        totalDistance
+      );
+
+
+      /*
+         Route erweitern
+      */
+
+      routePoints.push(
+        [lat,lon]
+      );
+
+      routeLine.setLatLngs(
+        routePoints
+      );
+    }
+  }
+
+  else {
+
+    routePoints.push(
+      [lat,lon]
+    );
+
+    routeLine.setLatLngs(
+      routePoints
     );
   }
 
 
-  function handlePosition(position) {
-
-    const message =
-      document.getElementById("message");
-
-    const currentPosition = {
-      lat: position.coords.latitude,
-      lon: position.coords.longitude,
-      accuracy: position.coords.accuracy
-    };
-
-    if (currentPosition.accuracy > 30) {
-
-      message.textContent =
-        "Warte auf genaueres GPS... Genauigkeit: " +
-        Math.round(currentPosition.accuracy) +
-        " m";
-
-      return;
-    }
+  lastPosition = current;
 
 
-    if (lastPosition) {
-
-      const distance = calculateDistance(
-        lastPosition.lat,
-        lastPosition.lon,
-        currentPosition.lat,
-        currentPosition.lon
-      );
-
-
-      if (distance >= 3 && distance < 200) {
-
-        sessionDistance += distance;
-        totalDistance += distance;
-
-        localStorage.setItem(
-          "ravenDistance",
-          totalDistance
-        );
-
-        document.getElementById("distance").textContent =
-          (totalDistance / 1000).toFixed(2);
-      }
-    }
-
-
-    lastPosition = currentPosition;
-
-    message.textContent =
-      "Erkundung läuft • " +
-      Math.round(sessionDistance) +
-      " m";
-  }
-
-
-  function stopExploration() {
-
-    if (watchId !== null) {
-      navigator.geolocation.clearWatch(watchId);
-    }
-
-    tracking = false;
-    watchId = null;
-    lastPosition = null;
-
-    const button =
-      document.getElementById("exploreButton");
-
-    const statusText =
-      document.getElementById("statusText");
-
-    button.textContent =
-      "Erkundung starten";
-
-    statusText.textContent =
-      "Bereit";
-
-
-    const earnedXP =
-      Math.floor(sessionDistance / 10);
-
-    if (earnedXP > 0) {
-      addXP(earnedXP);
-    }
-
-
-    document.getElementById("message").textContent =
-      "Erkundung beendet • " +
-      Math.round(sessionDistance) +
-      " m • +" +
-      earnedXP +
-      " XP";
-
-    sessionDistance = 0;
-  }
-
-
-  function calculateDistance(
-    lat1,
-    lon1,
-    lat2,
-    lon2
-  ) {
-
-    const R = 6371000;
-
-    const phi1 = lat1 * Math.PI / 180;
-    const phi2 = lat2 * Math.PI / 180;
-
-    const deltaPhi =
-      (lat2 - lat1) * Math.PI / 180;
-
-    const deltaLambda =
-      (lon2 - lon1) * Math.PI / 180;
-
-
-    const a =
-      Math.sin(deltaPhi / 2) *
-      Math.sin(deltaPhi / 2) +
-
-      Math.cos(phi1) *
-      Math.cos(phi2) *
-
-      Math.sin(deltaLambda / 2) *
-      Math.sin(deltaLambda / 2);
-
-
-    const c =
-      2 *
-      Math.atan2(
-        Math.sqrt(a),
-        Math.sqrt(1 - a)
-      );
-
-
-    return R * c;
-  }
+  document.getElementById("message").textContent =
+    "Erkundung läuft • GPS ±" +
+    Math.round(accuracy) +
+    " m";
 
 
   updateUI();
+}
+
+
+/* -------------------------
+   GPS FEHLER
+------------------------- */
+
+function handleGPSError(error) {
+
+  tracking = false;
+
+  document.getElementById("status").textContent =
+    "Bereit";
+
+  document.getElementById("exploreButton").textContent =
+    "Erkundung starten";
+
+
+  if (error.code === 1) {
+
+    document.getElementById("message").textContent =
+      "Standortzugriff wurde verweigert.";
+
+  }
+
+  else if (error.code === 2) {
+
+    document.getElementById("message").textContent =
+      "GPS-Position nicht verfügbar.";
+
+  }
+
+  else {
+
+    document.getElementById("message").textContent =
+      "GPS-Zeitüberschreitung.";
+  }
+}
+
+
+/* -------------------------
+   STOP
+------------------------- */
+
+function stopExploration() {
+
+  if (watchId !== null) {
+
+    navigator.geolocation.clearWatch(
+      watchId
+    );
+  }
+
+
+  watchId = null;
+
+  tracking = false;
+
+  lastPosition = null;
+
+
+  const earnedXP =
+    Math.floor(
+      sessionDistance / 10
+    );
+
+
+  if (earnedXP > 0) {
+
+    addXP(
+      earnedXP
+    );
+  }
+
+
+  document.getElementById("status").textContent =
+    "Bereit";
+
+  document.getElementById("exploreButton").textContent =
+    "Erkundung starten";
+
+
+  document.getElementById("message").textContent =
+    "Erkundung beendet • " +
+    Math.round(sessionDistance) +
+    " m • +" +
+    earnedXP +
+    " XP";
+
+
+  updateUI();
+}
+
+
+/* -------------------------
+   DISTANZ
+------------------------- */
+
+function calculateDistance(
+  lat1,
+  lon1,
+  lat2,
+  lon2
+) {
+
+  const R =
+    6371000;
+
+
+  const phi1 =
+    lat1 * Math.PI / 180;
+
+  const phi2 =
+    lat2 * Math.PI / 180;
+
+
+  const deltaPhi =
+    (lat2-lat1) *
+    Math.PI / 180;
+
+  const deltaLambda =
+    (lon2-lon1) *
+    Math.PI / 180;
+
+
+  const a =
+
+    Math.sin(deltaPhi/2) *
+    Math.sin(deltaPhi/2)
+
+    +
+
+    Math.cos(phi1) *
+    Math.cos(phi2) *
+
+    Math.sin(deltaLambda/2) *
+    Math.sin(deltaLambda/2);
+
+
+  const c =
+
+    2 *
+
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1-a)
+    );
+
+
+  return R * c;
+}
+
+
+updateUI();
 
 </script>
 
