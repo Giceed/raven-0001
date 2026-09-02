@@ -192,10 +192,6 @@
       color: #c4b5fd;
     }
 
-    /* ===============================
-       KARTENMODUS
-    ================================ */
-
     .mapMode {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -246,8 +242,7 @@
 
     #fogOverlay {
       position: absolute;
-      left: 0;
-      top: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
@@ -533,7 +528,6 @@
     <div class="travelSummary">
 
       <div class="travelSummaryBox">
-
         <div
           class="travelSummaryNumber"
           id="countriesCount"
@@ -544,11 +538,9 @@
         <div class="travelSummaryLabel">
           LÄNDER
         </div>
-
       </div>
 
       <div class="travelSummaryBox">
-
         <div
           class="travelSummaryNumber"
           id="regionsCount"
@@ -559,11 +551,9 @@
         <div class="travelSummaryLabel">
           REGIONEN
         </div>
-
       </div>
 
       <div class="travelSummaryBox">
-
         <div
           class="travelSummaryNumber"
           id="bookPlacesCount"
@@ -574,7 +564,6 @@
         <div class="travelSummaryLabel">
           ORTE
         </div>
-
       </div>
 
     </div>
@@ -587,7 +576,7 @@
   </div>
 
   <div class="version">
-    RAVEN PROTOTYPE V0.9
+    RAVEN PROTOTYPE V1.0
   </div>
 
 </div>
@@ -599,7 +588,7 @@
 <script>
 
 /* ===============================
-   RAVEN SPEICHER
+   SPEICHER
 ================================ */
 
 let xp =
@@ -619,29 +608,21 @@ let totalDistance =
 
 let exploredPoints =
   JSON.parse(
-    localStorage.getItem(
-      "ravenExploredPoints"
-    )
+    localStorage.getItem("ravenExploredPoints")
   ) || [];
 
 let travelHistory =
   JSON.parse(
-    localStorage.getItem(
-      "ravenTravelHistory"
-    )
+    localStorage.getItem("ravenTravelHistory")
   ) || [];
 
 let discoveredPlaces =
   JSON.parse(
-    localStorage.getItem(
-      "ravenDiscoveredPlaces"
-    )
+    localStorage.getItem("ravenDiscoveredPlaces")
   ) || [];
 
 let mapMode =
-  localStorage.getItem(
-    "ravenMapMode"
-  ) || "explore";
+  localStorage.getItem("ravenMapMode") || "explore";
 
 
 /* ===============================
@@ -649,48 +630,15 @@ let mapMode =
 ================================ */
 
 let tracking = false;
-
 let watchId = null;
-
 let lastPosition = null;
-
 let sessionDistance = 0;
-
-let sessionPoints = [];
-
 let mapCentered = false;
 
 let lastGeocodeTime = 0;
-
 let lastGeocodePosition = null;
 
-
-/*
-  Fog-Aufdeckung
-*/
-
 const REVEAL_RADIUS_METERS = 40;
-
-
-/*
-  V0.9:
-
-  Wenn zwei gespeicherte Routenpunkte
-  mehr als 200 Meter auseinanderliegen,
-  werden sie NICHT mit einer Linie
-  verbunden.
-
-  Da neue GPS-Punkte bereits nur bei
-  Bewegungen unter 150 m gespeichert
-  werden, ist ein größerer Sprung fast
-  immer:
-
-  - neue Session
-  - anderer Ort
-  - alter GPS-Fehler
-*/
-
-const ROUTE_BREAK_DISTANCE = 200;
 
 
 /* ===============================
@@ -713,135 +661,7 @@ L.tileLayer(
 
 
 /* ===============================
-   ROUTEN SEGMENTIEREN
-================================ */
-
-function buildTravelSegments() {
-
-  if (travelHistory.length === 0) {
-    return [];
-  }
-
-  const segments = [];
-
-  let currentSegment = [];
-
-  travelHistory.forEach(
-    point => {
-
-      if (
-        !Array.isArray(point) ||
-        point.length < 2
-      ) {
-        return;
-      }
-
-      if (currentSegment.length === 0) {
-
-        currentSegment.push(
-          point
-        );
-
-        return;
-
-      }
-
-      const previous =
-        currentSegment[
-          currentSegment.length - 1
-        ];
-
-      const distance =
-        calculateDistance(
-          previous[0],
-          previous[1],
-          point[0],
-          point[1]
-        );
-
-      /*
-        Großer Sprung:
-
-        alte Route beenden und
-        neue Route anfangen.
-      */
-
-      if (
-        distance > ROUTE_BREAK_DISTANCE
-      ) {
-
-        if (
-          currentSegment.length >= 2
-        ) {
-
-          segments.push(
-            currentSegment
-          );
-
-        }
-
-        currentSegment = [
-          point
-        ];
-
-      }
-
-      else {
-
-        currentSegment.push(
-          point
-        );
-
-      }
-
-    }
-  );
-
-  if (
-    currentSegment.length >= 2
-  ) {
-
-    segments.push(
-      currentSegment
-    );
-
-  }
-
-  return segments;
-
-}
-
-
-/* ===============================
-   HISTORISCHE ROUTE
-================================ */
-
-const historyLine =
-  L.polyline(
-    buildTravelSegments(),
-    {
-      weight: 4,
-      opacity: 0.65
-    }
-  );
-
-
-/* ===============================
-   AKTUELLE SESSION
-================================ */
-
-const sessionLine =
-  L.polyline(
-    [],
-    {
-      weight: 5,
-      opacity: 0.95
-    }
-  );
-
-
-/* ===============================
-   AKTUELLE POSITION
+   POSITION
 ================================ */
 
 const positionMarker =
@@ -856,7 +676,7 @@ const positionMarker =
 
 
 /* ===============================
-   FOG SVG
+   FOG OVERLAY
 ================================ */
 
 const mapContainer =
@@ -919,10 +739,6 @@ function updateMapMode() {
     );
 
 
-  /* ===============================
-     REISE
-  ================================ */
-
   if (
     mapMode === "travel"
   ) {
@@ -939,50 +755,9 @@ function updateMapMode() {
     );
 
     description.textContent =
-      "Deine vollständige Reisekarte und tatsächlich aufgezeichneten Wege.";
-
-
-    /*
-      Historische Route anzeigen
-    */
-
-    if (
-      !map.hasLayer(
-        historyLine
-      )
-    ) {
-
-      historyLine.addTo(
-        map
-      );
-
-    }
-
-
-    /*
-      Aktuelle Session anzeigen,
-      falls Erkundung gerade läuft.
-    */
-
-    if (
-      tracking &&
-      !map.hasLayer(
-        sessionLine
-      )
-    ) {
-
-      sessionLine.addTo(
-        map
-      );
-
-    }
+      "Deine vollständige Reisekarte und besuchten Orte.";
 
   }
-
-
-  /* ===============================
-     ERKUNDUNG
-  ================================ */
 
   else {
 
@@ -999,38 +774,6 @@ function updateMapMode() {
 
     description.textContent =
       "Nur Gebiete, die Raven tatsächlich erkundet hat, sind sichtbar.";
-
-
-    /*
-      Keine Routenlinien auf
-      der Fog-of-War-Karte.
-    */
-
-    if (
-      map.hasLayer(
-        historyLine
-      )
-    ) {
-
-      map.removeLayer(
-        historyLine
-      );
-
-    }
-
-
-    if (
-      map.hasLayer(
-        sessionLine
-      )
-    ) {
-
-      map.removeLayer(
-        sessionLine
-      );
-
-    }
-
 
     updateFogOfWar();
 
@@ -1270,13 +1013,9 @@ map.on(
   updateFogOfWar
 );
 
-map.whenReady(
-  updateFogOfWar
-);
-
 
 /* ===============================
-   LETZTEN ORT ANZEIGEN
+   LETZTE POSITION
 ================================ */
 
 if (
@@ -1357,7 +1096,7 @@ function updateUI() {
 
 
 /* ===============================
-   ENTDECKUNGSBUCH
+   REISEBUCH
 ================================ */
 
 function updateTravelBook() {
@@ -1553,7 +1292,9 @@ function formatDiscoveryDate(
   if (
     !isoDate
   ) {
+
     return "Unbekannt";
+
   }
 
   const date =
@@ -1566,7 +1307,9 @@ function formatDiscoveryDate(
       date.getTime()
     )
   ) {
+
     return "Unbekannt";
+
   }
 
   return date.toLocaleDateString(
@@ -1596,7 +1339,6 @@ function addXP(
   ) {
 
     xp -= 100;
-
     level++;
 
   }
@@ -1640,7 +1382,7 @@ function toggleExploration() {
 
 
 /* ===============================
-   ERKUNDUNG STARTEN
+   START
 ================================ */
 
 function startExploration() {
@@ -1667,12 +1409,6 @@ function startExploration() {
 
   lastPosition = null;
 
-  sessionPoints = [];
-
-  sessionLine.setLatLngs(
-    []
-  );
-
   document.getElementById(
     "exploreButton"
   ).textContent =
@@ -1680,26 +1416,6 @@ function startExploration() {
 
   message.textContent =
     "GPS wird gestartet...";
-
-
-  /*
-    Nur in REISE wird die
-    aktive Session als Linie gezeigt.
-  */
-
-  if (
-    mapMode === "travel" &&
-    !map.hasLayer(
-      sessionLine
-    )
-  ) {
-
-    sessionLine.addTo(
-      map
-    );
-
-  }
-
 
   watchId =
     navigator.geolocation.watchPosition(
@@ -1720,7 +1436,7 @@ function startExploration() {
 
 
 /* ===============================
-   GPS POSITION
+   GPS
 ================================ */
 
 function handlePosition(
@@ -1736,10 +1452,6 @@ function handlePosition(
   const accuracy =
     position.coords.accuracy;
 
-
-  /*
-    Ungenaue GPS-Werte ignorieren.
-  */
 
   if (
     accuracy > 35
@@ -1760,20 +1472,15 @@ function handlePosition(
 
 
   const current = {
-
     lat: lat,
     lon: lon
-
   };
 
-
-  /* ===============================
-     AKTUELLE POSITION
-  ================================ */
 
   positionMarker.setLatLng(
     [lat, lon]
   );
+
 
   if (
     !map.hasLayer(
@@ -1802,19 +1509,11 @@ function handlePosition(
   }
 
 
-  /* ===============================
-     ORT
-  ================================ */
-
   maybeCheckLocation(
     lat,
     lon
   );
 
-
-  /* ===============================
-     BEWEGUNG
-  ================================ */
 
   if (
     lastPosition
@@ -1831,14 +1530,6 @@ function handlePosition(
 
       );
 
-
-    /*
-      Unter 3 Meter:
-      GPS-Zittern.
-
-      Ab 150 Meter:
-      GPS-Sprung.
-    */
 
     if (
       moved >= 3 &&
@@ -1857,44 +1548,25 @@ function handlePosition(
       );
 
 
+      /*
+        Position weiterhin speichern.
+
+        Wir zeichnen daraus aber
+        KEINE Linie mehr.
+      */
+
       const newPoint =
         [lat, lon];
-
-
-      sessionPoints.push(
-        newPoint
-      );
-
 
       travelHistory.push(
         newPoint
       );
-
 
       localStorage.setItem(
         "ravenTravelHistory",
         JSON.stringify(
           travelHistory
         )
-      );
-
-
-      sessionLine.setLatLngs(
-        sessionPoints
-      );
-
-
-      /*
-        V0.9:
-        Historische Route wird jedes Mal
-        neu segmentiert.
-
-        Dadurch können keine langen
-        Verbindungsstriche entstehen.
-      */
-
-      historyLine.setLatLngs(
-        buildTravelSegments()
       );
 
 
@@ -1910,29 +1582,11 @@ function handlePosition(
   else {
 
     /*
-      Erster GPS-Punkt der Session.
+      Erster Punkt der Session.
     */
 
     const firstPoint =
       [lat, lon];
-
-    sessionPoints.push(
-      firstPoint
-    );
-
-    sessionLine.setLatLngs(
-      sessionPoints
-    );
-
-
-    /*
-      Wichtig:
-      Der erste Punkt wird jetzt auch
-      in der Reisehistorie gespeichert.
-
-      Dadurch hat jede neue Session
-      einen sauberen Startpunkt.
-    */
 
     travelHistory.push(
       firstPoint
@@ -1944,11 +1598,6 @@ function handlePosition(
         travelHistory
       )
     );
-
-    historyLine.setLatLngs(
-      buildTravelSegments()
-    );
-
 
     addExploredArea(
       lat,
@@ -2016,16 +1665,17 @@ function addExploredArea(
 
   }
 
-  const point = {
 
+  const point = {
     lat: lat,
     lon: lon
-
   };
+
 
   exploredPoints.push(
     point
   );
+
 
   localStorage.setItem(
     "ravenExploredPoints",
@@ -2033,6 +1683,7 @@ function addExploredArea(
       exploredPoints
     )
   );
+
 
   updateFogOfWar();
 
@@ -2053,6 +1704,7 @@ function maybeCheckLocation(
   const now =
     Date.now();
 
+
   if (
     now -
     lastGeocodeTime <
@@ -2062,6 +1714,7 @@ function maybeCheckLocation(
     return;
 
   }
+
 
   if (
     lastGeocodePosition
@@ -2088,15 +1741,16 @@ function maybeCheckLocation(
 
   }
 
+
   lastGeocodeTime =
     now;
 
-  lastGeocodePosition = {
 
+  lastGeocodePosition = {
     lat: lat,
     lon: lon
-
   };
+
 
   reverseGeocode(
     lat,
@@ -2139,6 +1793,7 @@ async function reverseGeocode(
         url
       );
 
+
     if (
       !response.ok
     ) {
@@ -2149,8 +1804,10 @@ async function reverseGeocode(
 
     }
 
+
     const data =
       await response.json();
+
 
     const city =
 
@@ -2172,6 +1829,7 @@ async function reverseGeocode(
     const region =
       data.principalSubdivision ||
       "";
+
 
     const country =
       data.countryName ||
@@ -2234,6 +1892,7 @@ function registerPlace(
     return;
 
   }
+
 
   const placeKey =
 
@@ -2376,19 +2035,6 @@ function handleGPSError(
     false;
 
 
-  if (
-    map.hasLayer(
-      sessionLine
-    )
-  ) {
-
-    map.removeLayer(
-      sessionLine
-    );
-
-  }
-
-
   document.getElementById(
     "exploreButton"
   ).textContent =
@@ -2430,7 +2076,7 @@ function handleGPSError(
 
 
 /* ===============================
-   ERKUNDUNG BEENDEN
+   STOP
 ================================ */
 
 function stopExploration() {
@@ -2445,36 +2091,12 @@ function stopExploration() {
 
   }
 
+
   watchId = null;
 
   tracking = false;
 
   lastPosition = null;
-
-
-  /*
-    Session-Linie entfernen.
-
-    Die Strecke bleibt anschließend
-    über historyLine in REISE sichtbar.
-  */
-
-  if (
-    map.hasLayer(
-      sessionLine
-    )
-  ) {
-
-    map.removeLayer(
-      sessionLine
-    );
-
-  }
-
-
-  historyLine.setLatLngs(
-    buildTravelSegments()
-  );
 
 
   const earnedXP =
@@ -2516,8 +2138,6 @@ function stopExploration() {
 
     " XP";
 
-
-  updateMapMode();
 
   updateUI();
 
@@ -2613,7 +2233,7 @@ function calculateDistance(
 
 
 /* ===============================
-   START
+   STARTSEITE
 ================================ */
 
 updateUI();
@@ -2625,10 +2245,6 @@ setTimeout(
   () => {
 
     map.invalidateSize();
-
-    historyLine.setLatLngs(
-      buildTravelSegments()
-    );
 
     updateMapMode();
 
