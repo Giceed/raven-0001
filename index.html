@@ -192,8 +192,49 @@
       color: #c4b5fd;
     }
 
-    #map {
+    /* ===============================
+       V0.8 KARTENMODUS
+    ================================ */
+
+    .mapMode {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
       margin-top: 20px;
+      padding: 5px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 15px;
+    }
+
+    .mapModeButton {
+      margin: 0;
+      padding: 11px 8px;
+      border-radius: 11px;
+      border: none;
+      background: transparent;
+      color: #8b949e;
+      font-size: 12px;
+      letter-spacing: 1px;
+      font-weight: bold;
+    }
+
+    .mapModeButton.active {
+      background: #21262d;
+      color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,.35);
+    }
+
+    .mapModeDescription {
+      margin-top: 9px;
+      text-align: center;
+      color: #8b949e;
+      font-size: 11px;
+      min-height: 14px;
+    }
+
+    #map {
+      margin-top: 12px;
       width: 100%;
       height: 330px;
       border-radius: 18px;
@@ -202,13 +243,6 @@
       background: #020304;
       position: relative;
     }
-
-    /*
-      ECHTER FOG OF WAR
-
-      Liegt über der kompletten Leaflet-Karte.
-      Die SVG-Maske schneidet erkundete Bereiche heraus.
-    */
 
     #fogOverlay {
       position: absolute;
@@ -361,7 +395,6 @@
     </div>
 
     <div class="levelLine">
-
       <span>
         Level <strong id="level">1</strong>
       </span>
@@ -369,7 +402,6 @@
       <span>
         Nächstes Level
       </span>
-
     </div>
 
     <div class="xpbar">
@@ -380,63 +412,35 @@
       <span id="xp">0</span> / 100 XP
     </div>
 
-
     <div class="stats">
 
       <div class="stat">
-        <div class="label">
-          STRECKE
-        </div>
-
+        <div class="label">STRECKE</div>
         <div class="value">
           <span id="distance">0.00</span> km
         </div>
       </div>
 
-
       <div class="stat">
-        <div class="label">
-          SESSION
-        </div>
-
+        <div class="label">SESSION</div>
         <div class="value">
           <span id="sessionDistance">0</span> m
         </div>
       </div>
 
-
       <div class="stat">
-        <div class="label">
-          ORTE ENTDECKT
-        </div>
-
-        <div
-          class="value"
-          id="placesCount"
-        >
-          0
-        </div>
+        <div class="label">ORTE ENTDECKT</div>
+        <div class="value" id="placesCount">0</div>
       </div>
 
-
       <div class="stat">
-        <div class="label">
-          ERKUNDUNGSPUNKTE
-        </div>
-
-        <div
-          class="value"
-          id="exploredCount"
-        >
-          0
-        </div>
+        <div class="label">ERKUNDUNGSPUNKTE</div>
+        <div class="value" id="exploredCount">0</div>
       </div>
 
     </div>
 
-
     <div class="locationCard">
-
       <div class="locationTitle">
         AKTUELLER ORT
       </div>
@@ -448,38 +452,52 @@
       <div id="currentRegion">
         Erkundung starten, um den Ort zu bestimmen.
       </div>
-
     </div>
 
-
-    <div
-      class="discovery"
-      id="discoveryBox"
-    >
-
+    <div class="discovery" id="discoveryBox">
       <div class="discoverySmall">
         🐦‍⬛ NEUER ORT ENTDECKT
       </div>
 
-      <div
-        class="discoveryName"
-        id="discoveryName"
-      >
+      <div class="discoveryName" id="discoveryName">
         -
       </div>
 
-      <div
-        class="discoveryXP"
-        id="discoveryXP"
-      >
+      <div class="discoveryXP" id="discoveryXP">
         +25 XP
       </div>
+    </div>
+
+    <!-- V0.8: Kartenumschalter -->
+
+    <div class="mapMode">
+
+      <button
+        class="mapModeButton"
+        id="travelMapButton"
+        onclick="setMapMode('travel')"
+      >
+        🗺️ REISE
+      </button>
+
+      <button
+        class="mapModeButton active"
+        id="exploreMapButton"
+        onclick="setMapMode('explore')"
+      >
+        🌑 ERKUNDUNG
+      </button>
 
     </div>
 
+    <div
+      class="mapModeDescription"
+      id="mapModeDescription"
+    >
+      Nur von Raven erkundete Gebiete sind sichtbar.
+    </div>
 
     <div id="map"></div>
-
 
     <button
       id="exploreButton"
@@ -488,16 +506,11 @@
       Erkundung starten
     </button>
 
-
-    <div
-      class="message"
-      id="message"
-    >
+    <div class="message" id="message">
       Dein Raven wartet auf sein nächstes Abenteuer.
     </div>
 
   </div>
-
 
   <div class="travelBook">
 
@@ -505,11 +518,9 @@
       🐦‍⬛ RAVENS REISEN
     </div>
 
-
     <div class="travelSummary">
 
       <div class="travelSummaryBox">
-
         <div
           class="travelSummaryNumber"
           id="countriesCount"
@@ -520,12 +531,9 @@
         <div class="travelSummaryLabel">
           LÄNDER
         </div>
-
       </div>
 
-
       <div class="travelSummaryBox">
-
         <div
           class="travelSummaryNumber"
           id="regionsCount"
@@ -536,12 +544,9 @@
         <div class="travelSummaryLabel">
           REGIONEN
         </div>
-
       </div>
 
-
       <div class="travelSummaryBox">
-
         <div
           class="travelSummaryNumber"
           id="bookPlacesCount"
@@ -552,11 +557,9 @@
         <div class="travelSummaryLabel">
           ORTE
         </div>
-
       </div>
 
     </div>
-
 
     <div
       class="placesList"
@@ -565,18 +568,15 @@
 
   </div>
 
-
   <div class="version">
-    RAVEN PROTOTYPE V0.7
+    RAVEN PROTOTYPE V0.8
   </div>
 
 </div>
 
-
 <script
   src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
 </script>
-
 
 <script>
 
@@ -585,45 +585,30 @@
 ================================ */
 
 let xp =
-  Number(
-    localStorage.getItem("ravenXP")
-  ) || 0;
-
+  Number(localStorage.getItem("ravenXP")) || 0;
 
 let level =
-  Number(
-    localStorage.getItem("ravenLevel")
-  ) || 1;
-
+  Number(localStorage.getItem("ravenLevel")) || 1;
 
 let totalDistance =
-  Number(
-    localStorage.getItem("ravenDistance")
-  ) || 0;
-
+  Number(localStorage.getItem("ravenDistance")) || 0;
 
 let exploredPoints =
-  JSON.parse(
-    localStorage.getItem(
-      "ravenExploredPoints"
-    )
-  ) || [];
-
+  JSON.parse(localStorage.getItem("ravenExploredPoints")) || [];
 
 let travelHistory =
-  JSON.parse(
-    localStorage.getItem(
-      "ravenTravelHistory"
-    )
-  ) || [];
-
+  JSON.parse(localStorage.getItem("ravenTravelHistory")) || [];
 
 let discoveredPlaces =
-  JSON.parse(
-    localStorage.getItem(
-      "ravenDiscoveredPlaces"
-    )
-  ) || [];
+  JSON.parse(localStorage.getItem("ravenDiscoveredPlaces")) || [];
+
+
+/* ===============================
+   V0.8 KARTENMODUS
+================================ */
+
+let mapMode =
+  localStorage.getItem("ravenMapMode") || "explore";
 
 
 /* ===============================
@@ -646,14 +631,6 @@ let lastGeocodeTime = 0;
 
 let lastGeocodePosition = null;
 
-
-/*
-  Größe des aufgedeckten Bereiches.
-
-  Jeder Erkundungspunkt deckt
-  aktuell 40 Meter Radius auf.
-*/
-
 const REVEAL_RADIUS_METERS = 40;
 
 
@@ -663,10 +640,9 @@ const REVEAL_RADIUS_METERS = 40;
 
 const map =
   L.map("map").setView(
-    [51.1657,10.4515],
+    [51.1657, 10.4515],
     5
   );
-
 
 L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -706,12 +682,12 @@ const sessionLine =
 
 
 /* ===============================
-   AKTUELLE POSITION
+   POSITION
 ================================ */
 
 const positionMarker =
   L.circleMarker(
-    [51.1657,10.4515],
+    [51.1657, 10.4515],
     {
       radius: 8,
       weight: 3,
@@ -721,23 +697,11 @@ const positionMarker =
 
 
 /* ===============================
-   FOG OF WAR SVG
+   FOG SVG
 ================================ */
-
-/*
-  Wir legen ein SVG direkt über
-  die Leaflet-Karte.
-
-  Die Karte wird von einer dunklen
-  Fläche bedeckt.
-
-  Die erkundeten Bereiche werden
-  aus dieser Fläche ausgeschnitten.
-*/
 
 const mapContainer =
   map.getContainer();
-
 
 const fogSvg =
   document.createElementNS(
@@ -745,18 +709,15 @@ const fogSvg =
     "svg"
   );
 
-
 fogSvg.setAttribute(
   "id",
   "fogOverlay"
 );
 
-
 fogSvg.setAttribute(
   "xmlns",
   "http://www.w3.org/2000/svg"
 );
-
 
 mapContainer.appendChild(
   fogSvg
@@ -764,26 +725,104 @@ mapContainer.appendChild(
 
 
 /* ===============================
-   FOG ZEICHNEN
+   V0.8 MODUS WECHSELN
+================================ */
+
+function setMapMode(mode) {
+
+  mapMode = mode;
+
+  localStorage.setItem(
+    "ravenMapMode",
+    mode
+  );
+
+  updateMapMode();
+
+}
+
+
+function updateMapMode() {
+
+  const travelButton =
+    document.getElementById(
+      "travelMapButton"
+    );
+
+  const exploreButton =
+    document.getElementById(
+      "exploreMapButton"
+    );
+
+  const description =
+    document.getElementById(
+      "mapModeDescription"
+    );
+
+
+  if (mapMode === "travel") {
+
+    fogSvg.style.display =
+      "none";
+
+    travelButton.classList.add(
+      "active"
+    );
+
+    exploreButton.classList.remove(
+      "active"
+    );
+
+    description.textContent =
+      "Deine vollständige Reisekarte und bisherige Route.";
+
+  }
+
+  else {
+
+    fogSvg.style.display =
+      "block";
+
+    travelButton.classList.remove(
+      "active"
+    );
+
+    exploreButton.classList.add(
+      "active"
+    );
+
+    description.textContent =
+      "Nur von Raven erkundete Gebiete sind sichtbar.";
+
+    updateFogOfWar();
+
+  }
+
+}
+
+
+/* ===============================
+   FOG OF WAR
 ================================ */
 
 function updateFogOfWar() {
 
+  if (mapMode !== "explore") {
+    return;
+  }
+
   const size =
     map.getSize();
-
 
   fogSvg.setAttribute(
     "width",
     size.x
   );
 
-
   fogSvg.setAttribute(
     "height",
     size.y
   );
-
 
   fogSvg.setAttribute(
     "viewBox",
@@ -793,14 +832,7 @@ function updateFogOfWar() {
     size.y
   );
 
-
-  /*
-    SVG komplett neu aufbauen.
-  */
-
-  fogSvg.innerHTML =
-    "";
-
+  fogSvg.innerHTML = "";
 
   const defs =
     document.createElementNS(
@@ -808,24 +840,16 @@ function updateFogOfWar() {
       "defs"
     );
 
-
   const mask =
     document.createElementNS(
       "http://www.w3.org/2000/svg",
       "mask"
     );
 
-
   mask.setAttribute(
     "id",
     "ravenFogMask"
   );
-
-
-  /*
-    Weiß bedeutet:
-    Fog sichtbar.
-  */
 
   const background =
     document.createElementNS(
@@ -833,120 +857,75 @@ function updateFogOfWar() {
       "rect"
     );
 
-
-  background.setAttribute(
-    "x",
-    "0"
-  );
-
-
-  background.setAttribute(
-    "y",
-    "0"
-  );
-
-
-  background.setAttribute(
-    "width",
-    size.x
-  );
-
-
-  background.setAttribute(
-    "height",
-    size.y
-  );
-
-
-  background.setAttribute(
-    "fill",
-    "white"
-  );
-
+  background.setAttribute("x", "0");
+  background.setAttribute("y", "0");
+  background.setAttribute("width", size.x);
+  background.setAttribute("height", size.y);
+  background.setAttribute("fill", "white");
 
   mask.appendChild(
     background
   );
 
 
-  /*
-    Schwarze Kreise innerhalb der Maske
-    entfernen den Fog.
+  exploredPoints.forEach(
+    point => {
 
-    Überlappende Kreise bleiben ebenfalls
-    frei und erzeugen so einen Korridor.
-  */
+      const center =
+        map.latLngToContainerPoint(
+          [
+            point.lat,
+            point.lon
+          ]
+        );
 
-  exploredPoints.forEach(point => {
-
-    const center =
-      map.latLngToContainerPoint(
-        [
+      const radius =
+        metersToPixels(
           point.lat,
-          point.lon
-        ]
+          point.lon,
+          REVEAL_RADIUS_METERS
+        );
+
+      const hole =
+        document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle"
+        );
+
+      hole.setAttribute(
+        "cx",
+        center.x
       );
 
-
-    const radius =
-      metersToPixels(
-        point.lat,
-        point.lon,
-        REVEAL_RADIUS_METERS
+      hole.setAttribute(
+        "cy",
+        center.y
       );
 
-
-    const hole =
-      document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "circle"
+      hole.setAttribute(
+        "r",
+        radius
       );
 
+      hole.setAttribute(
+        "fill",
+        "black"
+      );
 
-    hole.setAttribute(
-      "cx",
-      center.x
-    );
+      mask.appendChild(
+        hole
+      );
 
-
-    hole.setAttribute(
-      "cy",
-      center.y
-    );
-
-
-    hole.setAttribute(
-      "r",
-      radius
-    );
-
-
-    hole.setAttribute(
-      "fill",
-      "black"
-    );
-
-
-    mask.appendChild(
-      hole
-    );
-
-  });
-
+    }
+  );
 
   defs.appendChild(
     mask
   );
 
-
   fogSvg.appendChild(
     defs
   );
-
-
-  /*
-    Eigentliche dunkle Schicht.
-  */
 
   const darkness =
     document.createElementNS(
@@ -954,42 +933,20 @@ function updateFogOfWar() {
       "rect"
     );
 
-
-  darkness.setAttribute(
-    "x",
-    "0"
-  );
-
-
-  darkness.setAttribute(
-    "y",
-    "0"
-  );
-
-
-  darkness.setAttribute(
-    "width",
-    size.x
-  );
-
-
-  darkness.setAttribute(
-    "height",
-    size.y
-  );
-
+  darkness.setAttribute("x", "0");
+  darkness.setAttribute("y", "0");
+  darkness.setAttribute("width", size.x);
+  darkness.setAttribute("height", size.y);
 
   darkness.setAttribute(
     "fill",
     "rgba(0,0,0,0.94)"
   );
 
-
   darkness.setAttribute(
     "mask",
     "url(#ravenFogMask)"
   );
-
 
   fogSvg.appendChild(
     darkness
@@ -999,7 +956,7 @@ function updateFogOfWar() {
 
 
 /* ===============================
-   METER IN PIXEL
+   METER → PIXEL
 ================================ */
 
 function metersToPixels(
@@ -1008,20 +965,13 @@ function metersToPixels(
   meters
 ) {
 
-  /*
-    Ungefähr 111.320 Meter
-    entsprechen einem Breitengrad.
-  */
-
   const latitudeOffset =
     meters / 111320;
 
-
   const center =
     map.latLngToContainerPoint(
-      [lat,lon]
+      [lat, lon]
     );
-
 
   const edge =
     map.latLngToContainerPoint(
@@ -1030,7 +980,6 @@ function metersToPixels(
         lon
       ]
     );
-
 
   return Math.max(
     1,
@@ -1042,21 +991,10 @@ function metersToPixels(
 }
 
 
-/*
-  Beim Zoomen oder Verschieben
-  müssen die Löcher neu berechnet werden.
-*/
-
 map.on(
   "move zoom resize",
   updateFogOfWar
 );
-
-
-/*
-  Nach Laden der Karte
-  Fog zeichnen.
-*/
 
 map.whenReady(
   updateFogOfWar
@@ -1067,15 +1005,12 @@ map.whenReady(
    LETZTEN ORT ANZEIGEN
 ================================ */
 
-if (
-  travelHistory.length > 0
-) {
+if (travelHistory.length > 0) {
 
   const last =
     travelHistory[
       travelHistory.length - 1
     ];
-
 
   map.setView(
     last,
@@ -1093,52 +1028,36 @@ function updateUI() {
 
   document.getElementById(
     "xp"
-  ).textContent =
-    xp;
-
+  ).textContent = xp;
 
   document.getElementById(
     "level"
-  ).textContent =
-    level;
-
+  ).textContent = level;
 
   document.getElementById(
     "distance"
   ).textContent =
-    (
-      totalDistance / 1000
-    ).toFixed(2);
-
+    (totalDistance / 1000).toFixed(2);
 
   document.getElementById(
     "sessionDistance"
   ).textContent =
-    Math.round(
-      sessionDistance
-    );
-
+    Math.round(sessionDistance);
 
   document.getElementById(
     "exploredCount"
   ).textContent =
     exploredPoints.length;
 
-
   document.getElementById(
     "placesCount"
   ).textContent =
     discoveredPlaces.length;
 
-
   document.getElementById(
     "xpfill"
   ).style.width =
-    Math.min(
-      xp,
-      100
-    ) + "%";
-
+    Math.min(xp, 100) + "%";
 
   updateTravelBook();
 
@@ -1154,10 +1073,8 @@ function updateTravelBook() {
   const countries =
     new Set();
 
-
   const regions =
     new Set();
-
 
   discoveredPlaces.forEach(
     place => {
@@ -1170,17 +1087,14 @@ function updateTravelBook() {
 
       }
 
-
       if (place.region) {
 
         regions.add(
-
           (
             place.country +
             "|" +
             place.region
           ).toLowerCase()
-
         );
 
       }
@@ -1188,24 +1102,20 @@ function updateTravelBook() {
     }
   );
 
-
   document.getElementById(
     "countriesCount"
   ).textContent =
     countries.size;
-
 
   document.getElementById(
     "regionsCount"
   ).textContent =
     regions.size;
 
-
   document.getElementById(
     "bookPlacesCount"
   ).textContent =
     discoveredPlaces.length;
-
 
   renderPlacesList();
 
@@ -1223,52 +1133,37 @@ function renderPlacesList() {
       "placesList"
     );
 
+  list.innerHTML = "";
 
-  list.innerHTML =
-    "";
-
-
-  if (
-    discoveredPlaces.length === 0
-  ) {
+  if (discoveredPlaces.length === 0) {
 
     const empty =
       document.createElement(
         "div"
       );
 
-
     empty.className =
       "emptyBook";
 
-
     empty.textContent =
       "Noch keine Orte entdeckt.";
-
 
     list.appendChild(
       empty
     );
 
-
     return;
 
   }
 
-
   const sortedPlaces =
     [...discoveredPlaces]
       .sort(
-        (a,b) =>
-          new Date(
-            b.discoveredAt
-          )
+        (a, b) =>
+          new Date(b.discoveredAt)
           -
-          new Date(
-            a.discoveredAt
-          )
+          new Date(a.discoveredAt)
       );
-
 
   sortedPlaces.forEach(
     place => {
@@ -1278,35 +1173,27 @@ function renderPlacesList() {
           "div"
         );
 
-
       entry.className =
         "placeEntry";
-
 
       const name =
         document.createElement(
           "div"
         );
 
-
       name.className =
         "placeName";
 
-
       name.textContent =
-        "📍 " +
-        place.name;
-
+        "📍 " + place.name;
 
       const details =
         document.createElement(
           "div"
         );
 
-
       details.className =
         "placeDetails";
-
 
       details.textContent =
         [
@@ -1316,16 +1203,13 @@ function renderPlacesList() {
         .filter(Boolean)
         .join(" • ");
 
-
       const date =
         document.createElement(
           "div"
         );
 
-
       date.className =
         "placeDate";
-
 
       date.textContent =
         "Erstmals entdeckt: " +
@@ -1333,25 +1217,11 @@ function renderPlacesList() {
           place.discoveredAt
         );
 
+      entry.appendChild(name);
+      entry.appendChild(details);
+      entry.appendChild(date);
 
-      entry.appendChild(
-        name
-      );
-
-
-      entry.appendChild(
-        details
-      );
-
-
-      entry.appendChild(
-        date
-      );
-
-
-      list.appendChild(
-        entry
-      );
+      list.appendChild(entry);
 
     }
   );
@@ -1368,28 +1238,19 @@ function formatDiscoveryDate(
 ) {
 
   if (!isoDate) {
-
     return "Unbekannt";
-
   }
 
-
   const date =
-    new Date(
-      isoDate
-    );
-
+    new Date(isoDate);
 
   if (
     Number.isNaN(
       date.getTime()
     )
   ) {
-
     return "Unbekannt";
-
   }
-
 
   return date.toLocaleDateString(
     "de-DE",
@@ -1407,35 +1268,26 @@ function formatDiscoveryDate(
    XP
 ================================ */
 
-function addXP(
-  amount
-) {
+function addXP(amount) {
 
   xp += amount;
 
-
-  while (
-    xp >= 100
-  ) {
+  while (xp >= 100) {
 
     xp -= 100;
-
     level++;
 
   }
-
 
   localStorage.setItem(
     "ravenXP",
     xp
   );
 
-
   localStorage.setItem(
     "ravenLevel",
     level
   );
-
 
   updateUI();
 
@@ -1449,15 +1301,11 @@ function addXP(
 function toggleExploration() {
 
   if (tracking) {
-
     stopExploration();
-
   }
 
   else {
-
     startExploration();
-
   }
 
 }
@@ -1474,10 +1322,7 @@ function startExploration() {
       "message"
     );
 
-
-  if (
-    !navigator.geolocation
-  ) {
+  if (!navigator.geolocation) {
 
     message.textContent =
       "GPS wird nicht unterstützt.";
@@ -1486,37 +1331,23 @@ function startExploration() {
 
   }
 
+  tracking = true;
 
-  tracking =
-    true;
+  sessionDistance = 0;
 
+  lastPosition = null;
 
-  sessionDistance =
-    0;
+  sessionPoints = [];
 
-
-  lastPosition =
-    null;
-
-
-  sessionPoints =
-    [];
-
-
-  sessionLine.setLatLngs(
-    []
-  );
-
+  sessionLine.setLatLngs([]);
 
   document.getElementById(
     "exploreButton"
   ).textContent =
     "Erkundung beenden";
 
-
   message.textContent =
     "GPS wird gestartet...";
-
 
   watchId =
     navigator.geolocation.watchPosition(
@@ -1537,171 +1368,98 @@ function startExploration() {
 
 
 /* ===============================
-   GPS POSITION
+   GPS
 ================================ */
 
-function handlePosition(
-  position
-) {
+function handlePosition(position) {
 
   const lat =
     position.coords.latitude;
 
-
   const lon =
     position.coords.longitude;
-
 
   const accuracy =
     position.coords.accuracy;
 
-
-  /*
-    Ungenaue GPS-Punkte
-    ignorieren.
-  */
-
-  if (
-    accuracy > 35
-  ) {
+  if (accuracy > 35) {
 
     document.getElementById(
       "message"
     ).textContent =
-
       "GPS wird genauer... ±" +
-      Math.round(
-        accuracy
-      ) +
+      Math.round(accuracy) +
       " m";
-
 
     return;
 
   }
 
-
   const current = {
-
     lat: lat,
     lon: lon
-
   };
 
-
-  /* ===============================
-     POSITION AUF KARTE
-  ================================ */
-
   positionMarker.setLatLng(
-    [lat,lon]
+    [lat, lon]
   );
 
+  if (!map.hasLayer(positionMarker)) {
 
-  if (
-    !map.hasLayer(
-      positionMarker
-    )
-  ) {
-
-    positionMarker.addTo(
-      map
-    );
+    positionMarker.addTo(map);
 
   }
 
-
-  /*
-    Beim ersten GPS-Fix
-    auf Raven zoomen.
-  */
-
-  if (
-    !mapCentered
-  ) {
+  if (!mapCentered) {
 
     map.setView(
-      [lat,lon],
+      [lat, lon],
       17
     );
 
-
-    mapCentered =
-      true;
+    mapCentered = true;
 
   }
-
-
-  /* ===============================
-     ORT BESTIMMEN
-  ================================ */
 
   maybeCheckLocation(
     lat,
     lon
   );
 
-
-  /* ===============================
-     BEWEGUNG
-  ================================ */
-
-  if (
-    lastPosition
-  ) {
+  if (lastPosition) {
 
     const moved =
       calculateDistance(
-
         lastPosition.lat,
         lastPosition.lon,
-
         lat,
         lon
-
       );
-
-
-    /*
-      Unter 3 Meter:
-      wahrscheinlich GPS-Zittern.
-
-      Über 150 Meter:
-      wahrscheinlich GPS-Sprung.
-    */
 
     if (
       moved >= 3 &&
       moved < 150
     ) {
 
-      sessionDistance +=
-        moved;
+      sessionDistance += moved;
 
-
-      totalDistance +=
-        moved;
-
+      totalDistance += moved;
 
       localStorage.setItem(
         "ravenDistance",
         totalDistance
       );
 
-
       const newPoint =
-        [lat,lon];
-
+        [lat, lon];
 
       sessionPoints.push(
         newPoint
       );
 
-
       travelHistory.push(
         newPoint
       );
-
 
       localStorage.setItem(
         "ravenTravelHistory",
@@ -1710,16 +1468,13 @@ function handlePosition(
         )
       );
 
-
       sessionLine.setLatLngs(
         sessionPoints
       );
 
-
       historyLine.setLatLngs(
         travelHistory
       );
-
 
       addExploredArea(
         lat,
@@ -1732,24 +1487,16 @@ function handlePosition(
 
   else {
 
-    /*
-      Erster Punkt einer Session
-      deckt direkt die Umgebung auf.
-    */
-
     const firstPoint =
-      [lat,lon];
-
+      [lat, lon];
 
     sessionPoints.push(
       firstPoint
     );
 
-
     sessionLine.setLatLngs(
       sessionPoints
     );
-
 
     addExploredArea(
       lat,
@@ -1758,21 +1505,14 @@ function handlePosition(
 
   }
 
-
-  lastPosition =
-    current;
-
+  lastPosition = current;
 
   document.getElementById(
     "message"
   ).textContent =
-
     "Erkundung läuft • GPS ±" +
-    Math.round(
-      accuracy
-    ) +
+    Math.round(accuracy) +
     " m";
-
 
   updateUI();
 
@@ -1780,7 +1520,7 @@ function handlePosition(
 
 
 /* ===============================
-   NEUEN BEREICH AUFDECKEN
+   BEREICH AUFDECKEN
 ================================ */
 
 function addExploredArea(
@@ -1788,56 +1528,35 @@ function addExploredArea(
   lon
 ) {
 
-  /*
-    Keine unnötigen Punkte
-    dicht nebeneinander.
-  */
-
-  if (
-    exploredPoints.length > 0
-  ) {
+  if (exploredPoints.length > 0) {
 
     const lastExplored =
       exploredPoints[
         exploredPoints.length - 1
       ];
 
-
     const distance =
       calculateDistance(
-
         lastExplored.lat,
         lastExplored.lon,
-
         lat,
         lon
-
       );
 
-
-    if (
-      distance < 20
-    ) {
-
+    if (distance < 20) {
       return;
-
     }
 
   }
 
-
   const point = {
-
     lat: lat,
     lon: lon
-
   };
-
 
   exploredPoints.push(
     point
   );
-
 
   localStorage.setItem(
     "ravenExploredPoints",
@@ -1846,13 +1565,7 @@ function addExploredArea(
     )
   );
 
-
-  /*
-    Fog sofort aktualisieren.
-  */
-
   updateFogOfWar();
-
 
   updateUI();
 
@@ -1871,66 +1584,34 @@ function maybeCheckLocation(
   const now =
     Date.now();
 
-
-  /*
-    API höchstens alle
-    60 Sekunden prüfen.
-  */
-
   if (
-    now -
-    lastGeocodeTime <
-    60000
+    now - lastGeocodeTime < 60000
   ) {
-
     return;
-
   }
 
-
-  /*
-    Außerdem muss Raven sich
-    mindestens 100 Meter bewegt haben.
-  */
-
-  if (
-    lastGeocodePosition
-  ) {
+  if (lastGeocodePosition) {
 
     const moved =
       calculateDistance(
-
         lastGeocodePosition.lat,
         lastGeocodePosition.lon,
-
         lat,
         lon
-
       );
 
-
-    if (
-      moved < 100
-    ) {
-
+    if (moved < 100) {
       return;
-
     }
 
   }
 
-
-  lastGeocodeTime =
-    now;
-
+  lastGeocodeTime = now;
 
   lastGeocodePosition = {
-
     lat: lat,
     lon: lon
-
   };
-
 
   reverseGeocode(
     lat,
@@ -1950,33 +1631,19 @@ async function reverseGeocode(
 ) {
 
   const url =
-
     "https://api.bigdatacloud.net/data/reverse-geocode-client" +
-
     "?latitude=" +
-    encodeURIComponent(
-      lat
-    ) +
-
+    encodeURIComponent(lat) +
     "&longitude=" +
-    encodeURIComponent(
-      lon
-    ) +
-
+    encodeURIComponent(lon) +
     "&localityLanguage=de";
-
 
   try {
 
     const response =
-      await fetch(
-        url
-      );
+      await fetch(url);
 
-
-    if (
-      !response.ok
-    ) {
+    if (!response.ok) {
 
       throw new Error(
         "Geocoding fehlgeschlagen"
@@ -1984,17 +1651,12 @@ async function reverseGeocode(
 
     }
 
-
     const data =
       await response.json();
 
-
     const city =
-
       data.city ||
-
       data.locality ||
-
       data.localityInfo
         ?.informative
         ?.find(
@@ -2002,37 +1664,28 @@ async function reverseGeocode(
             item.description === "city"
         )
         ?.name ||
-
       "Unbekannter Ort";
 
-
     const region =
-      data.principalSubdivision ||
-      "";
-
+      data.principalSubdivision || "";
 
     const country =
-      data.countryName ||
-      "";
-
+      data.countryName || "";
 
     document.getElementById(
       "currentPlace"
     ).textContent =
       city;
 
-
     document.getElementById(
       "currentRegion"
     ).textContent =
-
       [
         region,
         country
       ]
       .filter(Boolean)
       .join(" • ");
-
 
     registerPlace(
       city,
@@ -2055,7 +1708,7 @@ async function reverseGeocode(
 
 
 /* ===============================
-   NEUEN ORT REGISTRIEREN
+   ORT REGISTRIEREN
 ================================ */
 
 function registerPlace(
@@ -2068,44 +1721,31 @@ function registerPlace(
     !city ||
     city === "Unbekannter Ort"
   ) {
-
     return;
-
   }
 
-
   const placeKey =
-
     (
       country +
       "|" +
       region +
       "|" +
       city
-    )
-    .toLowerCase();
-
+    ).toLowerCase();
 
   const alreadyDiscovered =
     discoveredPlaces.some(
-
       place =>
-        place.key ===
-        placeKey
-
+        place.key === placeKey
     );
 
-
-  if (
-    alreadyDiscovered
-  ) {
+  if (alreadyDiscovered) {
 
     updateTravelBook();
 
     return;
 
   }
-
 
   const newPlace = {
 
@@ -2126,11 +1766,9 @@ function registerPlace(
 
   };
 
-
   discoveredPlaces.push(
     newPlace
   );
-
 
   localStorage.setItem(
     "ravenDiscoveredPlaces",
@@ -2139,22 +1777,12 @@ function registerPlace(
     )
   );
 
-
-  /*
-    Neuer Ort:
-    +25 XP
-  */
-
-  addXP(
-    25
-  );
-
+  addXP(25);
 
   showDiscovery(
     city,
     25
   );
-
 
   updateUI();
 
@@ -2162,7 +1790,7 @@ function registerPlace(
 
 
 /* ===============================
-   ENTDECKUNG ANZEIGEN
+   ENTDECKUNG
 ================================ */
 
 function showDiscovery(
@@ -2175,25 +1803,20 @@ function showDiscovery(
       "discoveryBox"
     );
 
-
   document.getElementById(
     "discoveryName"
   ).textContent =
     name;
 
-
   document.getElementById(
     "discoveryXP"
   ).textContent =
-
     "+" +
     reward +
     " Entdeckungs-XP";
 
-
   box.style.display =
     "block";
-
 
   setTimeout(
     () => {
@@ -2212,23 +1835,16 @@ function showDiscovery(
    GPS FEHLER
 ================================ */
 
-function handleGPSError(
-  error
-) {
+function handleGPSError(error) {
 
-  tracking =
-    false;
-
+  tracking = false;
 
   document.getElementById(
     "exploreButton"
   ).textContent =
     "Erkundung starten";
 
-
-  if (
-    error.code === 1
-  ) {
+  if (error.code === 1) {
 
     document.getElementById(
       "message"
@@ -2237,9 +1853,7 @@ function handleGPSError(
 
   }
 
-  else if (
-    error.code === 2
-  ) {
+  else if (error.code === 2) {
 
     document.getElementById(
       "message"
@@ -2266,9 +1880,7 @@ function handleGPSError(
 
 function stopExploration() {
 
-  if (
-    watchId !== null
-  ) {
+  if (watchId !== null) {
 
     navigator.geolocation.clearWatch(
       watchId
@@ -2276,34 +1888,18 @@ function stopExploration() {
 
   }
 
+  watchId = null;
 
-  watchId =
-    null;
+  tracking = false;
 
-
-  tracking =
-    false;
-
-
-  lastPosition =
-    null;
-
-
-  /*
-    Prototyp-Regel:
-
-    10 Meter = 1 XP
-  */
+  lastPosition = null;
 
   const earnedXP =
     Math.floor(
       sessionDistance / 10
     );
 
-
-  if (
-    earnedXP > 0
-  ) {
+  if (earnedXP > 0) {
 
     addXP(
       earnedXP
@@ -2311,29 +1907,19 @@ function stopExploration() {
 
   }
 
-
   document.getElementById(
     "exploreButton"
   ).textContent =
     "Erkundung starten";
 
-
   document.getElementById(
     "message"
   ).textContent =
-
     "Erkundung beendet • " +
-
-    Math.round(
-      sessionDistance
-    ) +
-
+    Math.round(sessionDistance) +
     " m • +" +
-
     earnedXP +
-
     " XP";
-
 
   updateUI();
 
@@ -2341,7 +1927,7 @@ function stopExploration() {
 
 
 /* ===============================
-   DISTANZ BERECHNEN
+   DISTANZ
 ================================ */
 
 function calculateDistance(
@@ -2354,74 +1940,37 @@ function calculateDistance(
   const R =
     6371000;
 
-
   const phi1 =
     lat1 *
     Math.PI / 180;
-
 
   const phi2 =
     lat2 *
     Math.PI / 180;
 
-
   const deltaPhi =
-    (
-      lat2 - lat1
-    ) *
+    (lat2 - lat1) *
     Math.PI / 180;
-
 
   const deltaLambda =
-    (
-      lon2 - lon1
-    ) *
+    (lon2 - lon1) *
     Math.PI / 180;
 
-
   const a =
-
-    Math.sin(
-      deltaPhi / 2
-    )
-    *
-    Math.sin(
-      deltaPhi / 2
-    )
-
+    Math.sin(deltaPhi / 2) *
+    Math.sin(deltaPhi / 2)
     +
-
-    Math.cos(
-      phi1
-    )
-    *
-    Math.cos(
-      phi2
-    )
-    *
-    Math.sin(
-      deltaLambda / 2
-    )
-    *
-    Math.sin(
-      deltaLambda / 2
-    );
-
+    Math.cos(phi1) *
+    Math.cos(phi2) *
+    Math.sin(deltaLambda / 2) *
+    Math.sin(deltaLambda / 2);
 
   const c =
-
     2 *
-
     Math.atan2(
-
       Math.sqrt(a),
-
-      Math.sqrt(
-        1 - a
-      )
-
+      Math.sqrt(1 - a)
     );
-
 
   return R * c;
 
@@ -2434,9 +1983,16 @@ function calculateDistance(
 
 updateUI();
 
+updateMapMode();
 
 setTimeout(
-  updateFogOfWar,
+  () => {
+
+    map.invalidateSize();
+
+    updateFogOfWar();
+
+  },
   300
 );
 
