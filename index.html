@@ -164,6 +164,34 @@
       color: #8b949e;
     }
 
+    .discovery {
+      display: none;
+      margin-top: 16px;
+      padding: 18px;
+      border: 1px solid #7c3aed;
+      border-radius: 18px;
+      background: rgba(124,58,237,.12);
+      text-align: center;
+    }
+
+    .discoverySmall {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #a78bfa;
+    }
+
+    .discoveryName {
+      margin-top: 6px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .discoveryXP {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #c4b5fd;
+    }
+
     #map {
       margin-top: 20px;
       width: 100%;
@@ -199,32 +227,83 @@
       min-height: 20px;
     }
 
-    .discovery {
-      display: none;
-      margin-top: 16px;
-      padding: 18px;
-      border: 1px solid #7c3aed;
-      border-radius: 18px;
-      background: rgba(124,58,237,.12);
+    .travelBook {
+      margin-top: 22px;
+      background: rgba(22,27,34,.94);
+      border: 1px solid #30363d;
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+
+    .travelBookTitle {
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: #a78bfa;
+      margin-bottom: 16px;
+    }
+
+    .travelSummary {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .travelSummaryBox {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 14px;
+      padding: 12px 8px;
       text-align: center;
     }
 
-    .discoverySmall {
-      font-size: 11px;
-      letter-spacing: 2px;
-      color: #a78bfa;
-    }
-
-    .discoveryName {
-      margin-top: 6px;
-      font-size: 22px;
+    .travelSummaryNumber {
+      font-size: 20px;
       font-weight: bold;
     }
 
-    .discoveryXP {
+    .travelSummaryLabel {
+      margin-top: 4px;
+      font-size: 10px;
+      color: #8b949e;
+    }
+
+    .placesList {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .placeEntry {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .placeName {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .placeDetails {
+      margin-top: 5px;
+      font-size: 12px;
+      color: #8b949e;
+    }
+
+    .placeDate {
       margin-top: 8px;
-      font-size: 14px;
-      color: #c4b5fd;
+      font-size: 11px;
+      color: #a78bfa;
+    }
+
+    .emptyBook {
+      color: #8b949e;
+      font-size: 13px;
+      text-align: center;
+      padding: 14px 0;
     }
 
     .version {
@@ -281,7 +360,6 @@
       <span id="xp">0</span> / 100 XP
     </div>
 
-
     <div class="stats">
 
       <div class="stat">
@@ -310,7 +388,6 @@
 
     </div>
 
-
     <div class="locationCard">
 
       <div class="locationTitle">
@@ -326,7 +403,6 @@
       </div>
 
     </div>
-
 
     <div class="discovery" id="discoveryBox">
 
@@ -344,9 +420,7 @@
 
     </div>
 
-
     <div id="map"></div>
-
 
     <button
       id="exploreButton"
@@ -354,7 +428,6 @@
     >
       Erkundung starten
     </button>
-
 
     <div
       class="message"
@@ -365,18 +438,68 @@
 
   </div>
 
+  <div class="travelBook">
+
+    <div class="travelBookTitle">
+      🐦‍⬛ RAVENS REISEN
+    </div>
+
+    <div class="travelSummary">
+
+      <div class="travelSummaryBox">
+        <div
+          class="travelSummaryNumber"
+          id="countriesCount"
+        >
+          0
+        </div>
+        <div class="travelSummaryLabel">
+          LÄNDER
+        </div>
+      </div>
+
+      <div class="travelSummaryBox">
+        <div
+          class="travelSummaryNumber"
+          id="regionsCount"
+        >
+          0
+        </div>
+        <div class="travelSummaryLabel">
+          REGIONEN
+        </div>
+      </div>
+
+      <div class="travelSummaryBox">
+        <div
+          class="travelSummaryNumber"
+          id="bookPlacesCount"
+        >
+          0
+        </div>
+        <div class="travelSummaryLabel">
+          ORTE
+        </div>
+      </div>
+
+    </div>
+
+    <div
+      class="placesList"
+      id="placesList"
+    ></div>
+
+  </div>
 
   <div class="version">
-    RAVEN PROTOTYPE V0.5
+    RAVEN PROTOTYPE V0.6
   </div>
 
 </div>
 
-
 <script
   src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
 </script>
-
 
 <script>
 
@@ -393,18 +516,15 @@ let level =
 let totalDistance =
   Number(localStorage.getItem("ravenDistance")) || 0;
 
-
 let exploredPoints =
   JSON.parse(
     localStorage.getItem("ravenExploredPoints")
   ) || [];
 
-
 let travelHistory =
   JSON.parse(
     localStorage.getItem("ravenTravelHistory")
   ) || [];
-
 
 let discoveredPlaces =
   JSON.parse(
@@ -428,12 +548,6 @@ let sessionPoints = [];
 
 let mapCentered = false;
 
-
-/*
-  Geocoder nicht bei jedem
-  GPS-Punkt aufrufen.
-*/
-
 let lastGeocodeTime = 0;
 
 let lastGeocodePosition = null;
@@ -449,7 +563,6 @@ const map =
     5
   );
 
-
 L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   {
@@ -457,9 +570,6 @@ L.tileLayer(
     attribution: "© OpenStreetMap"
   }
 ).addTo(map);
-
-
-/* Historie */
 
 const historyLine =
   L.polyline(
@@ -470,9 +580,6 @@ const historyLine =
     }
   ).addTo(map);
 
-
-/* aktuelle Session */
-
 const sessionLine =
   L.polyline(
     [],
@@ -481,9 +588,6 @@ const sessionLine =
       opacity: 0.95
     }
   ).addTo(map);
-
-
-/* aktuelle Position */
 
 const positionMarker =
   L.circleMarker(
@@ -519,8 +623,6 @@ function drawExploredAreas() {
 
 drawExploredAreas();
 
-
-/* Karte auf letzten bekannten Punkt */
 
 if (travelHistory.length > 0) {
 
@@ -563,6 +665,222 @@ function updateUI() {
 
   document.getElementById("xpfill").style.width =
     Math.min(xp,100) + "%";
+
+  updateTravelBook();
+
+}
+
+
+/* ===============================
+   ENTDECKUNGSBUCH
+================================ */
+
+function updateTravelBook() {
+
+  const countries =
+    new Set();
+
+  const regions =
+    new Set();
+
+  discoveredPlaces.forEach(place => {
+
+    if (place.country) {
+      countries.add(
+        place.country.toLowerCase()
+      );
+    }
+
+    if (place.region) {
+      regions.add(
+        (
+          place.country +
+          "|" +
+          place.region
+        ).toLowerCase()
+      );
+    }
+
+  });
+
+
+  document.getElementById(
+    "countriesCount"
+  ).textContent =
+    countries.size;
+
+
+  document.getElementById(
+    "regionsCount"
+  ).textContent =
+    regions.size;
+
+
+  document.getElementById(
+    "bookPlacesCount"
+  ).textContent =
+    discoveredPlaces.length;
+
+
+  renderPlacesList();
+
+}
+
+
+function renderPlacesList() {
+
+  const list =
+    document.getElementById(
+      "placesList"
+    );
+
+
+  list.innerHTML =
+    "";
+
+
+  if (discoveredPlaces.length === 0) {
+
+    const empty =
+      document.createElement(
+        "div"
+      );
+
+    empty.className =
+      "emptyBook";
+
+    empty.textContent =
+      "Noch keine Orte entdeckt.";
+
+    list.appendChild(
+      empty
+    );
+
+    return;
+
+  }
+
+
+  const sortedPlaces =
+    [...discoveredPlaces]
+      .sort(
+        (a,b) =>
+          new Date(b.discoveredAt) -
+          new Date(a.discoveredAt)
+      );
+
+
+  sortedPlaces.forEach(place => {
+
+    const entry =
+      document.createElement(
+        "div"
+      );
+
+    entry.className =
+      "placeEntry";
+
+
+    const name =
+      document.createElement(
+        "div"
+      );
+
+    name.className =
+      "placeName";
+
+    name.textContent =
+      "📍 " + place.name;
+
+
+    const details =
+      document.createElement(
+        "div"
+      );
+
+    details.className =
+      "placeDetails";
+
+    details.textContent =
+      [
+        place.region,
+        place.country
+      ]
+      .filter(Boolean)
+      .join(" • ");
+
+
+    const date =
+      document.createElement(
+        "div"
+      );
+
+    date.className =
+      "placeDate";
+
+    date.textContent =
+      "Erstmals entdeckt: " +
+      formatDiscoveryDate(
+        place.discoveredAt
+      );
+
+
+    entry.appendChild(
+      name
+    );
+
+    entry.appendChild(
+      details
+    );
+
+    entry.appendChild(
+      date
+    );
+
+
+    list.appendChild(
+      entry
+    );
+
+  });
+
+}
+
+
+function formatDiscoveryDate(
+  isoDate
+) {
+
+  if (!isoDate) {
+    return "Unbekannt";
+  }
+
+
+  const date =
+    new Date(
+      isoDate
+    );
+
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+
+    return "Unbekannt";
+
+  }
+
+
+  return date.toLocaleDateString(
+    "de-DE",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }
+  );
 
 }
 
@@ -707,8 +1025,6 @@ function handlePosition(position) {
   };
 
 
-  /* Marker */
-
   positionMarker.setLatLng(
     [lat,lon]
   );
@@ -720,8 +1036,6 @@ function handlePosition(position) {
 
   }
 
-
-  /* Karte beim ersten Fix */
 
   if (!mapCentered) {
 
@@ -735,15 +1049,11 @@ function handlePosition(position) {
   }
 
 
-  /* Ort bestimmen */
-
   maybeCheckLocation(
     lat,
     lon
   );
 
-
-  /* Bewegung */
 
   if (lastPosition) {
 
@@ -931,11 +1241,6 @@ function maybeCheckLocation(
     Date.now();
 
 
-  /*
-     Mindestens 60 Sekunden Abstand
-     zwischen Standort-Abfragen.
-  */
-
   if (
     now - lastGeocodeTime <
     60000
@@ -945,14 +1250,6 @@ function maybeCheckLocation(
 
   }
 
-
-  /*
-     Wenn wir schon einen Ort
-     geprüft haben:
-
-     erst wieder nach mindestens
-     ca. 100 Metern.
-  */
 
   if (lastGeocodePosition) {
 
@@ -1030,14 +1327,6 @@ async function reverseGeocode(
     const data =
       await response.json();
 
-
-    /*
-       BigDataCloud kann je nach Ort
-       unterschiedliche Felder liefern.
-
-       Deshalb mehrere mögliche
-       Felder berücksichtigen.
-    */
 
     const city =
 
@@ -1125,10 +1414,6 @@ function registerPlace(
   }
 
 
-  /*
-     eindeutiger Schlüssel
-  */
-
   const placeKey =
 
     (
@@ -1149,6 +1434,8 @@ function registerPlace(
 
 
   if (alreadyDiscovered) {
+
+    updateTravelBook();
 
     return;
 
@@ -1185,11 +1472,6 @@ function registerPlace(
     JSON.stringify(discoveredPlaces)
   );
 
-
-  /*
-     Neue Stadt:
-     +25 XP
-  */
 
   addXP(
     25
@@ -1239,11 +1521,6 @@ function showDiscovery(
   box.style.display =
     "block";
 
-
-  /*
-     Nach 8 Sekunden
-     wieder ausblenden
-  */
 
   setTimeout(
     () => {
@@ -1330,13 +1607,6 @@ function stopExploration() {
   lastPosition =
     null;
 
-
-  /*
-     aktuell weiterhin
-     Prototyp-Regel:
-
-     10 Meter = 1 XP
-  */
 
   const earnedXP =
     Math.floor(
