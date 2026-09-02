@@ -199,7 +199,25 @@
       border-radius: 18px;
       border: 1px solid #30363d;
       overflow: hidden;
-      background: #080a0d;
+      background: #020304;
+      position: relative;
+    }
+
+    /*
+      ECHTER FOG OF WAR
+
+      Liegt über der kompletten Leaflet-Karte.
+      Die SVG-Maske schneidet erkundete Bereiche heraus.
+    */
+
+    #fogOverlay {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 650;
     }
 
     button {
@@ -316,9 +334,9 @@
 
     .leaflet-tile-pane {
       filter:
-        grayscale(75%)
-        brightness(42%)
-        contrast(120%);
+        grayscale(70%)
+        brightness(65%)
+        contrast(115%);
     }
   </style>
 </head>
@@ -343,6 +361,7 @@
     </div>
 
     <div class="levelLine">
+
       <span>
         Level <strong id="level">1</strong>
       </span>
@@ -350,6 +369,7 @@
       <span>
         Nächstes Level
       </span>
+
     </div>
 
     <div class="xpbar">
@@ -360,33 +380,60 @@
       <span id="xp">0</span> / 100 XP
     </div>
 
+
     <div class="stats">
 
       <div class="stat">
-        <div class="label">STRECKE</div>
+        <div class="label">
+          STRECKE
+        </div>
+
         <div class="value">
           <span id="distance">0.00</span> km
         </div>
       </div>
 
+
       <div class="stat">
-        <div class="label">SESSION</div>
+        <div class="label">
+          SESSION
+        </div>
+
         <div class="value">
           <span id="sessionDistance">0</span> m
         </div>
       </div>
 
-      <div class="stat">
-        <div class="label">ORTE ENTDECKT</div>
-        <div class="value" id="placesCount">0</div>
-      </div>
 
       <div class="stat">
-        <div class="label">ERKUNDUNGSPUNKTE</div>
-        <div class="value" id="exploredCount">0</div>
+        <div class="label">
+          ORTE ENTDECKT
+        </div>
+
+        <div
+          class="value"
+          id="placesCount"
+        >
+          0
+        </div>
+      </div>
+
+
+      <div class="stat">
+        <div class="label">
+          ERKUNDUNGSPUNKTE
+        </div>
+
+        <div
+          class="value"
+          id="exploredCount"
+        >
+          0
+        </div>
       </div>
 
     </div>
+
 
     <div class="locationCard">
 
@@ -404,23 +451,35 @@
 
     </div>
 
-    <div class="discovery" id="discoveryBox">
+
+    <div
+      class="discovery"
+      id="discoveryBox"
+    >
 
       <div class="discoverySmall">
         🐦‍⬛ NEUER ORT ENTDECKT
       </div>
 
-      <div class="discoveryName" id="discoveryName">
+      <div
+        class="discoveryName"
+        id="discoveryName"
+      >
         -
       </div>
 
-      <div class="discoveryXP" id="discoveryXP">
+      <div
+        class="discoveryXP"
+        id="discoveryXP"
+      >
         +25 XP
       </div>
 
     </div>
 
+
     <div id="map"></div>
+
 
     <button
       id="exploreButton"
@@ -428,6 +487,7 @@
     >
       Erkundung starten
     </button>
+
 
     <div
       class="message"
@@ -438,51 +498,65 @@
 
   </div>
 
+
   <div class="travelBook">
 
     <div class="travelBookTitle">
       🐦‍⬛ RAVENS REISEN
     </div>
 
+
     <div class="travelSummary">
 
       <div class="travelSummaryBox">
+
         <div
           class="travelSummaryNumber"
           id="countriesCount"
         >
           0
         </div>
+
         <div class="travelSummaryLabel">
           LÄNDER
         </div>
+
       </div>
 
+
       <div class="travelSummaryBox">
+
         <div
           class="travelSummaryNumber"
           id="regionsCount"
         >
           0
         </div>
+
         <div class="travelSummaryLabel">
           REGIONEN
         </div>
+
       </div>
 
+
       <div class="travelSummaryBox">
+
         <div
           class="travelSummaryNumber"
           id="bookPlacesCount"
         >
           0
         </div>
+
         <div class="travelSummaryLabel">
           ORTE
         </div>
+
       </div>
 
     </div>
+
 
     <div
       class="placesList"
@@ -491,15 +565,18 @@
 
   </div>
 
+
   <div class="version">
-    RAVEN PROTOTYPE V0.6
+    RAVEN PROTOTYPE V0.7
   </div>
 
 </div>
 
+
 <script
   src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
 </script>
+
 
 <script>
 
@@ -508,27 +585,44 @@
 ================================ */
 
 let xp =
-  Number(localStorage.getItem("ravenXP")) || 0;
+  Number(
+    localStorage.getItem("ravenXP")
+  ) || 0;
+
 
 let level =
-  Number(localStorage.getItem("ravenLevel")) || 1;
+  Number(
+    localStorage.getItem("ravenLevel")
+  ) || 1;
+
 
 let totalDistance =
-  Number(localStorage.getItem("ravenDistance")) || 0;
+  Number(
+    localStorage.getItem("ravenDistance")
+  ) || 0;
+
 
 let exploredPoints =
   JSON.parse(
-    localStorage.getItem("ravenExploredPoints")
+    localStorage.getItem(
+      "ravenExploredPoints"
+    )
   ) || [];
+
 
 let travelHistory =
   JSON.parse(
-    localStorage.getItem("ravenTravelHistory")
+    localStorage.getItem(
+      "ravenTravelHistory"
+    )
   ) || [];
+
 
 let discoveredPlaces =
   JSON.parse(
-    localStorage.getItem("ravenDiscoveredPlaces")
+    localStorage.getItem(
+      "ravenDiscoveredPlaces"
+    )
   ) || [];
 
 
@@ -553,6 +647,16 @@ let lastGeocodeTime = 0;
 let lastGeocodePosition = null;
 
 
+/*
+  Größe des aufgedeckten Bereiches.
+
+  Jeder Erkundungspunkt deckt
+  aktuell 40 Meter Radius auf.
+*/
+
+const REVEAL_RADIUS_METERS = 40;
+
+
 /* ===============================
    KARTE
 ================================ */
@@ -563,6 +667,7 @@ const map =
     5
   );
 
+
 L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   {
@@ -571,14 +676,24 @@ L.tileLayer(
   }
 ).addTo(map);
 
+
+/* ===============================
+   HISTORISCHE ROUTE
+================================ */
+
 const historyLine =
   L.polyline(
     travelHistory,
     {
       weight: 3,
-      opacity: 0.4
+      opacity: 0.45
     }
   ).addTo(map);
+
+
+/* ===============================
+   AKTUELLE SESSION
+================================ */
 
 const sessionLine =
   L.polyline(
@@ -588,6 +703,11 @@ const sessionLine =
       opacity: 0.95
     }
   ).addTo(map);
+
+
+/* ===============================
+   AKTUELLE POSITION
+================================ */
 
 const positionMarker =
   L.circleMarker(
@@ -601,35 +721,361 @@ const positionMarker =
 
 
 /* ===============================
-   BISHER ERKUNDETE BEREICHE
+   FOG OF WAR SVG
 ================================ */
 
-function drawExploredAreas() {
+/*
+  Wir legen ein SVG direkt über
+  die Leaflet-Karte.
+
+  Die Karte wird von einer dunklen
+  Fläche bedeckt.
+
+  Die erkundeten Bereiche werden
+  aus dieser Fläche ausgeschnitten.
+*/
+
+const mapContainer =
+  map.getContainer();
+
+
+const fogSvg =
+  document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+
+
+fogSvg.setAttribute(
+  "id",
+  "fogOverlay"
+);
+
+
+fogSvg.setAttribute(
+  "xmlns",
+  "http://www.w3.org/2000/svg"
+);
+
+
+mapContainer.appendChild(
+  fogSvg
+);
+
+
+/* ===============================
+   FOG ZEICHNEN
+================================ */
+
+function updateFogOfWar() {
+
+  const size =
+    map.getSize();
+
+
+  fogSvg.setAttribute(
+    "width",
+    size.x
+  );
+
+
+  fogSvg.setAttribute(
+    "height",
+    size.y
+  );
+
+
+  fogSvg.setAttribute(
+    "viewBox",
+    "0 0 " +
+    size.x +
+    " " +
+    size.y
+  );
+
+
+  /*
+    SVG komplett neu aufbauen.
+  */
+
+  fogSvg.innerHTML =
+    "";
+
+
+  const defs =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "defs"
+    );
+
+
+  const mask =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "mask"
+    );
+
+
+  mask.setAttribute(
+    "id",
+    "ravenFogMask"
+  );
+
+
+  /*
+    Weiß bedeutet:
+    Fog sichtbar.
+  */
+
+  const background =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "rect"
+    );
+
+
+  background.setAttribute(
+    "x",
+    "0"
+  );
+
+
+  background.setAttribute(
+    "y",
+    "0"
+  );
+
+
+  background.setAttribute(
+    "width",
+    size.x
+  );
+
+
+  background.setAttribute(
+    "height",
+    size.y
+  );
+
+
+  background.setAttribute(
+    "fill",
+    "white"
+  );
+
+
+  mask.appendChild(
+    background
+  );
+
+
+  /*
+    Schwarze Kreise innerhalb der Maske
+    entfernen den Fog.
+
+    Überlappende Kreise bleiben ebenfalls
+    frei und erzeugen so einen Korridor.
+  */
 
   exploredPoints.forEach(point => {
 
-    L.circle(
-      [point.lat,point.lon],
-      {
-        radius: 35,
-        weight: 0,
-        fillOpacity: 0.20
-      }
-    ).addTo(map);
+    const center =
+      map.latLngToContainerPoint(
+        [
+          point.lat,
+          point.lon
+        ]
+      );
+
+
+    const radius =
+      metersToPixels(
+        point.lat,
+        point.lon,
+        REVEAL_RADIUS_METERS
+      );
+
+
+    const hole =
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle"
+      );
+
+
+    hole.setAttribute(
+      "cx",
+      center.x
+    );
+
+
+    hole.setAttribute(
+      "cy",
+      center.y
+    );
+
+
+    hole.setAttribute(
+      "r",
+      radius
+    );
+
+
+    hole.setAttribute(
+      "fill",
+      "black"
+    );
+
+
+    mask.appendChild(
+      hole
+    );
 
   });
 
+
+  defs.appendChild(
+    mask
+  );
+
+
+  fogSvg.appendChild(
+    defs
+  );
+
+
+  /*
+    Eigentliche dunkle Schicht.
+  */
+
+  const darkness =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "rect"
+    );
+
+
+  darkness.setAttribute(
+    "x",
+    "0"
+  );
+
+
+  darkness.setAttribute(
+    "y",
+    "0"
+  );
+
+
+  darkness.setAttribute(
+    "width",
+    size.x
+  );
+
+
+  darkness.setAttribute(
+    "height",
+    size.y
+  );
+
+
+  darkness.setAttribute(
+    "fill",
+    "rgba(0,0,0,0.94)"
+  );
+
+
+  darkness.setAttribute(
+    "mask",
+    "url(#ravenFogMask)"
+  );
+
+
+  fogSvg.appendChild(
+    darkness
+  );
+
 }
 
-drawExploredAreas();
+
+/* ===============================
+   METER IN PIXEL
+================================ */
+
+function metersToPixels(
+  lat,
+  lon,
+  meters
+) {
+
+  /*
+    Ungefähr 111.320 Meter
+    entsprechen einem Breitengrad.
+  */
+
+  const latitudeOffset =
+    meters / 111320;
 
 
-if (travelHistory.length > 0) {
+  const center =
+    map.latLngToContainerPoint(
+      [lat,lon]
+    );
+
+
+  const edge =
+    map.latLngToContainerPoint(
+      [
+        lat + latitudeOffset,
+        lon
+      ]
+    );
+
+
+  return Math.max(
+    1,
+    Math.abs(
+      center.y - edge.y
+    )
+  );
+
+}
+
+
+/*
+  Beim Zoomen oder Verschieben
+  müssen die Löcher neu berechnet werden.
+*/
+
+map.on(
+  "move zoom resize",
+  updateFogOfWar
+);
+
+
+/*
+  Nach Laden der Karte
+  Fog zeichnen.
+*/
+
+map.whenReady(
+  updateFogOfWar
+);
+
+
+/* ===============================
+   LETZTEN ORT ANZEIGEN
+================================ */
+
+if (
+  travelHistory.length > 0
+) {
 
   const last =
     travelHistory[
       travelHistory.length - 1
     ];
+
 
   map.setView(
     last,
@@ -645,26 +1091,54 @@ if (travelHistory.length > 0) {
 
 function updateUI() {
 
-  document.getElementById("xp").textContent =
+  document.getElementById(
+    "xp"
+  ).textContent =
     xp;
 
-  document.getElementById("level").textContent =
+
+  document.getElementById(
+    "level"
+  ).textContent =
     level;
 
-  document.getElementById("distance").textContent =
-    (totalDistance / 1000).toFixed(2);
 
-  document.getElementById("sessionDistance").textContent =
-    Math.round(sessionDistance);
+  document.getElementById(
+    "distance"
+  ).textContent =
+    (
+      totalDistance / 1000
+    ).toFixed(2);
 
-  document.getElementById("exploredCount").textContent =
+
+  document.getElementById(
+    "sessionDistance"
+  ).textContent =
+    Math.round(
+      sessionDistance
+    );
+
+
+  document.getElementById(
+    "exploredCount"
+  ).textContent =
     exploredPoints.length;
 
-  document.getElementById("placesCount").textContent =
+
+  document.getElementById(
+    "placesCount"
+  ).textContent =
     discoveredPlaces.length;
 
-  document.getElementById("xpfill").style.width =
-    Math.min(xp,100) + "%";
+
+  document.getElementById(
+    "xpfill"
+  ).style.width =
+    Math.min(
+      xp,
+      100
+    ) + "%";
+
 
   updateTravelBook();
 
@@ -680,28 +1154,39 @@ function updateTravelBook() {
   const countries =
     new Set();
 
+
   const regions =
     new Set();
 
-  discoveredPlaces.forEach(place => {
 
-    if (place.country) {
-      countries.add(
-        place.country.toLowerCase()
-      );
+  discoveredPlaces.forEach(
+    place => {
+
+      if (place.country) {
+
+        countries.add(
+          place.country.toLowerCase()
+        );
+
+      }
+
+
+      if (place.region) {
+
+        regions.add(
+
+          (
+            place.country +
+            "|" +
+            place.region
+          ).toLowerCase()
+
+        );
+
+      }
+
     }
-
-    if (place.region) {
-      regions.add(
-        (
-          place.country +
-          "|" +
-          place.region
-        ).toLowerCase()
-      );
-    }
-
-  });
+  );
 
 
   document.getElementById(
@@ -727,6 +1212,10 @@ function updateTravelBook() {
 }
 
 
+/* ===============================
+   ORTSLISTE
+================================ */
+
 function renderPlacesList() {
 
   const list =
@@ -739,22 +1228,28 @@ function renderPlacesList() {
     "";
 
 
-  if (discoveredPlaces.length === 0) {
+  if (
+    discoveredPlaces.length === 0
+  ) {
 
     const empty =
       document.createElement(
         "div"
       );
 
+
     empty.className =
       "emptyBook";
+
 
     empty.textContent =
       "Noch keine Orte entdeckt.";
 
+
     list.appendChild(
       empty
     );
+
 
     return;
 
@@ -765,94 +1260,117 @@ function renderPlacesList() {
     [...discoveredPlaces]
       .sort(
         (a,b) =>
-          new Date(b.discoveredAt) -
-          new Date(a.discoveredAt)
+          new Date(
+            b.discoveredAt
+          )
+          -
+          new Date(
+            a.discoveredAt
+          )
       );
 
 
-  sortedPlaces.forEach(place => {
+  sortedPlaces.forEach(
+    place => {
 
-    const entry =
-      document.createElement(
-        "div"
+      const entry =
+        document.createElement(
+          "div"
+        );
+
+
+      entry.className =
+        "placeEntry";
+
+
+      const name =
+        document.createElement(
+          "div"
+        );
+
+
+      name.className =
+        "placeName";
+
+
+      name.textContent =
+        "📍 " +
+        place.name;
+
+
+      const details =
+        document.createElement(
+          "div"
+        );
+
+
+      details.className =
+        "placeDetails";
+
+
+      details.textContent =
+        [
+          place.region,
+          place.country
+        ]
+        .filter(Boolean)
+        .join(" • ");
+
+
+      const date =
+        document.createElement(
+          "div"
+        );
+
+
+      date.className =
+        "placeDate";
+
+
+      date.textContent =
+        "Erstmals entdeckt: " +
+        formatDiscoveryDate(
+          place.discoveredAt
+        );
+
+
+      entry.appendChild(
+        name
       );
 
-    entry.className =
-      "placeEntry";
 
-
-    const name =
-      document.createElement(
-        "div"
-      );
-
-    name.className =
-      "placeName";
-
-    name.textContent =
-      "📍 " + place.name;
-
-
-    const details =
-      document.createElement(
-        "div"
-      );
-
-    details.className =
-      "placeDetails";
-
-    details.textContent =
-      [
-        place.region,
-        place.country
-      ]
-      .filter(Boolean)
-      .join(" • ");
-
-
-    const date =
-      document.createElement(
-        "div"
-      );
-
-    date.className =
-      "placeDate";
-
-    date.textContent =
-      "Erstmals entdeckt: " +
-      formatDiscoveryDate(
-        place.discoveredAt
+      entry.appendChild(
+        details
       );
 
 
-    entry.appendChild(
-      name
-    );
-
-    entry.appendChild(
-      details
-    );
-
-    entry.appendChild(
-      date
-    );
+      entry.appendChild(
+        date
+      );
 
 
-    list.appendChild(
-      entry
-    );
+      list.appendChild(
+        entry
+      );
 
-  });
+    }
+  );
 
 }
 
+
+/* ===============================
+   DATUM
+================================ */
 
 function formatDiscoveryDate(
   isoDate
 ) {
 
   if (!isoDate) {
+
     return "Unbekannt";
+
   }
 
 
@@ -889,11 +1407,16 @@ function formatDiscoveryDate(
    XP
 ================================ */
 
-function addXP(amount) {
+function addXP(
+  amount
+) {
 
   xp += amount;
 
-  while (xp >= 100) {
+
+  while (
+    xp >= 100
+  ) {
 
     xp -= 100;
 
@@ -901,15 +1424,18 @@ function addXP(amount) {
 
   }
 
+
   localStorage.setItem(
     "ravenXP",
     xp
   );
 
+
   localStorage.setItem(
     "ravenLevel",
     level
   );
+
 
   updateUI();
 
@@ -923,23 +1449,35 @@ function addXP(amount) {
 function toggleExploration() {
 
   if (tracking) {
+
     stopExploration();
+
   }
 
   else {
+
     startExploration();
+
   }
 
 }
 
 
+/* ===============================
+   ERKUNDUNG STARTEN
+================================ */
+
 function startExploration() {
 
   const message =
-    document.getElementById("message");
+    document.getElementById(
+      "message"
+    );
 
 
-  if (!navigator.geolocation) {
+  if (
+    !navigator.geolocation
+  ) {
 
     message.textContent =
       "GPS wird nicht unterstützt.";
@@ -949,15 +1487,25 @@ function startExploration() {
   }
 
 
-  tracking = true;
+  tracking =
+    true;
 
-  sessionDistance = 0;
 
-  lastPosition = null;
+  sessionDistance =
+    0;
 
-  sessionPoints = [];
 
-  sessionLine.setLatLngs([]);
+  lastPosition =
+    null;
+
+
+  sessionPoints =
+    [];
+
+
+  sessionLine.setLatLngs(
+    []
+  );
 
 
   document.getElementById(
@@ -989,30 +1537,44 @@ function startExploration() {
 
 
 /* ===============================
-   GPS
+   GPS POSITION
 ================================ */
 
-function handlePosition(position) {
+function handlePosition(
+  position
+) {
 
   const lat =
     position.coords.latitude;
 
+
   const lon =
     position.coords.longitude;
+
 
   const accuracy =
     position.coords.accuracy;
 
 
-  if (accuracy > 35) {
+  /*
+    Ungenaue GPS-Punkte
+    ignorieren.
+  */
+
+  if (
+    accuracy > 35
+  ) {
 
     document.getElementById(
       "message"
     ).textContent =
 
       "GPS wird genauer... ±" +
-      Math.round(accuracy) +
+      Math.round(
+        accuracy
+      ) +
       " m";
+
 
     return;
 
@@ -1020,34 +1582,59 @@ function handlePosition(position) {
 
 
   const current = {
+
     lat: lat,
     lon: lon
+
   };
 
+
+  /* ===============================
+     POSITION AUF KARTE
+  ================================ */
 
   positionMarker.setLatLng(
     [lat,lon]
   );
 
 
-  if (!map.hasLayer(positionMarker)) {
+  if (
+    !map.hasLayer(
+      positionMarker
+    )
+  ) {
 
-    positionMarker.addTo(map);
+    positionMarker.addTo(
+      map
+    );
 
   }
 
 
-  if (!mapCentered) {
+  /*
+    Beim ersten GPS-Fix
+    auf Raven zoomen.
+  */
+
+  if (
+    !mapCentered
+  ) {
 
     map.setView(
       [lat,lon],
       17
     );
 
-    mapCentered = true;
+
+    mapCentered =
+      true;
 
   }
 
+
+  /* ===============================
+     ORT BESTIMMEN
+  ================================ */
 
   maybeCheckLocation(
     lat,
@@ -1055,25 +1642,45 @@ function handlePosition(position) {
   );
 
 
-  if (lastPosition) {
+  /* ===============================
+     BEWEGUNG
+  ================================ */
+
+  if (
+    lastPosition
+  ) {
 
     const moved =
       calculateDistance(
+
         lastPosition.lat,
         lastPosition.lon,
+
         lat,
         lon
+
       );
 
+
+    /*
+      Unter 3 Meter:
+      wahrscheinlich GPS-Zittern.
+
+      Über 150 Meter:
+      wahrscheinlich GPS-Sprung.
+    */
 
     if (
       moved >= 3 &&
       moved < 150
     ) {
 
-      sessionDistance += moved;
+      sessionDistance +=
+        moved;
 
-      totalDistance += moved;
+
+      totalDistance +=
+        moved;
 
 
       localStorage.setItem(
@@ -1098,7 +1705,9 @@ function handlePosition(position) {
 
       localStorage.setItem(
         "ravenTravelHistory",
-        JSON.stringify(travelHistory)
+        JSON.stringify(
+          travelHistory
+        )
       );
 
 
@@ -1122,6 +1731,11 @@ function handlePosition(position) {
   }
 
   else {
+
+    /*
+      Erster Punkt einer Session
+      deckt direkt die Umgebung auf.
+    */
 
     const firstPoint =
       [lat,lon];
@@ -1154,7 +1768,9 @@ function handlePosition(position) {
   ).textContent =
 
     "Erkundung läuft • GPS ±" +
-    Math.round(accuracy) +
+    Math.round(
+      accuracy
+    ) +
     " m";
 
 
@@ -1164,7 +1780,7 @@ function handlePosition(position) {
 
 
 /* ===============================
-   ERKUNDUNGSFLÄCHE
+   NEUEN BEREICH AUFDECKEN
 ================================ */
 
 function addExploredArea(
@@ -1172,7 +1788,14 @@ function addExploredArea(
   lon
 ) {
 
-  if (exploredPoints.length > 0) {
+  /*
+    Keine unnötigen Punkte
+    dicht nebeneinander.
+  */
+
+  if (
+    exploredPoints.length > 0
+  ) {
 
     const lastExplored =
       exploredPoints[
@@ -1182,23 +1805,32 @@ function addExploredArea(
 
     const distance =
       calculateDistance(
+
         lastExplored.lat,
         lastExplored.lon,
+
         lat,
         lon
+
       );
 
 
-    if (distance < 20) {
+    if (
+      distance < 20
+    ) {
+
       return;
+
     }
 
   }
 
 
   const point = {
+
     lat: lat,
     lon: lon
+
   };
 
 
@@ -1209,18 +1841,17 @@ function addExploredArea(
 
   localStorage.setItem(
     "ravenExploredPoints",
-    JSON.stringify(exploredPoints)
+    JSON.stringify(
+      exploredPoints
+    )
   );
 
 
-  L.circle(
-    [lat,lon],
-    {
-      radius: 35,
-      weight: 0,
-      fillOpacity: 0.20
-    }
-  ).addTo(map);
+  /*
+    Fog sofort aktualisieren.
+  */
+
+  updateFogOfWar();
 
 
   updateUI();
@@ -1241,8 +1872,14 @@ function maybeCheckLocation(
     Date.now();
 
 
+  /*
+    API höchstens alle
+    60 Sekunden prüfen.
+  */
+
   if (
-    now - lastGeocodeTime <
+    now -
+    lastGeocodeTime <
     60000
   ) {
 
@@ -1251,19 +1888,33 @@ function maybeCheckLocation(
   }
 
 
-  if (lastGeocodePosition) {
+  /*
+    Außerdem muss Raven sich
+    mindestens 100 Meter bewegt haben.
+  */
+
+  if (
+    lastGeocodePosition
+  ) {
 
     const moved =
       calculateDistance(
+
         lastGeocodePosition.lat,
         lastGeocodePosition.lon,
+
         lat,
         lon
+
       );
 
 
-    if (moved < 100) {
+    if (
+      moved < 100
+    ) {
+
       return;
+
     }
 
   }
@@ -1274,8 +1925,10 @@ function maybeCheckLocation(
 
 
   lastGeocodePosition = {
+
     lat: lat,
     lon: lon
+
   };
 
 
@@ -1288,7 +1941,7 @@ function maybeCheckLocation(
 
 
 /* ===============================
-   REVERSE GEOCODING
+   ORTSERKENNUNG
 ================================ */
 
 async function reverseGeocode(
@@ -1301,10 +1954,14 @@ async function reverseGeocode(
     "https://api.bigdatacloud.net/data/reverse-geocode-client" +
 
     "?latitude=" +
-    encodeURIComponent(lat) +
+    encodeURIComponent(
+      lat
+    ) +
 
     "&longitude=" +
-    encodeURIComponent(lon) +
+    encodeURIComponent(
+      lon
+    ) +
 
     "&localityLanguage=de";
 
@@ -1312,10 +1969,14 @@ async function reverseGeocode(
   try {
 
     const response =
-      await fetch(url);
+      await fetch(
+        url
+      );
 
 
-    if (!response.ok) {
+    if (
+      !response.ok
+    ) {
 
       throw new Error(
         "Geocoding fehlgeschlagen"
@@ -1346,16 +2007,12 @@ async function reverseGeocode(
 
 
     const region =
-
       data.principalSubdivision ||
-
       "";
 
 
     const country =
-
       data.countryName ||
-
       "";
 
 
@@ -1369,9 +2026,12 @@ async function reverseGeocode(
       "currentRegion"
     ).textContent =
 
-      [region,country]
-        .filter(Boolean)
-        .join(" • ");
+      [
+        region,
+        country
+      ]
+      .filter(Boolean)
+      .join(" • ");
 
 
     registerPlace(
@@ -1428,12 +2088,17 @@ function registerPlace(
 
   const alreadyDiscovered =
     discoveredPlaces.some(
+
       place =>
-        place.key === placeKey
+        place.key ===
+        placeKey
+
     );
 
 
-  if (alreadyDiscovered) {
+  if (
+    alreadyDiscovered
+  ) {
 
     updateTravelBook();
 
@@ -1469,9 +2134,16 @@ function registerPlace(
 
   localStorage.setItem(
     "ravenDiscoveredPlaces",
-    JSON.stringify(discoveredPlaces)
+    JSON.stringify(
+      discoveredPlaces
+    )
   );
 
+
+  /*
+    Neuer Ort:
+    +25 XP
+  */
 
   addXP(
     25
@@ -1490,7 +2162,7 @@ function registerPlace(
 
 
 /* ===============================
-   ENTDECKUNGSANZEIGE
+   ENTDECKUNG ANZEIGEN
 ================================ */
 
 function showDiscovery(
@@ -1513,6 +2185,7 @@ function showDiscovery(
   document.getElementById(
     "discoveryXP"
   ).textContent =
+
     "+" +
     reward +
     " Entdeckungs-XP";
@@ -1553,7 +2226,9 @@ function handleGPSError(
     "Erkundung starten";
 
 
-  if (error.code === 1) {
+  if (
+    error.code === 1
+  ) {
 
     document.getElementById(
       "message"
@@ -1562,7 +2237,9 @@ function handleGPSError(
 
   }
 
-  else if (error.code === 2) {
+  else if (
+    error.code === 2
+  ) {
 
     document.getElementById(
       "message"
@@ -1589,7 +2266,9 @@ function handleGPSError(
 
 function stopExploration() {
 
-  if (watchId !== null) {
+  if (
+    watchId !== null
+  ) {
 
     navigator.geolocation.clearWatch(
       watchId
@@ -1601,12 +2280,20 @@ function stopExploration() {
   watchId =
     null;
 
+
   tracking =
     false;
+
 
   lastPosition =
     null;
 
+
+  /*
+    Prototyp-Regel:
+
+    10 Meter = 1 XP
+  */
 
   const earnedXP =
     Math.floor(
@@ -1614,7 +2301,9 @@ function stopExploration() {
     );
 
 
-  if (earnedXP > 0) {
+  if (
+    earnedXP > 0
+  ) {
 
     addXP(
       earnedXP
@@ -1634,9 +2323,15 @@ function stopExploration() {
   ).textContent =
 
     "Erkundung beendet • " +
-    Math.round(sessionDistance) +
+
+    Math.round(
+      sessionDistance
+    ) +
+
     " m • +" +
+
     earnedXP +
+
     " XP";
 
 
@@ -1646,7 +2341,7 @@ function stopExploration() {
 
 
 /* ===============================
-   DISTANZ
+   DISTANZ BERECHNEN
 ================================ */
 
 function calculateDistance(
@@ -1671,27 +2366,46 @@ function calculateDistance(
 
 
   const deltaPhi =
-    (lat2-lat1) *
+    (
+      lat2 - lat1
+    ) *
     Math.PI / 180;
 
 
   const deltaLambda =
-    (lon2-lon1) *
+    (
+      lon2 - lon1
+    ) *
     Math.PI / 180;
 
 
   const a =
 
-    Math.sin(deltaPhi/2) *
-    Math.sin(deltaPhi/2)
+    Math.sin(
+      deltaPhi / 2
+    )
+    *
+    Math.sin(
+      deltaPhi / 2
+    )
 
     +
 
-    Math.cos(phi1) *
-    Math.cos(phi2) *
-
-    Math.sin(deltaLambda/2) *
-    Math.sin(deltaLambda/2);
+    Math.cos(
+      phi1
+    )
+    *
+    Math.cos(
+      phi2
+    )
+    *
+    Math.sin(
+      deltaLambda / 2
+    )
+    *
+    Math.sin(
+      deltaLambda / 2
+    );
 
 
   const c =
@@ -1699,8 +2413,13 @@ function calculateDistance(
     2 *
 
     Math.atan2(
+
       Math.sqrt(a),
-      Math.sqrt(1-a)
+
+      Math.sqrt(
+        1 - a
+      )
+
     );
 
 
@@ -1709,7 +2428,17 @@ function calculateDistance(
 }
 
 
+/* ===============================
+   START
+================================ */
+
 updateUI();
+
+
+setTimeout(
+  updateFogOfWar,
+  300
+);
 
 </script>
 
