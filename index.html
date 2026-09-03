@@ -3,18 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
   <title>Raven #0001</title>
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  >
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -23,9 +17,7 @@
       font-family: Arial, Helvetica, sans-serif;
     }
 
-    button {
-      font-family: inherit;
-    }
+    button { font-family: inherit; }
 
     .app {
       max-width: 720px;
@@ -83,7 +75,6 @@
     .level-line {
       display: flex;
       justify-content: space-between;
-      gap: 10px;
       font-size: 13px;
       margin-bottom: 7px;
     }
@@ -123,14 +114,14 @@
       padding: 13px;
     }
 
-    .stat .label {
+    .label {
       color: #7d8590;
       font-size: 10px;
       letter-spacing: 1px;
       margin-bottom: 5px;
     }
 
-    .stat .value {
+    .value {
       font-size: 17px;
       font-weight: 800;
     }
@@ -217,8 +208,7 @@
 
     #fogOverlay {
       position: absolute;
-      left: 0;
-      top: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
@@ -237,7 +227,6 @@
       background: #161b22;
       color: white;
       font-size: 21px;
-      box-shadow: 0 5px 16px rgba(0,0,0,.35);
     }
 
     .follow-indicator {
@@ -245,7 +234,7 @@
       left: 12px;
       top: 12px;
       z-index: 900;
-      background: rgba(13,17,23,.9);
+      background: rgba(13,17,23,.92);
       border: 1px solid #30363d;
       border-radius: 999px;
       padding: 7px 10px;
@@ -259,43 +248,33 @@
       inset: 0;
       z-index: 1000;
       display: none;
-      align-items: flex-start;
       justify-content: center;
+      align-items: flex-start;
       padding: 14px;
       pointer-events: none;
-      background: linear-gradient(
-        to bottom,
-        rgba(0,0,0,.36),
-        transparent 45%
-      );
+      background: linear-gradient(to bottom, rgba(0,0,0,.35), transparent 45%);
     }
 
-    .drive-overlay.show {
-      display: flex;
-    }
+    .drive-overlay.show { display: flex; }
 
     .drive-box {
       width: min(92%, 390px);
-      background: rgba(13,17,23,.96);
+      background: rgba(13,17,23,.97);
       border: 1px solid #f0b429;
       border-radius: 15px;
       padding: 13px 15px;
       text-align: center;
-      box-shadow: 0 8px 24px rgba(0,0,0,.45);
     }
 
     .drive-title {
       color: #f0b429;
       font-weight: 900;
-      font-size: 14px;
-      letter-spacing: 1px;
     }
 
     .drive-text {
       color: #c9d1d9;
       font-size: 11px;
       margin-top: 5px;
-      line-height: 1.4;
     }
 
     .main-button {
@@ -310,13 +289,7 @@
       margin-top: 15px;
     }
 
-    .main-button.stop {
-      background: #da3633;
-    }
-
-    .main-button:disabled {
-      opacity: .45;
-    }
+    .main-button.stop { background: #da3633; }
 
     #message {
       text-align: center;
@@ -324,7 +297,6 @@
       margin-top: 13px;
       color: #8b949e;
       font-size: 12px;
-      line-height: 1.45;
     }
 
     .section-title {
@@ -342,9 +314,8 @@
     .mission-header {
       display: flex;
       justify-content: space-between;
-      gap: 10px;
-      align-items: center;
       margin-top: 16px;
+      align-items: center;
     }
 
     .mission-name {
@@ -376,10 +347,6 @@
       gap: 11px;
     }
 
-    .poi:disabled {
-      opacity: 1;
-    }
-
     .poi-icon {
       font-size: 25px;
       width: 34px;
@@ -400,10 +367,6 @@
       color: #8b949e;
       font-size: 11px;
       margin-top: 4px;
-    }
-
-    .poi.unknown {
-      border-color: #30363d;
     }
 
     .poi.range {
@@ -437,80 +400,20 @@
       font-weight: 900;
     }
 
-    .mission-complete.show {
-      display: block;
-    }
-
-    .travel-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 14px;
-    }
-
-    .travel-stat {
-      background: #0b0f14;
-      border: 1px solid #242b33;
-      border-radius: 12px;
-      text-align: center;
-      padding: 11px 5px;
-    }
-
-    .travel-number {
-      font-size: 21px;
-      font-weight: 900;
-    }
-
-    .travel-label {
-      font-size: 9px;
-      letter-spacing: 1px;
-      color: #7d8590;
-      margin-top: 3px;
-    }
-
-    #travelList {
-      display: grid;
-      gap: 8px;
-      margin-top: 14px;
-    }
-
-    .travel-place {
-      background: #0b0f14;
-      border: 1px solid #242b33;
-      border-radius: 12px;
-      padding: 12px;
-    }
-
-    .travel-place-name {
-      font-weight: 900;
-    }
-
-    .travel-place-region {
-      color: #8b949e;
-      font-size: 11px;
-      margin-top: 3px;
-    }
-
-    .travel-place-date {
-      color: #6e7681;
-      font-size: 10px;
-      margin-top: 7px;
-    }
+    .mission-complete.show { display: block; }
 
     .scratch-modal {
       position: fixed;
       inset: 0;
       z-index: 5000;
-      background: rgba(0,0,0,.86);
+      background: rgba(0,0,0,.88);
       display: none;
       align-items: center;
       justify-content: center;
       padding: 18px;
     }
 
-    .scratch-modal.show {
-      display: flex;
-    }
+    .scratch-modal.show { display: flex; }
 
     .scratch-panel {
       width: min(100%, 420px);
@@ -541,8 +444,7 @@
       height: 245px;
       border-radius: 17px;
       overflow: hidden;
-      background:
-        radial-gradient(circle at center, #1b2735, #0b0f14 70%);
+      background: radial-gradient(circle at center, #1b2735, #0b0f14 70%);
       border: 1px solid #3b434d;
     }
 
@@ -553,13 +455,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
       text-align: center;
     }
 
-    #scratchRevealIcon {
-      font-size: 58px;
-    }
+    #scratchRevealIcon { font-size: 58px; }
 
     #scratchRevealName {
       margin-top: 8px;
@@ -593,7 +492,6 @@
       width: 0%;
       height: 100%;
       background: #d29922;
-      transition: width .12s linear;
     }
 
     #scratchText {
@@ -636,7 +534,6 @@
   <div class="card">
 
     <div class="raven">🐦‍⬛</div>
-
     <h1>RAVEN #0001</h1>
     <div class="generation">Generation 1</div>
 
@@ -691,33 +588,21 @@
     <div id="mapDescription"></div>
 
     <div class="map-wrap">
-
       <div id="map"></div>
-
       <svg id="fogOverlay"></svg>
 
-      <div class="follow-indicator" id="followIndicator">
-        📍 FOLGT DIR
-      </div>
+      <div class="follow-indicator" id="followIndicator">📍 FOLGT DIR</div>
 
-      <button
-        class="recenter"
-        id="recenterButton"
-        type="button"
-        aria-label="Karte auf meine Position zentrieren"
-      >
-        📍
-      </button>
+      <button class="recenter" id="recenterButton" type="button">📍</button>
 
       <div class="drive-overlay" id="driveOverlay">
         <div class="drive-box">
           <div class="drive-title">🚗 FAHRMODUS AKTIV</div>
           <div class="drive-text">
-            Raven verfolgt deine Reise. Interaktionen sind während schneller Bewegung pausiert.
+            Raven verfolgt deine Reise. Interaktionen sind pausiert.
           </div>
         </div>
       </div>
-
     </div>
 
     <button class="main-button" id="exploreButton" type="button">
@@ -730,17 +615,17 @@
 
   </div>
 
-
-  <div class="card" id="missionCard">
+  <div class="card">
 
     <div class="section-title">🐦‍⬛ RAVEN-ERKUNDUNG</div>
+
     <div class="section-subtitle">
-      Komm nah genug an einen Erkundungspunkt heran. Erst dann kannst du ihn antippen und freirubbeln.
+      Komm an einen Erkundungspunkt heran. Dann kannst du ihn antippen und freirubbeln.
     </div>
 
     <div class="mission-header">
       <div class="mission-name">Fürstenberg</div>
-      <div class="mission-progress" id="missionProgress">0 / 2</div>
+      <div class="mission-progress" id="missionProgress">0 / 3</div>
     </div>
 
     <div class="poi-list" id="poiList"></div>
@@ -751,43 +636,11 @@
 
   </div>
 
-
-  <div class="card">
-
-    <div class="section-title">🐦‍⬛ RAVENS REISEN</div>
-    <div class="section-subtitle">
-      Alle Orte, die Raven gemeinsam mit dir entdeckt hat.
-    </div>
-
-    <div class="travel-stats">
-
-      <div class="travel-stat">
-        <div class="travel-number" id="countryCount">0</div>
-        <div class="travel-label">LÄNDER</div>
-      </div>
-
-      <div class="travel-stat">
-        <div class="travel-number" id="regionCount">0</div>
-        <div class="travel-label">REGIONEN</div>
-      </div>
-
-      <div class="travel-stat">
-        <div class="travel-number" id="placeCount">0</div>
-        <div class="travel-label">ORTE</div>
-      </div>
-
-    </div>
-
-    <div id="travelList"></div>
-
-  </div>
-
   <div class="version">
-    RAVEN PROTOTYPE V1.2
+    RAVEN PROTOTYPE V1.3
   </div>
 
 </div>
-
 
 <div class="scratch-modal" id="scratchModal">
 
@@ -796,7 +649,7 @@
     <div class="scratch-top">
       <div class="scratch-heading">🪙 ENTDECKUNG</div>
       <div class="scratch-help">
-        Rubble den Erkundungspunkt mit deinem Finger frei.
+        Rubble den Ort mit deinem Finger frei.
       </div>
     </div>
 
@@ -813,15 +666,10 @@
     </div>
 
     <div class="scratch-progress">
-      <div
-        class="scratch-progress-fill"
-        id="scratchProgressFill"
-      ></div>
+      <div class="scratch-progress-fill" id="scratchProgressFill"></div>
     </div>
 
-    <div id="scratchText">
-      0 % freigelegt
-    </div>
+    <div id="scratchText">0 % freigelegt</div>
 
     <button class="scratch-close" id="scratchClose" type="button">
       Später weiter
@@ -831,3033 +679,1534 @@
 
 </div>
 
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-  /* =========================================================
-     RAVEN V1.2
-     ========================================================= */
+const REVEAL_RADIUS_METERS = 40;
 
+const FUERSTENBERG = {
+  name: "Fürstenberg",
 
-  const REVEAL_RADIUS_METERS = 40;
+  center: {
+    lat: 51.51558,
+    lon: 8.73678
+  },
 
-  const FUERSTENBERG = {
-    name: "Fürstenberg",
+  visitRadius: 60,
+  completionRevealRadius: 1200,
+  poiXP: 25,
+  completionXP: 100,
 
-    center: {
-      lat: 51.51558,
-      lon: 8.73678
-    },
-
-    discoveryRadius: 1500,
-
-    // V1.2: kleiner als vorher
-    visitRadius: 60,
-
-    completionRevealRadius: 1200,
-
-    poiXP: 25,
-    completionXP: 100,
-
-    // Schloss ist für den Feldtest entfernt.
-    pois: [
-      {
-        id: "st_marien",
-        name: "St. Marien / Sintfeld-Dom",
-        icon: "⛪",
-        lat: 51.5157079,
-        lon: 8.7397917
-      },
-      {
-        id: "rathaus",
-        name: "Rathaus",
-        icon: "🏛️",
-        lat: 51.5164455,
-        lon: 8.7449286
-      }
-    ]
-  };
-
-
-  /* =========================================================
-     SPEICHER
-     ========================================================= */
-
-  let xp =
-    Number(localStorage.getItem("ravenXP")) || 0;
-
-  let level =
-    Number(localStorage.getItem("ravenLevel")) || 1;
-
-  let totalDistance =
-    Number(localStorage.getItem("ravenDistance")) || 0;
-
-  let exploredPoints =
-    JSON.parse(
-      localStorage.getItem("ravenExploredPoints")
-    ) || [];
-
-  let travelHistory =
-    JSON.parse(
-      localStorage.getItem("ravenTravelHistory")
-    ) || [];
-
-  let discoveredPlaces =
-    JSON.parse(
-      localStorage.getItem("ravenDiscoveredPlaces")
-    ) || [];
-
-  let mapMode =
-    localStorage.getItem("ravenMapMode") || "reise";
-
-
-  /*
-    Wir benutzen bewusst weiterhin denselben Speicher,
-    damit vorhandene Entdeckungen erhalten bleiben.
-
-    Falls im alten Test "schloss" gespeichert wurde,
-    zählt es ab V1.2 NICHT mehr für Fürstenberg.
-  */
-
-  let savedMission =
-    JSON.parse(
-      localStorage.getItem("ravenFuerstenbergMission")
-    ) || {};
-
-  let fuerstenbergMission = {
-    discovered: Boolean(savedMission.discovered),
-
-    completed: false,
-
-    completedAt:
-      savedMission.completedAt || null,
-
-    visitedPOIs:
-      Array.isArray(savedMission.visitedPOIs)
-        ? savedMission.visitedPOIs.filter(
-            id =>
-              id === "st_marien" ||
-              id === "rathaus"
-          )
-        : []
-  };
-
-  if (
-    fuerstenbergMission.visitedPOIs.length ===
-    FUERSTENBERG.pois.length
-  ) {
-    fuerstenbergMission.completed = true;
-  }
-
-  saveMission();
-
-
-  /* =========================================================
-     TRACKING
-     ========================================================= */
-
-  let tracking = false;
-  let watchId = null;
-
-  let lastPosition = null;
-  let latestPosition = null;
-
-  let sessionDistance = 0;
-
-  let followMe = true;
-
-  let lastGeocodePosition = null;
-  let lastGeocodeTime = 0;
-
-
-  /* =========================================================
-     FAHRMODUS
-     ========================================================= */
-
-  let driveMode = false;
-
-  let speedSamples = [];
-
-  let fastStartTime = null;
-  let slowStartTime = null;
-
-  let currentSmoothedSpeed = 0;
-
-  const DRIVE_ENTER_SPEED = 5.5;
-  // ca. 20 km/h
-
-  const DRIVE_EXIT_SPEED = 2.5;
-  // ca. 9 km/h
-
-  const DRIVE_ENTER_TIME = 10000;
-  // 10 Sekunden
-
-  const DRIVE_EXIT_TIME = 12000;
-  // 12 Sekunden
-
-
-  /* =========================================================
-     POI-ZUSTÄNDE
-     ========================================================= */
-
-  let poiMarkers = {};
-
-  let poiDistances = {};
-
-  let activeScratchPOI = null;
-
-  let scratchDiscovered = false;
-
-
-  /* =========================================================
-     MAP
-     ========================================================= */
-
-  const map =
-    L.map("map", {
-      zoomControl: true
-    }).setView(
-      [51.1657, 10.4515],
-      5
-    );
-
-  L.tileLayer(
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  pois: [
     {
-      maxZoom: 19,
-      attribution: "© OpenStreetMap"
+      id: "st_marien",
+      name: "St. Marien / Sintfeld-Dom",
+      icon: "⛪",
+      lat: 51.5157079,
+      lon: 8.7397917
+    },
+    {
+      id: "rathaus",
+      name: "Rathaus",
+      icon: "🏛️",
+      lat: 51.5164455,
+      lon: 8.7449286
+    },
+    {
+      id: "test_brunsteinweg",
+      name: "Testpunkt Brunsteinweg",
+      icon: "🧪",
+      lat: 51.5133427,
+      lon: 8.7526203
     }
-  ).addTo(map);
+  ]
+};
 
+let xp = Number(localStorage.getItem("ravenXP")) || 0;
+let level = Number(localStorage.getItem("ravenLevel")) || 1;
+let totalDistance = Number(localStorage.getItem("ravenDistance")) || 0;
 
-  let positionMarker = null;
+let exploredPoints =
+  JSON.parse(localStorage.getItem("ravenExploredPoints")) || [];
 
+let travelHistory =
+  JSON.parse(localStorage.getItem("ravenTravelHistory")) || [];
 
-  /* =========================================================
-     FOG OF WAR
-     ========================================================= */
+let mapMode =
+  localStorage.getItem("ravenMapMode") || "reise";
 
-  const fogSvg =
-    document.getElementById("fogOverlay");
+let savedMission =
+  JSON.parse(localStorage.getItem("ravenFuerstenbergMission")) || {};
 
-  const SVG_NS =
-    "http://www.w3.org/2000/svg";
+let fuerstenbergMission = {
+  visitedPOIs:
+    Array.isArray(savedMission.visitedPOIs)
+      ? savedMission.visitedPOIs.filter(id =>
+          ["st_marien", "rathaus", "test_brunsteinweg"].includes(id)
+        )
+      : [],
 
-  const maskId =
-    "ravenFogMask";
+  completed: false,
+  completedAt: savedMission.completedAt || null
+};
 
-  function metersToPixels(
-    meters,
-    lat,
-    zoom
-  ) {
+if (
+  fuerstenbergMission.visitedPOIs.length ===
+  FUERSTENBERG.pois.length
+) {
+  fuerstenbergMission.completed = true;
+}
 
-    const earthCircumference =
-      40075016.686;
+let tracking = false;
+let watchId = null;
 
-    const metersPerPixel =
-      earthCircumference *
-      Math.cos(
-        lat * Math.PI / 180
-      ) /
-      Math.pow(
-        2,
-        zoom + 8
-      );
+let latestPosition = null;
+let lastPosition = null;
 
-    return meters / metersPerPixel;
-  }
+let sessionDistance = 0;
 
+let followMe = true;
 
-  function redrawFog() {
+let poiDistances = {};
+let poiMarkers = {};
 
-    fogSvg.innerHTML = "";
+let activeScratchPOI = null;
+let scratchDiscovered = false;
 
-    if (mapMode !== "erkundung") {
-      fogSvg.style.display = "none";
-      return;
-    }
+let driveMode = false;
 
-    fogSvg.style.display = "block";
+let speedSamples = [];
+let fastStartTime = null;
+let slowStartTime = null;
+let currentSmoothedSpeed = 0;
 
-    const size =
-      map.getSize();
+const DRIVE_ENTER_SPEED = 5.5;
+const DRIVE_EXIT_SPEED = 2.5;
 
-    fogSvg.setAttribute(
-      "width",
-      size.x
-    );
+const DRIVE_ENTER_TIME = 10000;
+const DRIVE_EXIT_TIME = 12000;
 
-    fogSvg.setAttribute(
-      "height",
-      size.y
-    );
-
-    fogSvg.setAttribute(
-      "viewBox",
-      `0 0 ${size.x} ${size.y}`
-    );
-
-
-    const defs =
-      document.createElementNS(
-        SVG_NS,
-        "defs"
-      );
-
-    const mask =
-      document.createElementNS(
-        SVG_NS,
-        "mask"
-      );
 
-    mask.setAttribute(
-      "id",
-      maskId
-    );
-
-
-    const whiteRect =
-      document.createElementNS(
-        SVG_NS,
-        "rect"
-      );
-
-    whiteRect.setAttribute(
-      "x",
-      0
-    );
-
-    whiteRect.setAttribute(
-      "y",
-      0
-    );
-
-    whiteRect.setAttribute(
-      "width",
-      size.x
-    );
-
-    whiteRect.setAttribute(
-      "height",
-      size.y
-    );
-
-    whiteRect.setAttribute(
-      "fill",
-      "white"
-    );
-
-    mask.appendChild(
-      whiteRect
-    );
-
-
-    exploredPoints.forEach(
-      point => {
-
-        const screenPoint =
-          map.latLngToContainerPoint(
-            [
-              point.lat,
-              point.lon
-            ]
-          );
-
-        const radius =
-          metersToPixels(
-            REVEAL_RADIUS_METERS,
-            point.lat,
-            map.getZoom()
-          );
-
-        const circle =
-          document.createElementNS(
-            SVG_NS,
-            "circle"
-          );
-
-        circle.setAttribute(
-          "cx",
-          screenPoint.x
-        );
-
-        circle.setAttribute(
-          "cy",
-          screenPoint.y
-        );
-
-        circle.setAttribute(
-          "r",
-          radius
-        );
-
-        circle.setAttribute(
-          "fill",
-          "black"
-        );
-
-        mask.appendChild(
-          circle
-        );
-
-      }
-    );
-
-
-    if (
-      fuerstenbergMission.completed
-    ) {
-
-      const p =
-        map.latLngToContainerPoint(
-          [
-            FUERSTENBERG.center.lat,
-            FUERSTENBERG.center.lon
-          ]
-        );
-
-      const radius =
-        metersToPixels(
-          FUERSTENBERG
-            .completionRevealRadius,
-          FUERSTENBERG.center.lat,
-          map.getZoom()
-        );
-
-      const circle =
-        document.createElementNS(
-          SVG_NS,
-          "circle"
-        );
-
-      circle.setAttribute(
-        "cx",
-        p.x
-      );
-
-      circle.setAttribute(
-        "cy",
-        p.y
-      );
-
-      circle.setAttribute(
-        "r",
-        radius
-      );
-
-      circle.setAttribute(
-        "fill",
-        "black"
-      );
-
-      mask.appendChild(
-        circle
-      );
-
-    }
-
-
-    defs.appendChild(
-      mask
-    );
-
-    fogSvg.appendChild(
-      defs
-    );
-
-
-    const fog =
-      document.createElementNS(
-        SVG_NS,
-        "rect"
-      );
-
-    fog.setAttribute(
-      "x",
-      0
-    );
-
-    fog.setAttribute(
-      "y",
-      0
-    );
-
-    fog.setAttribute(
-      "width",
-      size.x
-    );
-
-    fog.setAttribute(
-      "height",
-      size.y
-    );
-
-    fog.setAttribute(
-      "fill",
-      "rgba(0,0,0,0.94)"
-    );
-
-    fog.setAttribute(
-      "mask",
-      `url(#${maskId})`
-    );
-
-    fogSvg.appendChild(
-      fog
-    );
-  }
-
-
-  map.on(
-    "move zoom resize",
-    redrawFog
+const map =
+  L.map("map").setView(
+    [51.5133427, 8.7526203],
+    16
   );
 
+L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    maxZoom: 19,
+    attribution: "© OpenStreetMap"
+  }
+).addTo(map);
 
-  /* =========================================================
-     MAP-MODUS
-     ========================================================= */
+let positionMarker = null;
 
-  function setMapMode(mode) {
 
-    mapMode = mode;
+const fogSvg = document.getElementById("fogOverlay");
+const SVG_NS = "http://www.w3.org/2000/svg";
 
-    localStorage.setItem(
-      "ravenMapMode",
-      mapMode
-    );
+function haversine(lat1, lon1, lat2, lon2) {
 
-    updateMapMode();
+  const R = 6371000;
+
+  const toRad =
+    value => value * Math.PI / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) *
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) ** 2;
+
+  return (
+    2 * R *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1 - a)
+    )
+  );
+}
+
+
+function metersToPixels(meters, lat, zoom) {
+
+  const earthCircumference = 40075016.686;
+
+  const metersPerPixel =
+    earthCircumference *
+    Math.cos(lat * Math.PI / 180) /
+    Math.pow(2, zoom + 8);
+
+  return meters / metersPerPixel;
+}
+
+
+function redrawFog() {
+
+  fogSvg.innerHTML = "";
+
+  if (mapMode !== "erkundung") {
+    fogSvg.style.display = "none";
+    return;
   }
 
+  fogSvg.style.display = "block";
 
-  function updateMapMode() {
+  const size = map.getSize();
 
-    const reiseButton =
-      document.getElementById(
-        "reiseButton"
+  fogSvg.setAttribute("viewBox", `0 0 ${size.x} ${size.y}`);
+
+  const defs =
+    document.createElementNS(SVG_NS, "defs");
+
+  const mask =
+    document.createElementNS(SVG_NS, "mask");
+
+  mask.setAttribute("id", "ravenFogMask");
+
+  const white =
+    document.createElementNS(SVG_NS, "rect");
+
+  white.setAttribute("width", size.x);
+  white.setAttribute("height", size.y);
+  white.setAttribute("fill", "white");
+
+  mask.appendChild(white);
+
+
+  exploredPoints.forEach(point => {
+
+    const screen =
+      map.latLngToContainerPoint(
+        [point.lat, point.lon]
       );
 
-    const erkundungButton =
-      document.getElementById(
-        "erkundungButton"
+    const radius =
+      metersToPixels(
+        REVEAL_RADIUS_METERS,
+        point.lat,
+        map.getZoom()
       );
 
-    const description =
-      document.getElementById(
-        "mapDescription"
+    const circle =
+      document.createElementNS(SVG_NS, "circle");
+
+    circle.setAttribute("cx", screen.x);
+    circle.setAttribute("cy", screen.y);
+    circle.setAttribute("r", radius);
+    circle.setAttribute("fill", "black");
+
+    mask.appendChild(circle);
+  });
+
+
+  if (fuerstenbergMission.completed) {
+
+    const screen =
+      map.latLngToContainerPoint(
+        [
+          FUERSTENBERG.center.lat,
+          FUERSTENBERG.center.lon
+        ]
       );
 
+    const radius =
+      metersToPixels(
+        FUERSTENBERG.completionRevealRadius,
+        FUERSTENBERG.center.lat,
+        map.getZoom()
+      );
 
-    reiseButton.classList.toggle(
+    const circle =
+      document.createElementNS(SVG_NS, "circle");
+
+    circle.setAttribute("cx", screen.x);
+    circle.setAttribute("cy", screen.y);
+    circle.setAttribute("r", radius);
+    circle.setAttribute("fill", "black");
+
+    mask.appendChild(circle);
+  }
+
+  defs.appendChild(mask);
+  fogSvg.appendChild(defs);
+
+  const fog =
+    document.createElementNS(SVG_NS, "rect");
+
+  fog.setAttribute("width", size.x);
+  fog.setAttribute("height", size.y);
+  fog.setAttribute("fill", "rgba(0,0,0,0.94)");
+  fog.setAttribute("mask", "url(#ravenFogMask)");
+
+  fogSvg.appendChild(fog);
+}
+
+
+map.on("move zoom resize", redrawFog);
+
+
+function updateMapMode() {
+
+  document
+    .getElementById("reiseButton")
+    .classList.toggle(
       "active",
       mapMode === "reise"
     );
 
-    erkundungButton.classList.toggle(
+  document
+    .getElementById("erkundungButton")
+    .classList.toggle(
       "active",
       mapMode === "erkundung"
     );
 
-
-    if (
+  document
+    .getElementById("mapDescription")
+    .textContent =
       mapMode === "reise"
-    ) {
+        ? "Deine vollständige Reisekarte und besuchten Orte."
+        : "Nur Gebiete, die Raven tatsächlich erkundet hat, sind sichtbar.";
 
-      description.textContent =
-        "Deine vollständige Reisekarte und besuchten Orte.";
+  redrawFog();
+}
 
-    } else {
 
-      description.textContent =
-        "Nur Gebiete, die Raven tatsächlich erkundet hat, sind sichtbar.";
+function setMapMode(mode) {
 
-    }
+  if (driveMode) return;
 
-    redrawFog();
+  mapMode = mode;
+
+  localStorage.setItem(
+    "ravenMapMode",
+    mapMode
+  );
+
+  updateMapMode();
+}
+
+
+document
+  .getElementById("reiseButton")
+  .addEventListener(
+    "click",
+    () => setMapMode("reise")
+  );
+
+document
+  .getElementById("erkundungButton")
+  .addEventListener(
+    "click",
+    () => setMapMode("erkundung")
+  );
+
+
+function updateFollowIndicator() {
+
+  const element =
+    document.getElementById(
+      "followIndicator"
+    );
+
+  if (driveMode) {
+    element.textContent = "🚗 TRACKING";
+  } else {
+    element.textContent =
+      followMe
+        ? "📍 FOLGT DIR"
+        : "🗺️ FREIE KARTE";
   }
+}
 
 
-  document
-    .getElementById(
-      "reiseButton"
-    )
-    .addEventListener(
-      "click",
-      () => {
+map.on("dragstart", () => {
 
-        if (driveMode) {
-          return;
-        }
-
-        setMapMode("reise");
-      }
-    );
-
-
-  document
-    .getElementById(
-      "erkundungButton"
-    )
-    .addEventListener(
-      "click",
-      () => {
-
-        if (driveMode) {
-          return;
-        }
-
-        setMapMode(
-          "erkundung"
-        );
-      }
-    );
-
-
-  /* =========================================================
-     FOLLOW-ME
-     ========================================================= */
-
-  function setFollowMe(value) {
-
-    followMe =
-      Boolean(value);
-
+  if (!driveMode) {
+    followMe = false;
     updateFollowIndicator();
-
-    if (
-      followMe &&
-      latestPosition
-    ) {
-
-      map.setView(
-        [
-          latestPosition.lat,
-          latestPosition.lon
-        ],
-        Math.max(
-          map.getZoom(),
-          16
-        )
-      );
-    }
   }
 
-
-  function updateFollowIndicator() {
-
-    const el =
-      document.getElementById(
-        "followIndicator"
-      );
-
-    if (driveMode) {
-
-      el.textContent =
-        "🚗 TRACKING";
-
-      return;
-    }
-
-    if (followMe) {
-
-      el.textContent =
-        "📍 FOLGT DIR";
-
-    } else {
-
-      el.textContent =
-        "🗺️ FREIE KARTE";
-
-    }
-  }
+});
 
 
-  map.on(
-    "dragstart",
+document
+  .getElementById("recenterButton")
+  .addEventListener(
+    "click",
     () => {
 
-      if (!driveMode) {
-        setFollowMe(false);
-      }
+      if (driveMode) return;
 
+      followMe = true;
+
+      updateFollowIndicator();
+
+      if (latestPosition) {
+
+        map.setView(
+          [
+            latestPosition.lat,
+            latestPosition.lon
+          ],
+          17
+        );
+
+      }
     }
   );
 
 
-  document
-    .getElementById(
-      "recenterButton"
-    )
-    .addEventListener(
-      "click",
-      () => {
+function updateSpeed(position, lat, lon) {
 
-        if (driveMode) {
-          return;
-        }
+  let speed = position.coords.speed;
 
-        setFollowMe(true);
-
-      }
-    );
-
-
-  /* =========================================================
-     FAHRMODUS
-     ========================================================= */
-
-  function updateSpeed(
-    position,
-    lat,
-    lon
+  if (
+    typeof speed !== "number" ||
+    speed < 0
   ) {
 
-    let speed = null;
+    if (!latestPosition) return;
 
+    const seconds =
+      (
+        position.timestamp -
+        latestPosition.timestamp
+      ) / 1000;
 
-    if (
-      typeof position.coords.speed ===
-        "number" &&
-      position.coords.speed >= 0
-    ) {
+    if (seconds <= 0) return;
 
-      speed =
-        position.coords.speed;
-
-    }
-
-
-    if (
-      speed === null &&
-      latestPosition
-    ) {
-
-      const seconds =
-        (
-          position.timestamp -
-          latestPosition.timestamp
-        ) / 1000;
-
-      if (
-        seconds > 0
-      ) {
-
-        const distance =
-          haversine(
-            latestPosition.lat,
-            latestPosition.lon,
-            lat,
-            lon
-          );
-
-        speed =
-          distance / seconds;
-      }
-    }
-
-
-    if (
-      speed === null ||
-      !Number.isFinite(speed)
-    ) {
-      return;
-    }
-
-
-    speedSamples.push(speed);
-
-    if (
-      speedSamples.length > 6
-    ) {
-      speedSamples.shift();
-    }
-
-
-    currentSmoothedSpeed =
-      speedSamples.reduce(
-        (sum, value) =>
-          sum + value,
-        0
-      ) /
-      speedSamples.length;
-
-
-    const now =
-      Date.now();
-
-
-    if (!driveMode) {
-
-      if (
-        currentSmoothedSpeed >=
-        DRIVE_ENTER_SPEED
-      ) {
-
-        if (!fastStartTime) {
-          fastStartTime = now;
-        }
-
-        if (
-          now - fastStartTime >=
-          DRIVE_ENTER_TIME
-        ) {
-
-          setDriveMode(true);
-
-        }
-
-      } else {
-
-        fastStartTime = null;
-
-      }
-
-    } else {
-
-      if (
-        currentSmoothedSpeed <=
-        DRIVE_EXIT_SPEED
-      ) {
-
-        if (!slowStartTime) {
-          slowStartTime = now;
-        }
-
-        if (
-          now - slowStartTime >=
-          DRIVE_EXIT_TIME
-        ) {
-
-          setDriveMode(false);
-
-        }
-
-      } else {
-
-        slowStartTime = null;
-
-      }
-
-    }
+    speed =
+      haversine(
+        latestPosition.lat,
+        latestPosition.lon,
+        lat,
+        lon
+      ) / seconds;
   }
 
+  speedSamples.push(speed);
 
-  function setDriveMode(enabled) {
+  if (speedSamples.length > 6) {
+    speedSamples.shift();
+  }
+
+  currentSmoothedSpeed =
+    speedSamples.reduce(
+      (a, b) => a + b,
+      0
+    ) /
+    speedSamples.length;
+
+  const now = Date.now();
+
+  if (!driveMode) {
 
     if (
-      driveMode === enabled
+      currentSmoothedSpeed >=
+      DRIVE_ENTER_SPEED
     ) {
-      return;
-    }
 
-    driveMode =
-      enabled;
-
-
-    const overlay =
-      document.getElementById(
-        "driveOverlay"
-      );
-
-    const reise =
-      document.getElementById(
-        "reiseButton"
-      );
-
-    const erkundung =
-      document.getElementById(
-        "erkundungButton"
-      );
-
-
-    if (driveMode) {
-
-      overlay.classList.add(
-        "show"
-      );
-
-      reise.disabled = true;
-      erkundung.disabled = true;
-
-      map.dragging.disable();
-
-      if (map.touchZoom) {
-        map.touchZoom.disable();
+      if (!fastStartTime) {
+        fastStartTime = now;
       }
 
-      if (map.doubleClickZoom) {
-        map.doubleClickZoom.disable();
+      if (
+        now - fastStartTime >=
+        DRIVE_ENTER_TIME
+      ) {
+        setDriveMode(true);
       }
-
-      if (map.scrollWheelZoom) {
-        map.scrollWheelZoom.disable();
-      }
-
-      followMe = true;
-
-      setMessage(
-        "🚗 Fahrmodus aktiv – Tracking läuft weiter. Interaktionen sind pausiert."
-      );
 
     } else {
-
-      overlay.classList.remove(
-        "show"
-      );
-
-      reise.disabled = false;
-      erkundung.disabled = false;
-
-      map.dragging.enable();
-
-      if (map.touchZoom) {
-        map.touchZoom.enable();
-      }
-
-      if (map.doubleClickZoom) {
-        map.doubleClickZoom.enable();
-      }
-
-      if (map.scrollWheelZoom) {
-        map.scrollWheelZoom.enable();
-      }
 
       fastStartTime = null;
-      slowStartTime = null;
-
-      setMessage(
-        "🐦‍⬛ Fahrmodus beendet. Raven ist wieder bereit."
-      );
 
     }
 
-    updateFollowIndicator();
-    updatePOIUI();
-  }
-
-
-  /* =========================================================
-     GPS
-     ========================================================= */
-
-  function startExploration() {
-
-    if (tracking) {
-
-      stopExploration();
-      return;
-    }
-
+  } else {
 
     if (
-      !navigator.geolocation
+      currentSmoothedSpeed <=
+      DRIVE_EXIT_SPEED
     ) {
 
-      setMessage(
-        "Dieses Gerät unterstützt keine Standortbestimmung."
-      );
-
-      return;
-    }
-
-
-    tracking = true;
-
-    sessionDistance = 0;
-
-    lastPosition = null;
-
-    document
-      .getElementById(
-        "exploreButton"
-      )
-      .textContent =
-        "Erkundung stoppen";
-
-    document
-      .getElementById(
-        "exploreButton"
-      )
-      .classList.add(
-        "stop"
-      );
-
-    document
-      .getElementById(
-        "statusText"
-      )
-      .textContent =
-        "Erkundet";
-
-    setMessage(
-      "GPS wird gestartet …"
-    );
-
-
-    watchId =
-      navigator.geolocation.watchPosition(
-
-        handlePosition,
-
-        handleLocationError,
-
-        {
-          enableHighAccuracy: true,
-          maximumAge: 0,
-          timeout: 20000
-        }
-
-      );
-  }
-
-
-  function stopExploration() {
-
-    tracking = false;
-
-    if (
-      watchId !== null
-    ) {
-
-      navigator.geolocation.clearWatch(
-        watchId
-      );
-
-      watchId = null;
-    }
-
-
-    const earnedXP =
-      Math.floor(
-        sessionDistance / 10
-      );
-
-    if (
-      earnedXP > 0
-    ) {
-
-      addXP(
-        earnedXP
-      );
-
-      setMessage(
-        `🐦‍⬛ Erkundung beendet: +${earnedXP} XP durch Bewegung.`
-      );
-
-    } else {
-
-      setMessage(
-        "Erkundung beendet."
-      );
-
-    }
-
-
-    document
-      .getElementById(
-        "exploreButton"
-      )
-      .textContent =
-        "Erkundung starten";
-
-    document
-      .getElementById(
-        "exploreButton"
-      )
-      .classList.remove(
-        "stop"
-      );
-
-    document
-      .getElementById(
-        "statusText"
-      )
-      .textContent =
-        "Bereit";
-
-    lastPosition = null;
-
-    setDriveMode(false);
-
-    updateUI();
-  }
-
-
-  document
-    .getElementById(
-      "exploreButton"
-    )
-    .addEventListener(
-      "click",
-      startExploration
-    );
-
-
-  function handlePosition(
-    position
-  ) {
-
-    const lat =
-      position.coords.latitude;
-
-    const lon =
-      position.coords.longitude;
-
-    const accuracy =
-      position.coords.accuracy;
-
-
-    if (
-      accuracy > 35
-    ) {
-
-      setMessage(
-        `GPS noch ungenau (${Math.round(accuracy)} m) …`
-      );
-
-      return;
-    }
-
-
-    updateSpeed(
-      position,
-      lat,
-      lon
-    );
-
-
-    latestPosition = {
-      lat,
-      lon,
-      timestamp:
-        position.timestamp
-    };
-
-
-    if (!positionMarker) {
-
-      positionMarker =
-        L.circleMarker(
-          [lat, lon],
-          {
-            radius: 9,
-            color: "#ffffff",
-            weight: 3,
-            fillColor: "#8957e5",
-            fillOpacity: 1
-          }
-        ).addTo(map);
-
-    } else {
-
-      positionMarker.setLatLng(
-        [lat, lon]
-      );
-
-    }
-
-
-    if (followMe) {
-
-      map.setView(
-        [lat, lon],
-        Math.max(
-          map.getZoom(),
-          16
-        ),
-        {
-          animate: true
-        }
-      );
-
-    }
-
-
-    if (
-      lastPosition
-    ) {
-
-      const moved =
-        haversine(
-          lastPosition.lat,
-          lastPosition.lon,
-          lat,
-          lon
-        );
-
+      if (!slowStartTime) {
+        slowStartTime = now;
+      }
 
       if (
-        moved >= 3 &&
-        moved < 150
+        now - slowStartTime >=
+        DRIVE_EXIT_TIME
       ) {
-
-        sessionDistance += moved;
-        totalDistance += moved;
-
-
-        travelHistory.push(
-          [lat, lon]
-        );
-
-
-        localStorage.setItem(
-          "ravenDistance",
-          totalDistance
-        );
-
-        localStorage.setItem(
-          "ravenTravelHistory",
-          JSON.stringify(
-            travelHistory
-          )
-        );
-
-
-        addExploredArea(
-          lat,
-          lon
-        );
-
+        setDriveMode(false);
       }
 
     } else {
+
+      slowStartTime = null;
+
+    }
+  }
+}
+
+
+function setDriveMode(enabled) {
+
+  driveMode = enabled;
+
+  document
+    .getElementById("driveOverlay")
+    .classList.toggle(
+      "show",
+      enabled
+    );
+
+  if (enabled) {
+
+    followMe = true;
+
+    map.dragging.disable();
+
+    document.getElementById("reiseButton").disabled = true;
+    document.getElementById("erkundungButton").disabled = true;
+
+    setMessage(
+      "🚗 Fahrmodus aktiv – Raven trackt weiter."
+    );
+
+  } else {
+
+    map.dragging.enable();
+
+    document.getElementById("reiseButton").disabled = false;
+    document.getElementById("erkundungButton").disabled = false;
+
+    setMessage(
+      "🐦‍⬛ Raven ist wieder bereit."
+    );
+
+    fastStartTime = null;
+    slowStartTime = null;
+  }
+
+  updateFollowIndicator();
+  updatePOIUI();
+}
+
+
+function startExploration() {
+
+  if (tracking) {
+    stopExploration();
+    return;
+  }
+
+  if (!navigator.geolocation) {
+
+    setMessage(
+      "GPS wird von diesem Gerät nicht unterstützt."
+    );
+
+    return;
+  }
+
+  tracking = true;
+  sessionDistance = 0;
+  lastPosition = null;
+
+  document
+    .getElementById("exploreButton")
+    .textContent =
+      "Erkundung stoppen";
+
+  document
+    .getElementById("exploreButton")
+    .classList.add("stop");
+
+  document
+    .getElementById("statusText")
+    .textContent =
+      "Erkundet";
+
+  setMessage("GPS wird gestartet …");
+
+  watchId =
+    navigator.geolocation.watchPosition(
+      handlePosition,
+      () => {
+        setMessage(
+          "GPS konnte nicht gelesen werden."
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 20000
+      }
+    );
+}
+
+
+function stopExploration() {
+
+  tracking = false;
+
+  if (watchId !== null) {
+
+    navigator.geolocation.clearWatch(
+      watchId
+    );
+
+    watchId = null;
+  }
+
+  const earnedXP =
+    Math.floor(
+      sessionDistance / 10
+    );
+
+  if (earnedXP > 0) {
+
+    addXP(earnedXP);
+
+    setMessage(
+      `🐦‍⬛ +${earnedXP} XP durch Bewegung.`
+    );
+
+  } else {
+
+    setMessage("Erkundung beendet.");
+  }
+
+  document
+    .getElementById("exploreButton")
+    .textContent =
+      "Erkundung starten";
+
+  document
+    .getElementById("exploreButton")
+    .classList.remove("stop");
+
+  document
+    .getElementById("statusText")
+    .textContent =
+      "Bereit";
+
+  setDriveMode(false);
+}
+
+
+document
+  .getElementById("exploreButton")
+  .addEventListener(
+    "click",
+    startExploration
+  );
+
+
+function handlePosition(position) {
+
+  const lat =
+    position.coords.latitude;
+
+  const lon =
+    position.coords.longitude;
+
+  const accuracy =
+    position.coords.accuracy;
+
+  if (accuracy > 35) {
+
+    setMessage(
+      `GPS ungenau (${Math.round(accuracy)} m)`
+    );
+
+    return;
+  }
+
+  updateSpeed(position, lat, lon);
+
+  latestPosition = {
+    lat,
+    lon,
+    timestamp: position.timestamp
+  };
+
+  if (!positionMarker) {
+
+    positionMarker =
+      L.circleMarker(
+        [lat, lon],
+        {
+          radius: 9,
+          color: "#ffffff",
+          weight: 3,
+          fillColor: "#8957e5",
+          fillOpacity: 1
+        }
+      ).addTo(map);
+
+  } else {
+
+    positionMarker.setLatLng(
+      [lat, lon]
+    );
+
+  }
+
+  if (followMe) {
+
+    map.setView(
+      [lat, lon],
+      Math.max(
+        map.getZoom(),
+        16
+      )
+    );
+
+  }
+
+  if (lastPosition) {
+
+    const moved =
+      haversine(
+        lastPosition.lat,
+        lastPosition.lon,
+        lat,
+        lon
+      );
+
+    if (
+      moved >= 3 &&
+      moved < 150
+    ) {
+
+      sessionDistance += moved;
+      totalDistance += moved;
 
       travelHistory.push(
         [lat, lon]
       );
 
       localStorage.setItem(
+        "ravenDistance",
+        totalDistance
+      );
+
+      localStorage.setItem(
         "ravenTravelHistory",
-        JSON.stringify(
-          travelHistory
-        )
+        JSON.stringify(travelHistory)
       );
 
-      addExploredArea(
-        lat,
-        lon
-      );
-
+      addExploredArea(lat, lon);
     }
 
+  } else {
 
-    lastPosition = {
-      lat,
-      lon,
-      timestamp:
-        position.timestamp
-    };
-
-
-    maybeCheckLocation(
-      lat,
-      lon
-    );
-
-    checkFuerstenberg(
-      lat,
-      lon
-    );
-
-    updatePOIDistances(
-      lat,
-      lon
-    );
-
-    updateUI();
-
-    redrawFog();
+    addExploredArea(lat, lon);
   }
 
+  lastPosition = {
+    lat,
+    lon,
+    timestamp: position.timestamp
+  };
 
-  function handleLocationError(
-    error
-  ) {
-
-    console.error(error);
-
-    setMessage(
-      "Standort konnte nicht gelesen werden. Prüfe die Browser-Berechtigung."
-    );
-  }
-
-
-  /* =========================================================
-     DISTANZ
-     ========================================================= */
-
-  function haversine(
-    lat1,
-    lon1,
-    lat2,
-    lon2
-  ) {
-
-    const R =
-      6371000;
-
-    const toRad =
-      value =>
-        value * Math.PI / 180;
-
-    const dLat =
-      toRad(
-        lat2 - lat1
-      );
-
-    const dLon =
-      toRad(
-        lon2 - lon1
-      );
-
-    const a =
-      Math.sin(
-        dLat / 2
-      ) ** 2 +
-
-      Math.cos(
-        toRad(lat1)
-      ) *
-
-      Math.cos(
-        toRad(lat2)
-      ) *
-
-      Math.sin(
-        dLon / 2
-      ) ** 2;
-
-
-    return (
-      2 *
-      R *
-      Math.atan2(
-        Math.sqrt(a),
-        Math.sqrt(1 - a)
-      )
-    );
-  }
-
-
-  /* =========================================================
-     FOG-PUNKTE
-     ========================================================= */
-
-  function addExploredArea(
+  updatePOIDistances(
     lat,
     lon
-  ) {
+  );
+
+  updateUI();
+  redrawFog();
+}
+
+
+function addExploredArea(lat, lon) {
+
+  if (exploredPoints.length > 0) {
+
+    const last =
+      exploredPoints[
+        exploredPoints.length - 1
+      ];
 
     if (
-      exploredPoints.length > 0
-    ) {
-
-      const last =
-        exploredPoints[
-          exploredPoints.length - 1
-        ];
-
-      const distance =
-        haversine(
-          last.lat,
-          last.lon,
-          lat,
-          lon
-        );
-
-      if (
-        distance < 20
-      ) {
-        return;
-      }
-    }
-
-
-    exploredPoints.push(
-      {
-        lat,
-        lon
-      }
-    );
-
-
-    localStorage.setItem(
-      "ravenExploredPoints",
-      JSON.stringify(
-        exploredPoints
-      )
-    );
-  }
-
-
-  /* =========================================================
-     FÜRSTENBERG
-     ========================================================= */
-
-  function checkFuerstenberg(
-    lat,
-    lon
-  ) {
-
-    const distance =
       haversine(
+        last.lat,
+        last.lon,
         lat,
-        lon,
-        FUERSTENBERG.center.lat,
-        FUERSTENBERG.center.lon
-      );
-
-
-    if (
-      distance <=
-        FUERSTENBERG.discoveryRadius &&
-      !fuerstenbergMission.discovered
+        lon
+      ) < 20
     ) {
-
-      fuerstenbergMission.discovered =
-        true;
-
-      saveMission();
-
-      setMessage(
-        "🐦‍⬛ Fürstenberg entdeckt – Raven hat Erkundungspunkte gefunden."
-      );
-
+      return;
     }
-
   }
 
-
-  function updatePOIDistances(
+  exploredPoints.push({
     lat,
     lon
+  });
+
+  localStorage.setItem(
+    "ravenExploredPoints",
+    JSON.stringify(exploredPoints)
+  );
+}
+
+
+function isDiscovered(id) {
+
+  return (
+    fuerstenbergMission
+      .visitedPOIs
+      .includes(id)
+  );
+}
+
+
+function isInRange(poi) {
+
+  const distance =
+    poiDistances[poi.id];
+
+  if (
+    typeof distance !== "number"
   ) {
-
-    FUERSTENBERG.pois.forEach(
-      poi => {
-
-        poiDistances[poi.id] =
-          haversine(
-            lat,
-            lon,
-            poi.lat,
-            poi.lon
-          );
-
-      }
-    );
-
-    updatePOIMarkers();
-    updatePOIUI();
+    return false;
   }
 
-
-  function isPOIDiscovered(
-    poiId
-  ) {
-
-    return (
-      fuerstenbergMission
-        .visitedPOIs
-        .includes(
-          poiId
-        )
-    );
-  }
+  return (
+    distance <=
+      FUERSTENBERG.visitRadius &&
+    !driveMode &&
+    currentSmoothedSpeed < 4.2
+  );
+}
 
 
-  function isPOIInRange(
-    poi
-  ) {
+function updatePOIDistances(lat, lon) {
 
-    const distance =
-      poiDistances[poi.id];
+  FUERSTENBERG.pois.forEach(
+    poi => {
 
-    if (
-      typeof distance !==
-      "number"
-    ) {
-      return false;
-    }
-
-
-    /*
-      Auch bevor der komplette Fahrmodus
-      nach einigen Sekunden anspringt,
-      verhindern wir Entdeckungen bei
-      höherer aktueller Geschwindigkeit.
-    */
-
-    const movingTooFast =
-      currentSmoothedSpeed >
-      4.2;
-
-
-    return (
-      distance <=
-        FUERSTENBERG.visitRadius &&
-      !driveMode &&
-      !movingTooFast
-    );
-  }
-
-
-  function addPOIMarkers() {
-
-    FUERSTENBERG.pois.forEach(
-      poi => {
-
-        const marker =
-          L.circleMarker(
-            [
-              poi.lat,
-              poi.lon
-            ],
-            {
-              radius: 9,
-              color: "#6e7681",
-              weight: 3,
-              fillColor: "#161b22",
-              fillOpacity: 1
-            }
-          ).addTo(map);
-
-
-        marker.on(
-          "click",
-          () => {
-
-            handlePOIClick(
-              poi
-            );
-
-          }
+      poiDistances[poi.id] =
+        haversine(
+          lat,
+          lon,
+          poi.lat,
+          poi.lon
         );
 
+    }
+  );
 
-        poiMarkers[poi.id] =
-          marker;
-
-      }
-    );
-
-    updatePOIMarkers();
-  }
+  updatePOIMarkers();
+  updatePOIUI();
+}
 
 
-  function updatePOIMarkers() {
+function addPOIMarkers() {
 
-    FUERSTENBERG.pois.forEach(
-      poi => {
+  FUERSTENBERG.pois.forEach(
+    poi => {
 
-        const marker =
-          poiMarkers[poi.id];
+      const marker =
+        L.circleMarker(
+          [poi.lat, poi.lon],
+          {
+            radius: 10,
+            color: "#6e7681",
+            fillColor: "#161b22",
+            fillOpacity: 1,
+            weight: 3
+          }
+        ).addTo(map);
 
-        if (!marker) {
-          return;
-        }
+      marker.on(
+        "click",
+        () =>
+          handlePOIClick(poi)
+      );
 
+      poiMarkers[poi.id] =
+        marker;
+    }
+  );
 
-        if (
-          isPOIDiscovered(
-            poi.id
-          )
-        ) {
-
-          marker.setStyle({
-            color: "#2ea043",
-            fillColor: "#238636",
-            fillOpacity: 1
-          });
-
-          marker.setRadius(10);
-
-          marker.bindTooltip(
-            `✓ ${poi.name}`
-          );
-
-          return;
-        }
+  updatePOIMarkers();
+}
 
 
-        if (
-          isPOIInRange(
-            poi
-          )
-        ) {
+function updatePOIMarkers() {
 
-          marker.setStyle({
-            color: "#f0b429",
-            fillColor: "#d29922",
-            fillOpacity: 1
-          });
+  FUERSTENBERG.pois.forEach(
+    poi => {
 
-          marker.setRadius(11);
+      const marker =
+        poiMarkers[poi.id];
 
-          marker.bindTooltip(
-            "◉ In Reichweite – antippen"
-          );
+      if (isDiscovered(poi.id)) {
 
-          return;
-        }
+        marker.setStyle({
+          color: "#2ea043",
+          fillColor: "#238636"
+        });
 
+        marker.bindTooltip(
+          `✓ ${poi.name}`
+        );
+
+      } else if (isInRange(poi)) {
+
+        marker.setStyle({
+          color: "#f0b429",
+          fillColor: "#d29922"
+        });
+
+        marker.bindTooltip(
+          "◉ In Reichweite"
+        );
+
+      } else {
 
         marker.setStyle({
           color: "#6e7681",
-          fillColor: "#161b22",
-          fillOpacity: 1
+          fillColor: "#161b22"
         });
-
-        marker.setRadius(9);
 
         marker.bindTooltip(
           "❓ Erkundungspunkt"
         );
+      }
+    }
+  );
+}
+
+
+function updatePOIUI() {
+
+  const list =
+    document.getElementById(
+      "poiList"
+    );
+
+  list.innerHTML = "";
+
+  FUERSTENBERG.pois.forEach(
+    poi => {
+
+      const discovered =
+        isDiscovered(poi.id);
+
+      const inRange =
+        isInRange(poi);
+
+      const distance =
+        poiDistances[poi.id];
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+      button.type = "button";
+      button.className = "poi";
+
+      if (discovered) {
+
+        button.classList.add(
+          "discovered"
+        );
+
+      } else if (inRange) {
+
+        button.classList.add(
+          "range"
+        );
+      }
+
+      let status =
+        "○ Noch nicht besucht";
+
+      if (
+        typeof distance ===
+        "number"
+      ) {
+
+        status =
+          `○ Noch ${Math.round(distance)} m`;
 
       }
+
+      if (inRange) {
+
+        status =
+          "◉ IN REICHWEITE – ANTIPPEN";
+
+      }
+
+      if (discovered) {
+
+        status =
+          "✓ ENTDECKT";
+
+      }
+
+      button.innerHTML =
+        `
+        <div class="poi-icon">
+          ${discovered ? poi.icon : "❓"}
+        </div>
+
+        <div class="poi-content">
+
+          <div class="poi-name">
+            ${
+              discovered
+                ? poi.name
+                : "Unbekannter Erkundungspunkt"
+            }
+          </div>
+
+          <div class="poi-status">
+            ${status}
+          </div>
+
+        </div>
+        `;
+
+      button.addEventListener(
+        "click",
+        () =>
+          handlePOIClick(poi)
+      );
+
+      list.appendChild(button);
+    }
+  );
+
+  document
+    .getElementById(
+      "missionProgress"
+    )
+    .textContent =
+      `${fuerstenbergMission.visitedPOIs.length} / ${FUERSTENBERG.pois.length}`;
+
+  document
+    .getElementById(
+      "missionComplete"
+    )
+    .classList.toggle(
+      "show",
+      fuerstenbergMission.completed
     );
+}
+
+
+function handlePOIClick(poi) {
+
+  if (driveMode) return;
+
+  if (isDiscovered(poi.id)) {
+
+    setMessage(
+      `🟢 ${poi.name} ist bereits entdeckt.`
+    );
+
+    return;
   }
 
-
-  function handlePOIClick(
-    poi
-  ) {
-
-    if (
-      driveMode
-    ) {
-
-      setMessage(
-        "🚗 Entdeckungen sind während schneller Bewegung gesperrt."
-      );
-
-      return;
-    }
-
-
-    if (
-      isPOIDiscovered(
-        poi.id
-      )
-    ) {
-
-      setMessage(
-        `🟢 ${poi.name} wurde bereits entdeckt.`
-      );
-
-      return;
-    }
-
+  if (!isInRange(poi)) {
 
     const distance =
       poiDistances[poi.id];
 
+    setMessage(
+      typeof distance === "number"
+        ? `Noch ${Math.round(distance)} m entfernt.`
+        : "Starte zuerst die Erkundung."
+    );
 
-    if (
-      typeof distance !==
-      "number"
-    ) {
+    return;
+  }
 
-      setMessage(
-        "Starte zuerst die Erkundung, damit Raven deinen Standort kennt."
-      );
+  openScratch(poi);
+}
 
-      return;
+
+const scratchModal =
+  document.getElementById(
+    "scratchModal"
+  );
+
+const canvas =
+  document.getElementById(
+    "scratchCanvas"
+  );
+
+const ctx =
+  canvas.getContext(
+    "2d",
+    {
+      willReadFrequently: true
     }
+  );
 
+let scratching = false;
+let lastScratchPoint = null;
 
-    if (
-      !isPOIInRange(
-        poi
-      )
-    ) {
 
-      setMessage(
-        `❓ Noch etwa ${Math.round(distance)} m bis zum Erkundungspunkt.`
-      );
+function openScratch(poi) {
 
-      return;
-    }
-
-
-    openScratch(
-      poi
-    );
-  }
-
-
-  /* =========================================================
-     POI LISTE
-     ========================================================= */
-
-  function updatePOIUI() {
-
-    const list =
-      document.getElementById(
-        "poiList"
-      );
-
-    list.innerHTML = "";
-
-
-    FUERSTENBERG.pois.forEach(
-      poi => {
-
-        const discovered =
-          isPOIDiscovered(
-            poi.id
-          );
-
-        const inRange =
-          isPOIInRange(
-            poi
-          );
-
-        const distance =
-          poiDistances[
-            poi.id
-          ];
-
-
-        const button =
-          document.createElement(
-            "button"
-          );
-
-        button.type =
-          "button";
-
-        button.className =
-          "poi";
-
-
-        if (discovered) {
-
-          button.classList.add(
-            "discovered"
-          );
-
-        } else if (inRange) {
-
-          button.classList.add(
-            "range"
-          );
-
-        } else {
-
-          button.classList.add(
-            "unknown"
-          );
-
-        }
-
-
-        let status =
-          "○ Noch nicht besucht";
-
-
-        if (
-          typeof distance ===
-            "number" &&
-          !discovered
-        ) {
-
-          status =
-            `○ Noch ${Math.round(distance)} m`;
-
-        }
-
-
-        if (inRange) {
-
-          status =
-            "◉ IN REICHWEITE – ZUM ENTDECKEN ANTIPPEN";
-
-        }
-
-
-        if (discovered) {
-
-          status =
-            "✓ ENTDECKT";
-
-        }
-
-
-        button.innerHTML =
-          `
-            <div class="poi-icon">
-              ${
-                discovered
-                  ? poi.icon
-                  : "❓"
-              }
-            </div>
-
-            <div class="poi-content">
-
-              <div class="poi-name">
-                ${
-                  discovered
-                    ? poi.name
-                    : "Unbekannter Erkundungspunkt"
-                }
-              </div>
-
-              <div class="poi-status">
-                ${status}
-              </div>
-
-            </div>
-          `;
-
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            handlePOIClick(
-              poi
-            );
-
-          }
-        );
-
-
-        list.appendChild(
-          button
-        );
-
-      }
-    );
-
-
-    const count =
-      fuerstenbergMission
-        .visitedPOIs
-        .length;
-
-
-    document
-      .getElementById(
-        "missionProgress"
-      )
-      .textContent =
-        `${count} / ${FUERSTENBERG.pois.length}`;
-
-
-    document
-      .getElementById(
-        "missionComplete"
-      )
-      .classList.toggle(
-        "show",
-        fuerstenbergMission.completed
-      );
-  }
-
-
-  /* =========================================================
-     FREIRUBBELN
-     ========================================================= */
-
-  const scratchModal =
-    document.getElementById(
-      "scratchModal"
-    );
-
-  const scratchCanvas =
-    document.getElementById(
-      "scratchCanvas"
-    );
-
-  const scratchContext =
-    scratchCanvas.getContext(
-      "2d",
-      {
-        willReadFrequently: true
-      }
-    );
-
-
-  let scratching =
-    false;
-
-  let lastScratchPoint =
-    null;
-
-
-  function openScratch(
-    poi
-  ) {
-
-    if (
-      driveMode ||
-      !isPOIInRange(poi)
-    ) {
-      return;
-    }
-
-
-    activeScratchPOI =
-      poi;
-
-    scratchDiscovered =
-      false;
-
-
-    document
-      .getElementById(
-        "scratchRevealIcon"
-      )
-      .textContent =
-        poi.icon;
-
-    document
-      .getElementById(
-        "scratchRevealName"
-      )
-      .textContent =
-        poi.name;
-
-
-    scratchModal
-      .classList.add(
-        "show"
-      );
-
-
-    document.body.style.overflow =
-      "hidden";
-
-
-    requestAnimationFrame(
-      initialiseScratchCanvas
-    );
-  }
-
-
-  function initialiseScratchCanvas() {
-
-    const rect =
-      scratchCanvas
-        .getBoundingClientRect();
-
-    const ratio =
-      Math.max(
-        1,
-        window.devicePixelRatio || 1
-      );
-
-
-    scratchCanvas.width =
-      Math.round(
-        rect.width * ratio
-      );
-
-    scratchCanvas.height =
-      Math.round(
-        rect.height * ratio
-      );
-
-
-    scratchContext.setTransform(
-      ratio,
-      0,
-      0,
-      ratio,
-      0,
-      0
-    );
-
-
-    const gradient =
-      scratchContext.createLinearGradient(
-        0,
-        0,
-        rect.width,
-        rect.height
-      );
-
-    gradient.addColorStop(
-      0,
-      "#343b44"
-    );
-
-    gradient.addColorStop(
-      .5,
-      "#151a20"
-    );
-
-    gradient.addColorStop(
-      1,
-      "#30363d"
-    );
-
-
-    scratchContext.globalCompositeOperation =
-      "source-over";
-
-    scratchContext.fillStyle =
-      gradient;
-
-    scratchContext.fillRect(
-      0,
-      0,
-      rect.width,
-      rect.height
-    );
-
-
-    scratchContext.fillStyle =
-      "#c9d1d9";
-
-    scratchContext.font =
-      "900 23px Arial";
-
-    scratchContext.textAlign =
-      "center";
-
-    scratchContext.textBaseline =
-      "middle";
-
-    scratchContext.fillText(
-      "???",
-      rect.width / 2,
-      rect.height / 2 - 12
-    );
-
-
-    scratchContext.font =
-      "700 12px Arial";
-
-    scratchContext.fillStyle =
-      "#8b949e";
-
-    scratchContext.fillText(
-      "FREIRUBBELN",
-      rect.width / 2,
-      rect.height / 2 + 22
-    );
-
-
-    scratchContext.globalCompositeOperation =
-      "destination-out";
-
-
-    document
-      .getElementById(
-        "scratchProgressFill"
-      )
-      .style.width =
-        "0%";
-
-    document
-      .getElementById(
-        "scratchText"
-      )
-      .textContent =
-        "0 % freigelegt";
-  }
-
-
-  function getScratchPoint(
-    event
-  ) {
-
-    const rect =
-      scratchCanvas
-        .getBoundingClientRect();
-
-    return {
-      x:
-        event.clientX -
-        rect.left,
-
-      y:
-        event.clientY -
-        rect.top
-    };
-  }
-
-
-  function scratchAt(
-    point
-  ) {
-
-    scratchContext
-      .beginPath();
-
-    scratchContext
-      .arc(
-        point.x,
-        point.y,
-        27,
-        0,
-        Math.PI * 2
-      );
-
-    scratchContext
-      .fill();
-
-
-    if (
-      lastScratchPoint
-    ) {
-
-      scratchContext
-        .beginPath();
-
-      scratchContext
-        .lineWidth =
-          54;
-
-      scratchContext
-        .lineCap =
-          "round";
-
-      scratchContext
-        .moveTo(
-          lastScratchPoint.x,
-          lastScratchPoint.y
-        );
-
-      scratchContext
-        .lineTo(
-          point.x,
-          point.y
-        );
-
-      scratchContext
-        .stroke();
-
-    }
-
-
-    lastScratchPoint =
-      point;
-  }
-
-
-  scratchCanvas
-    .addEventListener(
-      "pointerdown",
-      event => {
-
-        if (
-          scratchDiscovered
-        ) {
-          return;
-        }
-
-        scratching =
-          true;
-
-        lastScratchPoint =
-          null;
-
-        scratchCanvas
-          .setPointerCapture(
-            event.pointerId
-          );
-
-        scratchAt(
-          getScratchPoint(
-            event
-          )
-        );
-
-      }
-    );
-
-
-  scratchCanvas
-    .addEventListener(
-      "pointermove",
-      event => {
-
-        if (
-          !scratching ||
-          scratchDiscovered
-        ) {
-          return;
-        }
-
-
-        scratchAt(
-          getScratchPoint(
-            event
-          )
-        );
-
-      }
-    );
-
-
-  function finishScratch() {
-
-    if (
-      !scratching
-    ) {
-      return;
-    }
-
-    scratching =
-      false;
-
-    lastScratchPoint =
-      null;
-
-    calculateScratchProgress();
-  }
-
-
-  scratchCanvas
-    .addEventListener(
-      "pointerup",
-      finishScratch
-    );
-
-  scratchCanvas
-    .addEventListener(
-      "pointercancel",
-      finishScratch
-    );
-
-
-  function calculateScratchProgress() {
-
-    const width =
-      scratchCanvas.width;
-
-    const height =
-      scratchCanvas.height;
-
-
-    const data =
-      scratchContext
-        .getImageData(
-          0,
-          0,
-          width,
-          height
-        )
-        .data;
-
-
-    let transparent =
-      0;
-
-    let checked =
-      0;
-
-
-    // Nicht jeden Pixel prüfen,
-    // damit es auf dem Handy flüssig bleibt.
-    const step =
-      8;
-
-
-    for (
-      let y = 0;
-      y < height;
-      y += step
-    ) {
-
-      for (
-        let x = 0;
-        x < width;
-        x += step
-      ) {
-
-        const index =
-          (
-            y * width +
-            x
-          ) * 4 + 3;
-
-
-        checked++;
-
-
-        if (
-          data[index] <
-          40
-        ) {
-          transparent++;
-        }
-
-      }
-    }
-
-
-    const percent =
-      Math.min(
-        100,
-        Math.round(
-          transparent /
-          checked *
-          100
-        )
-      );
-
-
-    document
-      .getElementById(
-        "scratchProgressFill"
-      )
-      .style.width =
-        `${percent}%`;
-
-
-    document
-      .getElementById(
-        "scratchText"
-      )
-      .textContent =
-        `${percent} % freigelegt`;
-
-
-    if (
-      percent >= 48 &&
-      !scratchDiscovered
-    ) {
-
-      completeScratchDiscovery();
-
-    }
-  }
-
-
-  function completeScratchDiscovery() {
-
-    if (
-      !activeScratchPOI ||
-      scratchDiscovered
-    ) {
-      return;
-    }
-
-
-    scratchDiscovered =
-      true;
-
-
-    scratchContext.clearRect(
-      0,
-      0,
-      scratchCanvas.width,
-      scratchCanvas.height
-    );
-
-
-    document
-      .getElementById(
-        "scratchProgressFill"
-      )
-      .style.width =
-        "100%";
-
-
-    document
-      .getElementById(
-        "scratchText"
-      )
-      .textContent =
-        "✓ ENTDECKT";
-
-
-    discoverPOI(
-      activeScratchPOI
-    );
-
-
-    setTimeout(
-      () => {
-
-        closeScratch();
-
-      },
-      1400
-    );
-  }
-
-
-  function closeScratch() {
-
-    scratchModal
-      .classList.remove(
-        "show"
-      );
-
-    document.body.style.overflow =
-      "";
-
-    activeScratchPOI =
-      null;
-
-    scratching =
-      false;
-
-    lastScratchPoint =
-      null;
-  }
-
+  activeScratchPOI = poi;
+  scratchDiscovered = false;
 
   document
     .getElementById(
-      "scratchClose"
+      "scratchRevealIcon"
     )
-    .addEventListener(
-      "click",
-      closeScratch
+    .textContent =
+      poi.icon;
+
+  document
+    .getElementById(
+      "scratchRevealName"
+    )
+    .textContent =
+      poi.name;
+
+  scratchModal.classList.add(
+    "show"
+  );
+
+  requestAnimationFrame(
+    initializeScratch
+  );
+}
+
+
+function initializeScratch() {
+
+  const rect =
+    canvas.getBoundingClientRect();
+
+  const ratio =
+    Math.max(
+      1,
+      window.devicePixelRatio || 1
     );
 
+  canvas.width =
+    rect.width * ratio;
 
-  function discoverPOI(
-    poi
-  ) {
+  canvas.height =
+    rect.height * ratio;
 
-    if (
-      isPOIDiscovered(
-        poi.id
-      )
-    ) {
-      return;
-    }
+  ctx.setTransform(
+    ratio,
+    0,
+    0,
+    ratio,
+    0,
+    0
+  );
+
+  ctx.globalCompositeOperation =
+    "source-over";
+
+  ctx.fillStyle =
+    "#2d333b";
+
+  ctx.fillRect(
+    0,
+    0,
+    rect.width,
+    rect.height
+  );
+
+  ctx.fillStyle =
+    "#c9d1d9";
+
+  ctx.font =
+    "900 28px Arial";
+
+  ctx.textAlign =
+    "center";
+
+  ctx.fillText(
+    "???",
+    rect.width / 2,
+    rect.height / 2
+  );
+
+  ctx.globalCompositeOperation =
+    "destination-out";
+
+  document
+    .getElementById(
+      "scratchProgressFill"
+    )
+    .style.width =
+      "0%";
+
+  document
+    .getElementById(
+      "scratchText"
+    )
+    .textContent =
+      "0 % freigelegt";
+}
 
 
-    fuerstenbergMission
-      .visitedPOIs
-      .push(
-        poi.id
-      );
+function scratchPoint(event) {
+
+  const rect =
+    canvas.getBoundingClientRect();
+
+  return {
+    x:
+      event.clientX -
+      rect.left,
+
+    y:
+      event.clientY -
+      rect.top
+  };
+}
 
 
-    addXP(
-      FUERSTENBERG.poiXP
+function scratchAt(point) {
+
+  ctx.beginPath();
+
+  ctx.arc(
+    point.x,
+    point.y,
+    30,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fill();
+
+  if (lastScratchPoint) {
+
+    ctx.beginPath();
+
+    ctx.lineWidth = 60;
+    ctx.lineCap = "round";
+
+    ctx.moveTo(
+      lastScratchPoint.x,
+      lastScratchPoint.y
     );
 
-
-    setMessage(
-      `🟢 ${poi.name} entdeckt! +${FUERSTENBERG.poiXP} XP`
+    ctx.lineTo(
+      point.x,
+      point.y
     );
 
-
-    if (
-      fuerstenbergMission
-        .visitedPOIs
-        .length ===
-      FUERSTENBERG.pois.length
-    ) {
-
-      completeFuerstenberg();
-
-    }
-
-
-    saveMission();
-
-    updatePOIMarkers();
-    updatePOIUI();
-    redrawFog();
+    ctx.stroke();
   }
 
+  lastScratchPoint = point;
 
-  function completeFuerstenberg() {
+  calculateScratchProgress();
+}
 
-    if (
-      fuerstenbergMission.completed
-    ) {
-      return;
+
+canvas.addEventListener(
+  "pointerdown",
+  event => {
+
+    if (scratchDiscovered) return;
+
+    scratching = true;
+    lastScratchPoint = null;
+
+    canvas.setPointerCapture(
+      event.pointerId
+    );
+
+    scratchAt(
+      scratchPoint(event)
+    );
+  }
+);
+
+
+canvas.addEventListener(
+  "pointermove",
+  event => {
+
+    if (!scratching) return;
+
+    scratchAt(
+      scratchPoint(event)
+    );
+  }
+);
+
+
+canvas.addEventListener(
+  "pointerup",
+  () => {
+    scratching = false;
+    lastScratchPoint = null;
+  }
+);
+
+
+function calculateScratchProgress() {
+
+  if (scratchDiscovered) return;
+
+  const data =
+    ctx.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    ).data;
+
+  let transparent = 0;
+  let checked = 0;
+
+  const step = 10;
+
+  for (
+    let i = 3;
+    i < data.length;
+    i += 4 * step
+  ) {
+
+    checked++;
+
+    if (data[i] < 40) {
+      transparent++;
     }
+  }
+
+  const percent =
+    Math.round(
+      transparent /
+      checked *
+      100
+    );
+
+  document
+    .getElementById(
+      "scratchProgressFill"
+    )
+    .style.width =
+      `${percent}%`;
+
+  document
+    .getElementById(
+      "scratchText"
+    )
+    .textContent =
+      `${percent} % freigelegt`;
+
+  if (percent >= 45) {
+
+    completeScratch();
+  }
+}
 
 
-    fuerstenbergMission.completed =
-      true;
+function completeScratch() {
+
+  if (
+    scratchDiscovered ||
+    !activeScratchPOI
+  ) {
+    return;
+  }
+
+  scratchDiscovered = true;
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  document
+    .getElementById(
+      "scratchText"
+    )
+    .textContent =
+      "✓ ENTDECKT";
+
+  discoverPOI(
+    activeScratchPOI
+  );
+
+  setTimeout(
+    closeScratch,
+    1400
+  );
+}
+
+
+function closeScratch() {
+
+  scratchModal.classList.remove(
+    "show"
+  );
+
+  activeScratchPOI = null;
+  scratching = false;
+}
+
+
+document
+  .getElementById(
+    "scratchClose"
+  )
+  .addEventListener(
+    "click",
+    closeScratch
+  );
+
+
+function discoverPOI(poi) {
+
+  if (isDiscovered(poi.id)) {
+    return;
+  }
+
+  fuerstenbergMission
+    .visitedPOIs
+    .push(poi.id);
+
+  addXP(
+    FUERSTENBERG.poiXP
+  );
+
+  if (
+    fuerstenbergMission.visitedPOIs.length ===
+    FUERSTENBERG.pois.length
+  ) {
+
+    fuerstenbergMission.completed = true;
 
     fuerstenbergMission.completedAt =
       new Date().toISOString();
 
-
     addXP(
-      FUERSTENBERG
-        .completionXP
+      FUERSTENBERG.completionXP
     );
-
 
     setMessage(
       `🐦‍⬛ FÜRSTENBERG ERKUNDET! +${FUERSTENBERG.completionXP} XP`
     );
 
+  } else {
 
-    saveMission();
-
-    redrawFog();
-  }
-
-
-  function saveMission() {
-
-    localStorage.setItem(
-      "ravenFuerstenbergMission",
-      JSON.stringify(
-        fuerstenbergMission
-      )
+    setMessage(
+      `🟢 ${poi.name} entdeckt! +${FUERSTENBERG.poiXP} XP`
     );
   }
 
+  saveMission();
 
-  /* =========================================================
-     ORTSERKENNUNG
-     ========================================================= */
-
-  async function maybeCheckLocation(
-    lat,
-    lon
-  ) {
-
-    const now =
-      Date.now();
+  updatePOIMarkers();
+  updatePOIUI();
+  redrawFog();
+}
 
 
-    if (
-      lastGeocodePosition
-    ) {
+function saveMission() {
 
-      const distance =
-        haversine(
-          lastGeocodePosition.lat,
-          lastGeocodePosition.lon,
-          lat,
-          lon
-        );
+  localStorage.setItem(
+    "ravenFuerstenbergMission",
+    JSON.stringify(
+      fuerstenbergMission
+    )
+  );
+}
 
 
-      if (
-        distance < 100 &&
-        now -
-          lastGeocodeTime <
-          60000
-      ) {
-        return;
-      }
+function addXP(amount) {
 
-    }
+  xp += amount;
 
+  while (xp >= 100) {
 
-    lastGeocodePosition = {
-      lat,
-      lon
-    };
-
-    lastGeocodeTime =
-      now;
-
-
-    try {
-
-      const url =
-        "https://api.bigdatacloud.net/data/reverse-geocode-client" +
-        "?latitude=" +
-        encodeURIComponent(lat) +
-        "&longitude=" +
-        encodeURIComponent(lon) +
-        "&localityLanguage=de";
-
-
-      const response =
-        await fetch(url);
-
-
-      if (
-        !response.ok
-      ) {
-        return;
-      }
-
-
-      const data =
-        await response.json();
-
-
-      const city =
-        data.city ||
-        data.locality ||
-        data.localityInfo
-          ?.informative
-          ?.find(
-            item =>
-              item.description ===
-              "city"
-          )
-          ?.name ||
-        "Unbekannter Ort";
-
-
-      const region =
-        data.principalSubdivision ||
-        "";
-
-
-      const country =
-        data.countryName ||
-        "";
-
-
-      document
-        .getElementById(
-          "currentPlace"
-        )
-        .textContent =
-          city;
-
-
-      document
-        .getElementById(
-          "currentRegion"
-        )
-        .textContent =
-          [
-            region,
-            country
-          ]
-            .filter(Boolean)
-            .join(" • ");
-
-
-      const placeKey =
-        (
-          country +
-          "|" +
-          region +
-          "|" +
-          city
-        )
-          .toLowerCase();
-
-
-      const alreadyDiscovered =
-        discoveredPlaces.some(
-          place =>
-            (
-              place.key ||
-              (
-                place.country +
-                "|" +
-                place.region +
-                "|" +
-                place.name
-              )
-                .toLowerCase()
-            ) ===
-            placeKey
-        );
-
-
-      if (
-        !alreadyDiscovered &&
-        city !==
-          "Unbekannter Ort"
-      ) {
-
-        discoveredPlaces.push(
-          {
-            key:
-              placeKey,
-
-            name:
-              city,
-
-            region,
-            country,
-
-            discoveredAt:
-              new Date()
-                .toISOString()
-          }
-        );
-
-
-        localStorage.setItem(
-          "ravenDiscoveredPlaces",
-          JSON.stringify(
-            discoveredPlaces
-          )
-        );
-
-
-        addXP(25);
-
-
-        setMessage(
-          `📍 ${city} entdeckt! +25 XP`
-        );
-
-
-        renderTravelBook();
-      }
-
-    } catch (
-      error
-    ) {
-
-      console.warn(
-        "Reverse Geocoding fehlgeschlagen:",
-        error
-      );
-
-    }
+    xp -= 100;
+    level++;
   }
 
-
-  /* =========================================================
-     REISEBUCH
-     ========================================================= */
-
-  function formatDiscoveryDate(
-    value
-  ) {
-
-    if (!value) {
-      return "Unbekannt";
-    }
-
-    const date =
-      new Date(value);
-
-    if (
-      Number.isNaN(
-        date.getTime()
-      )
-    ) {
-      return "Unbekannt";
-    }
-
-    return date.toLocaleDateString(
-      "de-DE"
-    );
-  }
-
-
-  function renderTravelBook() {
-
-    const countries =
-      new Set();
-
-    const regions =
-      new Set();
-
-
-    discoveredPlaces.forEach(
-      place => {
-
-        if (
-          place.country
-        ) {
-
-          countries.add(
-            place.country
-              .toLowerCase()
-          );
-        }
-
-
-        if (
-          place.region
-        ) {
-
-          regions.add(
-            (
-              place.country +
-              "|" +
-              place.region
-            )
-              .toLowerCase()
-          );
-        }
-
-      }
-    );
-
-
-    document
-      .getElementById(
-        "countryCount"
-      )
-      .textContent =
-        countries.size;
-
-
-    document
-      .getElementById(
-        "regionCount"
-      )
-      .textContent =
-        regions.size;
-
-
-    document
-      .getElementById(
-        "placeCount"
-      )
-      .textContent =
-        discoveredPlaces.length;
-
-
-    const list =
-      document.getElementById(
-        "travelList"
-      );
-
-
-    list.innerHTML =
-      "";
-
-
-    const sorted =
-      [...discoveredPlaces]
-        .sort(
-          (a, b) =>
-
-            new Date(
-              b.discoveredAt || 0
-            ) -
-
-            new Date(
-              a.discoveredAt || 0
-            )
-        );
-
-
-    sorted.forEach(
-      place => {
-
-        const item =
-          document.createElement(
-            "div"
-          );
-
-        item.className =
-          "travel-place";
-
-
-        item.innerHTML =
-          `
-            <div class="travel-place-name">
-              📍 ${place.name || "Unbekannter Ort"}
-            </div>
-
-            <div class="travel-place-region">
-              ${
-                [
-                  place.region,
-                  place.country
-                ]
-                  .filter(Boolean)
-                  .join(" • ")
-              }
-            </div>
-
-            <div class="travel-place-date">
-              Erstmals entdeckt:
-              ${formatDiscoveryDate(place.discoveredAt)}
-            </div>
-          `;
-
-
-        list.appendChild(
-          item
-        );
-
-      }
-    );
-
-
-    if (
-      discoveredPlaces.length === 0
-    ) {
-
-      list.innerHTML =
-        `
-          <div class="travel-place">
-            <div class="travel-place-region">
-              Noch keine Orte entdeckt.
-            </div>
-          </div>
-        `;
-
-    }
-  }
-
-
-  /* =========================================================
-     XP
-     ========================================================= */
-
-  function addXP(
-    amount
-  ) {
-
-    xp +=
-      amount;
-
-
-    while (
-      xp >= 100
-    ) {
-
-      xp -= 100;
-      level += 1;
-
-    }
-
-
-    localStorage.setItem(
-      "ravenXP",
-      xp
-    );
-
-
-    localStorage.setItem(
-      "ravenLevel",
-      level
-    );
-
-
-    updateUI();
-  }
-
-
-  /* =========================================================
-     UI
-     ========================================================= */
-
-  function updateUI() {
-
-    document
-      .getElementById(
-        "xp"
-      )
-      .textContent =
-        xp;
-
-
-    document
-      .getElementById(
-        "level"
-      )
-      .textContent =
-        level;
-
-
-    document
-      .getElementById(
-        "xpfill"
-      )
-      .style.width =
-        `${Math.min(100, xp)}%`;
-
-
-    document
-      .getElementById(
-        "distance"
-      )
-      .textContent =
-        (
-          totalDistance /
-          1000
-        )
-          .toFixed(2);
-
-
-    document
-      .getElementById(
-        "sessionDistance"
-      )
-      .textContent =
-        (
-          sessionDistance /
-          1000
-        )
-          .toFixed(2);
-
-
-    document
-      .getElementById(
-        "areas"
-      )
-      .textContent =
-        exploredPoints.length;
-  }
-
-
-  function setMessage(
-    text
-  ) {
-
-    document
-      .getElementById(
-        "message"
-      )
-      .textContent =
-        text;
-  }
-
-
-  /* =========================================================
-     START
-     ========================================================= */
-
-  addPOIMarkers();
+  localStorage.setItem(
+    "ravenXP",
+    xp
+  );
+
+  localStorage.setItem(
+    "ravenLevel",
+    level
+  );
 
   updateUI();
-
-  updateMapMode();
-
-  updateFollowIndicator();
-
-  updatePOIUI();
-
-  renderTravelBook();
+}
 
 
-  if (
-    travelHistory.length > 0
-  ) {
+function updateUI() {
 
-    const last =
-      travelHistory[
-        travelHistory.length - 1
-      ];
+  document.getElementById("xp").textContent =
+    xp;
 
-    if (
-      Array.isArray(last) &&
-      last.length >= 2
-    ) {
+  document.getElementById("level").textContent =
+    level;
 
-      map.setView(
-        last,
-        15
-      );
+  document.getElementById("xpfill").style.width =
+    `${xp}%`;
 
-    }
-  }
+  document.getElementById("distance").textContent =
+    (totalDistance / 1000).toFixed(2);
+
+  document.getElementById("sessionDistance").textContent =
+    (sessionDistance / 1000).toFixed(2);
+
+  document.getElementById("areas").textContent =
+    exploredPoints.length;
+}
 
 
-  setTimeout(
-    () => {
+function setMessage(text) {
 
-      map.invalidateSize();
-      redrawFog();
+  document
+    .getElementById("message")
+    .textContent =
+      text;
+}
 
-    },
-    250
-  );
+
+addPOIMarkers();
+updateMapMode();
+updateFollowIndicator();
+updatePOIUI();
+updateUI();
+
+setTimeout(
+  () => {
+    map.invalidateSize();
+    redrawFog();
+  },
+  250
+);
 
 </script>
 
