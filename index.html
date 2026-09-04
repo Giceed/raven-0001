@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="raven-version" content="2.6-access-radii">
+  <meta name="raven-version" content="2.7-poi-review">
 <title>RAVEN #0001</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -17,18 +17,39 @@
 
 <div class="topbar">
   <div class="brand">RAVEN</div>
-  <div class="online">● ONLINE</div>
+  <div class="online">â— ONLINE</div>
+</div>
+
+<div class="card review-card">
+  <button class="secondary" id="reviewToggle" onclick="togglePoiReview()">
+    ðŸ§­ POI-PRÃœFMODUS STARTEN
+  </button>
+  <div class="review-status" id="reviewStatus">
+    Noch keine OSM-VorschlÃ¤ge geladen.
+  </div>
+  <div class="review-editor" id="reviewEditor" hidden>
+    <div class="review-kicker">RAVEN-VORSCHLAG</div>
+    <div class="review-name" id="reviewName"></div>
+    <div class="review-meta" id="reviewMeta"></div>
+    <div class="review-actions">
+      <button onclick="changeReviewRadius(-10)">âˆ’10 m</button>
+      <button onclick="changeReviewRadius(10)">+10 m</button>
+      <button onclick="moveReviewCandidate()">ðŸ“ Verschieben</button>
+      <button onclick="approveReviewCandidate()">âœ“ Behalten</button>
+      <button class="danger" onclick="rejectReviewCandidate()">âœ• LÃ¶schen</button>
+    </div>
+  </div>
 </div>
 
 <div class="card">
 
-<div class="raven">🐦‍⬛</div>
+<div class="raven">ðŸ¦â€â¬›</div>
 <h1>RAVEN #0001</h1>
 <div class="generation">Generation 1</div>
 
 <div class="level-line">
   <span>Level <strong id="level">1</strong></span>
-  <span>Nächstes Level</span>
+  <span>NÃ¤chstes Level</span>
 </div>
 
 <div class="xpbar">
@@ -72,18 +93,18 @@
 
 <div class="mode-switch">
   <button class="mode-btn" id="travelModeButton" onclick="setMapMode('travel')">
-    🗺️ REISE
+    ðŸ—ºï¸ REISE
   </button>
 
   <button class="mode-btn" id="exploreModeButton" onclick="setMapMode('explore')">
-    🌑 ERKUNDUNG
+    ðŸŒ‘ ERKUNDUNG
   </button>
 </div>
 
 <div class="location-box">
   <div class="location-label">AKTUELLER ORT</div>
-  <div class="location-name" id="locationName">Fürstenberg</div>
-  <div class="location-region" id="locationRegion">Nordrhein-Westfalen · Deutschland</div>
+  <div class="location-name" id="locationName">FÃ¼rstenberg</div>
+  <div class="location-region" id="locationRegion">Nordrhein-Westfalen Â· Deutschland</div>
 </div>
 
 </div>
@@ -91,14 +112,14 @@
 <div id="map">
 
   <div class="god-box" id="godBox">
-    <button class="god-button" onclick="toggleGodMode()">🛠 GOD MODE</button>
+    <button class="god-button" onclick="toggleGodMode()">ðŸ›  GOD MODE</button>
     <div class="god-hint">Karte antippen = teleportieren</div>
   </div>
 
-  <div class="follow-state" id="followState">📍 RAVEN FOLGT DIR</div>
+  <div class="follow-state" id="followState">ðŸ“ RAVEN FOLGT DIR</div>
 
   <div class="map-controls">
-    <button class="recenter" onclick="recenterMap()">📍</button>
+    <button class="recenter" onclick="recenterMap()">ðŸ“</button>
   </div>
 
 </div>
@@ -112,35 +133,35 @@
 </button>
 
 <div class="message" id="message">
-  Dein Raven wartet auf sein nächstes Abenteuer.
+  Dein Raven wartet auf sein nÃ¤chstes Abenteuer.
 </div>
 
 </div>
 
 <div class="card">
 
-<div class="mission-title" id="missionTitle">📍 Standort: Fürstenberg</div>
+<div class="mission-title" id="missionTitle">ðŸ“ Standort: FÃ¼rstenberg</div>
 
 <div class="mission-subtitle" id="missionText">
-  Erkundungspunkte werden geladen …
+  Erkundungspunkte werden geladen â€¦
 </div>
 
-<div class="section-label">ERKUNDUNGSPUNKTE · ZÄHLEN FÜR DEN ORT</div>
+<div class="section-label">ERKUNDUNGSPUNKTE Â· ZÃ„HLEN FÃœR DEN ORT</div>
 <div class="poi-list" id="explorationList"></div>
 
-<div class="section-label">AKTIVITÄTEN · OPTIONAL</div>
+<div class="section-label">AKTIVITÃ„TEN Â· OPTIONAL</div>
 <div class="poi-list" id="activityList"></div>
 
 <div class="boundary-status" id="boundaryStatus">
-  Ortsgrenze wird nach Entdeckung verfügbar …
+  Ortsgrenze wird nach Entdeckung verfÃ¼gbar â€¦
 </div>
 
 <div class="boundary-status test-region-status" id="testRegionStatus">
-  🧭 Testgebiet: 100 km um Fürstenberg
+  ðŸ§­ Testgebiet: 100 km um FÃ¼rstenberg
 </div>
 
 <div class="boundary-status loading" id="areaBoundaryStatus">
-  Orts- und Ortsteilgrenzen werden vorbereitet …
+  Orts- und Ortsteilgrenzen werden vorbereitet â€¦
 </div>
 
 </div>
@@ -149,7 +170,7 @@
 
 <div class="travel-overview" id="travelOverview">
 
-<div class="travel-title">📖 RAVENS REISEN</div>
+<div class="travel-title">ðŸ“– RAVENS REISEN</div>
 <div class="travel-summary" id="travelSummary"></div>
 
 <div class="travel-list" id="travelList"></div>
@@ -161,7 +182,7 @@
 </div>
 
 <div class="version">
-RAVEN PROTOTYPE V2.6 · DEV
+      RAVEN PROTOTYPE V2.7 Â· DEV
 </div>
 
 </div>
@@ -170,7 +191,7 @@ RAVEN PROTOTYPE V2.6 · DEV
 
 <div class="scratch-card">
 
-<div class="scratch-title" id="scratchTitle">🐦‍⬛ Erkundungspunkt</div>
+<div class="scratch-title" id="scratchTitle">ðŸ¦â€â¬› Erkundungspunkt</div>
 <div class="scratch-text">Rubbel den Punkt frei.</div>
 
 <div class="scratch-area">
@@ -185,7 +206,7 @@ RAVEN PROTOTYPE V2.6 · DEV
 </div>
 
 <button class="secondary scratch-close" id="scratchClose" onclick="closeScratch()">
-  Schließen
+  SchlieÃŸen
 </button>
 
 </div>
@@ -201,6 +222,7 @@ RAVEN PROTOTYPE V2.6 · DEV
 <script src="js/fog.js?v=26r4"></script>
 <script src="js/gps.js?v=26r4"></script>
 <script src="js/poi.js?v=26r4"></script>
+<script src="js/review.js?v=27r1"></script>
 <script src="js/travelbook.js?v=26r4"></script>
 <script src="js/app.js?v=26r4"></script>
 
