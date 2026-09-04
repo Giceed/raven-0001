@@ -29,6 +29,10 @@ if(!localStorage.getItem("ravenV27HiddenPlacesResetDone")){
   discoveredPlaces=[];
   localStorage.setItem("ravenV27HiddenPlacesResetDone","1");
 }
+if(!localStorage.getItem("ravenV27PlayerViewResetDone")){
+  discoveredPlaces=[];
+  localStorage.setItem("ravenV27PlayerViewResetDone","1");
+}
 localStorage.setItem("ravenDiscoveredPlaces",JSON.stringify(discoveredPlaces));
 
 let mapMode =
