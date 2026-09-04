@@ -215,7 +215,7 @@ button{
   width:28px;
   height:28px;
   border-radius:50%;
-  background:#3f3f46;
+  background:#6d28d9;
   border:2px solid white;
   display:flex;
   align-items:center;
@@ -469,7 +469,7 @@ button{
 
 <div class="card">
 
-<div class="mission-title">🏘️ Fürstenberg</div>
+<div class="mission-title" id="missionTitle">📍 Orte</div>
 
 <div class="mission-subtitle" id="missionText">
   Erkundungspunkte werden geladen …
@@ -482,7 +482,7 @@ button{
 <div class="poi-list" id="activityList"></div>
 
 <div class="boundary-status" id="boundaryStatus">
-  Gemarkungsgrenze wird geladen …
+  Ortsgrenze wird nach Entdeckung verfügbar …
 </div>
 
 </div>
@@ -503,7 +503,7 @@ button{
 </div>
 
 <div class="version">
-RAVEN PROTOTYPE V1.8 · DEV
+RAVEN PROTOTYPE V1.9 · DEV
 </div>
 
 </div>
@@ -539,29 +539,35 @@ RAVEN PROTOTYPE V1.8 · DEV
 <script>
 
 /* ==========================================================
-   V1.8 TEST-RESET
+   V1.9 TEST-RESET
+   - Kein Ort ist beim Start automatisch entdeckt.
+   - 2 Erkundungspunkte + 2 Aktivitäten sind für schnelle Tests
+     bereits freigeschaltet.
    ========================================================== */
 
-if (!localStorage.getItem("ravenV18ResetDone")) {
+if (!localStorage.getItem("ravenV19ResetDone")) {
 
   localStorage.removeItem("ravenExploredPoints");
   localStorage.removeItem("ravenTravelHistory");
+  localStorage.removeItem("ravenDiscoveredPlaces");
   localStorage.removeItem("ravenFuerstenbergMission");
 
   localStorage.setItem(
     "ravenDiscoveredPlaces",
-    JSON.stringify([
-      {
-        name:"Fürstenberg",
-        region:"Nordrhein-Westfalen",
-        country:"Deutschland",
-        discoveredAt:Date.now()
-      }
-    ])
+    JSON.stringify([])
+  );
+
+  localStorage.setItem(
+    "ravenFuerstenbergMission",
+    JSON.stringify({
+      visitedPOIs:["schloss","st_marien"],
+      visitedActivities:["beerenstelle_dev","spielplatz_dev"],
+      completed:false
+    })
   );
 
   localStorage.setItem("ravenMapMode","explore");
-  localStorage.setItem("ravenV18ResetDone","1");
+  localStorage.setItem("ravenV19ResetDone","1");
 }
 
 
@@ -1113,12 +1119,17 @@ async function loadFuerstenbergBoundary(){
 
     if(!fuerstenbergBoundary) throw new Error();
 
-    document.getElementById("boundaryStatus").textContent =
-      "✓ Amtliche Gemarkungsgrenze geladen";
+    if (isFuerstenbergDiscovered()) {
+      document.getElementById("boundaryStatus").textContent =
+        "✓ Amtliche Gemarkungsgrenze geladen";
 
-    document
-      .getElementById("boundaryStatus")
-      .classList.add("ok");
+      document
+        .getElementById("boundaryStatus")
+        .classList.add("ok");
+    } else {
+      document.getElementById("boundaryStatus").textContent =
+        "Ortsgrenze wird nach Entdeckung verfügbar …";
+    }
 
     updateBoundaryOutline();
     redrawFog();
@@ -1659,6 +1670,13 @@ async function maybeReverseGeocode(lat,lon,force=false){
       );
 
       renderTravelBook();
+      updateMissionUI();
+
+      if (isFuerstenbergDiscovered() && fuerstenbergBoundary) {
+        document.getElementById("boundaryStatus").textContent =
+          "✓ Amtliche Gemarkungsgrenze geladen";
+        document.getElementById("boundaryStatus").classList.add("ok");
+      }
     }
 
     updateUI();
@@ -2204,7 +2222,19 @@ function saveMission(){
   );
 }
 
+function isFuerstenbergDiscovered(){
+
+  return discoveredPlaces.some(place =>
+    normalizePlaceName(place.name).includes("fürstenberg")
+  );
+}
+
 function updateMissionUI(){
+
+  const placeKnown=isFuerstenbergDiscovered();
+
+  document.getElementById("missionTitle").textContent =
+    placeKnown ? "🏘️ Fürstenberg" : "📍 Orte";
 
   const visited=
     fuerstenbergMission.visitedPOIs.length;
@@ -2219,11 +2249,15 @@ function updateMissionUI(){
     FUERSTENBERG.activityPOIs.length;
 
   document.getElementById("missionText").textContent =
-    fuerstenbergMission.completed
+    !placeKnown
 
-      ? `Fürstenberg ist vollständig erkundet · ${visited}/${total} · Aktivitäten ${activities}/${activityTotal}.`
+      ? `${visited} / ${total} Erkundungspunkte vorbereitet · Aktivitäten ${activities}/${activityTotal} · Starte GPS, um den Ort zu entdecken.`
 
-      : `${visited} / ${total} Erkundungspunkte entdeckt · Aktivitäten ${activities}/${activityTotal}.`;
+      : fuerstenbergMission.completed
+
+        ? `Fürstenberg ist vollständig erkundet · ${visited}/${total} · Aktivitäten ${activities}/${activityTotal}.`
+
+        : `${visited} / ${total} Erkundungspunkte entdeckt · Aktivitäten ${activities}/${activityTotal}.`;
 }
 
 
