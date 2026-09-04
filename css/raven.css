@@ -276,6 +276,11 @@ button{
 .place-name{font-size:13px;font-weight:bold}
 .place-meta{font-size:10px;color:#8b949e;margin-top:4px}
 .place-arrow{color:#6e7681;font-size:18px}
+.municipality-group{margin-bottom:10px;border:1px solid #30363d;border-radius:12px;overflow:hidden;background:#090c10}
+.municipality-title{padding:10px 12px;color:#c084fc;font-size:13px;font-weight:900;border-bottom:1px solid #21262d}
+.municipality-group .place{margin:0;border:0;border-radius:0;border-bottom:1px solid #161b22;background:transparent}
+.municipality-group .place:last-child{border-bottom:0}
+.district-indent{padding-left:12px}
 
 .boundary-status{margin-top:11px;font-size:10px;color:#8b949e}
 .boundary-status.ok{color:#4ade80}
@@ -354,3 +359,4 @@ button{
   touch-action:none
 }
 .scratch-close{margin-top:13px}
+
