@@ -92,13 +92,8 @@ async function maybeReverseGeocode(lat,lon,force=false){
       address.county ||
       "Unbekannter Ort";
 
-    const allowedOrtschaften=new Set([
-      "Bad Wünnenberg","Bleiwäsche","Elisenhof","Fürstenberg",
-      "Haaren","Helmern","Leiberg"
-    ]);
-    const inBadWuennenberg=
-      municipality.includes("Bad Wünnenberg") ||
-      allowedOrtschaften.has(district);
+    const allowedOrtschaften=new Set(["Fürstenberg"]);
+    const inBadWuennenberg=allowedOrtschaften.has(district);
 
     if(!inBadWuennenberg){
       testStatus.textContent="⚠ Außerhalb des Testgebiets Bad Wünnenberg";
@@ -114,9 +109,7 @@ async function maybeReverseGeocode(lat,lon,force=false){
       ? "Bad Wünnenberg"
       : detectedName;
 
-    currentRavenDistrict=allowedOrtschaften.has(name)
-      ? name
-      : (municipality.includes("Bad Wünnenberg") ? "Bad Wünnenberg" : null);
+    currentRavenDistrict=allowedOrtschaften.has(name)?name:null;
 
     const region=
       address.state || address.county || "";
@@ -234,7 +227,7 @@ async function maybeReverseGeocode(lat,lon,force=false){
 function renderTravelBook(){
   const list=document.getElementById("travelList");
   list.innerHTML="";
-  const districtNames=["Bad Wünnenberg","Bleiwäsche","Elisenhof","Fürstenberg","Haaren","Helmern","Leiberg"];
+  const districtNames=["Fürstenberg"];
   const knownPlaces=districtNames
     .map(name=>discoveredPlaces.find(place=>normalizePlaceName(place.name)===normalizePlaceName(name)))
     .filter(Boolean);
