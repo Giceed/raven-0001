@@ -14,14 +14,7 @@ if (!localStorage.getItem("ravenV25DistrictResetDone")) {
 
   localStorage.setItem(
     "ravenDiscoveredPlaces",
-    JSON.stringify([{
-      name:"Fürstenberg",
-      district:"Fürstenberg",
-      municipality:"Bad Wünnenberg",
-      region:"Nordrhein-Westfalen",
-      country:"Deutschland",
-      discoveredAt:Date.now()
-    }])
+    JSON.stringify([])
   );
 
   localStorage.setItem(
@@ -103,6 +96,9 @@ const TEST_REGION = {
   radiusMeters:20000,
   countryCode:"de"
 };
+
+/* Wird erst nach einer echten GPS- oder God-Mode-Ortserkennung gesetzt. */
+let currentRavenDistrict=null;
 
 /* ==========================================================
    FÜRSTENBERG
