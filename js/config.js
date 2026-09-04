@@ -92,15 +92,15 @@ if (!localStorage.getItem("ravenV26RadiusTestR4Done")) {
 /* ==========================================================
    TESTGEBIET
    Ganz Deutschland bleibt auf der Karte erreichbar. Für die
-   erste Testphase werden Orte im 100-km-Kreis um Fürstenberg
-   automatisch erkannt und mit ihrer OSM-Ortsgrenze versehen.
+   erste Testphase gilt nur die Stadt Bad Wünnenberg mit ihren
+   sieben Ortschaften.
    ========================================================== */
 
 const TEST_REGION = {
-  name:"100 km um Fürstenberg",
+  name:"Stadt Bad Wünnenberg",
   centerLat:51.5157,
   centerLon:8.741,
-  radiusMeters:100000,
+  radiusMeters:20000,
   countryCode:"de"
 };
 
