@@ -23,6 +23,12 @@ const ravenAllowedDistricts=new Set([
 discoveredPlaces=discoveredPlaces.filter(place=>
   ravenAllowedDistricts.has(String(place.name||"").trim().toLowerCase())
 );
+
+/* Einmaliger Konzeptreset: Ortsnamen müssen neu durch GPS enthüllt werden. */
+if(!localStorage.getItem("ravenV27HiddenPlacesResetDone")){
+  discoveredPlaces=[];
+  localStorage.setItem("ravenV27HiddenPlacesResetDone","1");
+}
 localStorage.setItem("ravenDiscoveredPlaces",JSON.stringify(discoveredPlaces));
 
 let mapMode =
