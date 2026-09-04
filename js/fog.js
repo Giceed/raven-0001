@@ -4,102 +4,58 @@
 
 const REVEAL_RADIUS_METERS=40;
 
-let fogSvg=null;
+let fogCanvas=null;
 
 function createFogLayer(){
 
-  if(fogSvg) fogSvg.remove();
+  if(fogCanvas) fogCanvas.remove();
 
-  fogSvg=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "svg"
-  );
-
-  fogSvg.classList.add("raven-fog-svg");
+  fogCanvas=document.createElement("canvas");
+  fogCanvas.classList.add("raven-fog-svg");
 
   /* Direkt über dem Kartenfenster platzieren. Dadurch bleibt der Fog
      unabhängig von Leaflets Pane-Transformationen stabil sichtbar. */
-  map.getContainer().appendChild(fogSvg);
+  map.getContainer().appendChild(fogCanvas);
 
   redrawFog();
 }
 
 function redrawFog(){
 
-  if(!fogSvg) return;
+  if(!fogCanvas) return;
 
   if(mapMode!=="explore"){
 
-    fogSvg.style.display="none";
+    fogCanvas.style.display="none";
     return;
   }
 
-  fogSvg.style.display="block";
+  fogCanvas.style.display="block";
 
   const size=map.getSize();
-
-  fogSvg.setAttribute("width",size.x);
-  fogSvg.setAttribute("height",size.y);
-  fogSvg.setAttribute("viewBox",`0 0 ${size.x} ${size.y}`);
-
-  fogSvg.innerHTML="";
-
-  const defs=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "defs"
-  );
-
-  const mask=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "mask"
-  );
-
-  mask.setAttribute("id","ravenFogMask");
-
-  const base=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "rect"
-  );
-
-  base.setAttribute("width","100%");
-  base.setAttribute("height","100%");
-  base.setAttribute("fill","white");
-
-  mask.appendChild(base);
+  const dpr=window.devicePixelRatio||1;
+  fogCanvas.width=Math.round(size.x*dpr);
+  fogCanvas.height=Math.round(size.y*dpr);
+  fogCanvas.style.width=size.x+"px";
+  fogCanvas.style.height=size.y+"px";
+  const context=fogCanvas.getContext("2d");
+  context.setTransform(dpr,0,0,dpr,0,0);
+  context.globalCompositeOperation="source-over";
+  context.clearRect(0,0,size.x,size.y);
+  context.fillStyle="rgba(0,0,0,.94)";
+  context.fillRect(0,0,size.x,size.y);
+  context.globalCompositeOperation="destination-out";
 
   exploredPoints.forEach(point=>{
-
-    appendRevealCircle(
-      mask,
-      point.lat,
-      point.lon,
-      REVEAL_RADIUS_METERS
-    );
-
+    const center=map.latLngToContainerPoint([point.lat,point.lon]);
+    const edge=destinationPoint(point.lat,point.lon,REVEAL_RADIUS_METERS,90);
+    const edgePoint=map.latLngToContainerPoint(edge);
+    const radius=Math.max(Math.abs(edgePoint.x-center.x),1);
+    context.beginPath();
+    context.arc(center.x,center.y,radius,0,Math.PI*2);
+    context.fill();
   });
-
-  if(fuerstenbergMission.completed && fuerstenbergBoundary){
-
-    appendGeoJSONGeometryToMask(
-      mask,
-      fuerstenbergBoundary.geometry
-    );
-  }
-
-  defs.appendChild(mask);
-  fogSvg.appendChild(defs);
-
-  const darkness=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "rect"
-  );
-
-  darkness.setAttribute("width","100%");
-  darkness.setAttribute("height","100%");
-  darkness.setAttribute("fill","rgba(0,0,0,.94)");
-  darkness.setAttribute("mask","url(#ravenFogMask)");
-
-  fogSvg.appendChild(darkness);
+  context.globalCompositeOperation="source-over";
 }
 
 function appendRevealCircle(mask,lat,lon,radiusMeters){
