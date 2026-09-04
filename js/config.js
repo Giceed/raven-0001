@@ -166,8 +166,8 @@ const FUERSTENBERG = {
       type:"activity",
       name:"Beerenstelle",
       icon:"🫐",
-      lat:51.51325,
-      lon:8.74215,
+      lat:51.514164328059515,
+      lon:8.741700053215029,
       discoveryRadius:35,
       access:"outdoor"
     },
@@ -177,8 +177,8 @@ const FUERSTENBERG = {
       type:"activity",
       name:"Spielplatz",
       icon:"🛝",
-      lat:51.51845,
-      lon:8.74730,
+      lat:51.51308183260237,
+      lon:8.745600332095771,
       discoveryRadius:35,
       access:"outdoor"
     }
