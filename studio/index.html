@@ -53,7 +53,7 @@
 const STORAGE_KEY="ravenStudioV1";
 const BAD_WUENNENBERG_BOUNDS=L.latLngBounds([51.447216,8.625182],[51.615433,8.846116]);
 const map=L.map("map",{preferCanvas:true,minZoom:11,maxBounds:BAD_WUENNENBERG_BOUNDS,maxBoundsViscosity:1}).setView([51.5157,8.741],14);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,noWrap:true,bounds:BAD_WUENNENBERG_BOUNDS.pad(.15),keepBuffer:2,attribution:"© OpenStreetMap"}).addTo(map);
 map.createPane("territoryMaskPane");map.getPane("territoryMaskPane").style.zIndex="650";map.getPane("territoryMaskPane").style.pointerEvents="none";
 function joinBoundaryLines(lines){const rest=lines.map(line=>line.map(point=>[point[0],point[1]])),ring=rest.shift()||[],key=point=>point[0].toFixed(6)+","+point[1].toFixed(6);while(rest.length){const end=key(ring[ring.length-1]),index=rest.findIndex(line=>key(line[0])===end||key(line[line.length-1])===end);if(index<0)break;let next=rest.splice(index,1)[0];if(key(next[next.length-1])===end)next.reverse();ring.push(...next.slice(1));}if(ring.length&&key(ring[0])!==key(ring[ring.length-1]))ring.push(ring[0]);return ring;}
 async function cutMapToBadWuennenberg(){try{const response=await fetch("../data/bad-wuennenberg-boundaries.json?v=2"),data=await response.json(),city=data.features.find(feature=>feature.level===8),ring=joinBoundaryLines(city.lines),outside=[[-85,-180],[-85,180],[85,180],[85,-180],[-85,-180]];L.polygon([outside,ring],{pane:"territoryMaskPane",stroke:false,fillColor:"#05070b",fillOpacity:1,fillRule:"evenodd",interactive:false}).addTo(map);}catch(error){console.warn("Stadtgrenzen-Ausschnitt konnte nicht geladen werden.",error);}}
