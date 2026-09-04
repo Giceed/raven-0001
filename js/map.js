@@ -9,7 +9,7 @@ const BAD_WUENNENBERG_BOUNDS = L.latLngBounds(
 
 const map = L.map("map",{
   zoomControl:false,
-  minZoom:14,
+  minZoom:12,
   maxBounds:BAD_WUENNENBERG_BOUNDS,
   maxBoundsViscosity:1
 }).setView([51.5157,8.741],15);
@@ -210,8 +210,8 @@ function toggleGodMode(){
 
   }else{
 
-    map.setMinZoom(14);
-    if(map.getZoom()<14) map.setZoom(14);
+    map.setMinZoom(12);
+    if(map.getZoom()<12) map.setZoom(12);
 
     disableGodModeView();
 
