@@ -2,7 +2,8 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">\n<meta name="raven-version" content="2.4">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="raven-version" content="2.5">
 <title>RAVEN #0001</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -138,6 +139,10 @@
   🧭 Testgebiet: 100 km um Fürstenberg
 </div>
 
+<div class="boundary-status loading" id="areaBoundaryStatus">
+  Orts- und Ortsteilgrenzen werden vorbereitet …
+</div>
+
 </div>
 
 <div class="card">
@@ -156,7 +161,7 @@
 </div>
 
 <div class="version">
-RAVEN PROTOTYPE V2.4 · DEV
+RAVEN PROTOTYPE V2.5 · DEV
 </div>
 
 </div>
@@ -192,6 +197,7 @@ RAVEN PROTOTYPE V2.4 · DEV
 <script src="js/config.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/map.js"></script>
+<script src="js/boundaries.js"></script>
 <script src="js/fog.js"></script>
 <script src="js/gps.js"></script>
 <script src="js/poi.js"></script>
@@ -200,3 +206,4 @@ RAVEN PROTOTYPE V2.4 · DEV
 
 </body>
 </html>
+
