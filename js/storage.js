@@ -41,3 +41,13 @@ localStorage.setItem("ravenDiscoveredPlaces",JSON.stringify(discoveredPlaces));
 let mapMode =
   localStorage.getItem("ravenMapMode") || "explore";
 
+if(!localStorage.getItem("ravenV27FuerstenbergFogResetDone")){
+  exploredPoints=[];
+  travelHistory=[];
+  mapMode="explore";
+  localStorage.setItem("ravenExploredPoints","[]");
+  localStorage.setItem("ravenTravelHistory","[]");
+  localStorage.setItem("ravenMapMode","explore");
+  localStorage.setItem("ravenV27FuerstenbergFogResetDone","1");
+}
+
