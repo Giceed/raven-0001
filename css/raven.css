@@ -216,8 +216,15 @@ button{
   box-shadow:0 0 14px #6d28d9
 }
 .poi-marker.range{background:#ca8a04;box-shadow:0 0 14px #ca8a04}
-.poi-marker.done{background:#15803d;box-shadow:0 0 14px #15803d}
-.poi-marker.activity.done{background:#075985;box-shadow:0 0 14px #0ea5e9}
+.poi-marker.done,
+.poi-marker.activity.done{
+  background:#4b5563;
+  border-color:#9ca3af;
+  color:#d1d5db;
+  box-shadow:none;
+  filter:grayscale(1);
+  opacity:.62
+}
 
 .message{
   text-align:center;
@@ -265,8 +272,14 @@ button{
 }
 .poi-name{font-size:12px;font-weight:bold}
 .poi-state{font-size:10px;color:#8b949e}
-.poi-row.done{border-color:#22c55e73;background:#1665341a}
-.poi-row.done .poi-state{color:#4ade80}
+.poi-row.done{
+  border-color:#30363d;
+  background:#11151a;
+  color:#7d8590;
+  filter:grayscale(1);
+  opacity:.68
+}
+.poi-row.done .poi-state{color:#8b949e}
 
 .place-row{
   display:flex;
