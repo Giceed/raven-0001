@@ -4,7 +4,7 @@
    ========================================================== */
 
 let poiReviewEnabled=false;
-let poiReviewCandidates=JSON.parse(localStorage.getItem("ravenPoiReviewV27") || "[]");
+let poiReviewCandidates=JSON.parse(localStorage.getItem("ravenPoiReviewV27r3") || "[]");
 let poiReviewMarkers={};
 let selectedReviewId=null;
 let movingReviewId=null;
@@ -29,6 +29,7 @@ function togglePoiReview(){
   if(poiReviewCandidates.length){
     renderReviewMarkers();
     updateReviewSummary();
+    focusReviewCandidates();
   }else{
     loadOsmReviewCandidates();
   }
@@ -72,6 +73,7 @@ async function loadOsmReviewCandidates(){
   saveReviewCandidates();
   renderReviewMarkers();
   updateReviewSummary();
+  focusReviewCandidates();
 }
 
 function makeReviewCandidate(element){
@@ -82,11 +84,11 @@ function makeReviewCandidate(element){
   if(["private","no"].includes(tags.access)||tags.foot==="no") return null;
 
   const explorationTypes=["castle","memorial","monument","archaeological_site","attraction","viewpoint","museum","artwork"];
-  const activityTypes=["playground","park","sports_centre","pitch","fitness_station","picnic_site"];
+  const activityTypes=["playground","park","sports_centre","pitch","fitness_station","picnic_site","swimming_pool"];
   const rawType=tags.historic||tags.tourism||tags.leisure||tags.amenity||"poi";
   const category=activityTypes.includes(rawType) ? "activity" : "exploration";
   const useful=explorationTypes.includes(rawType)||activityTypes.includes(rawType)||
-    ["place_of_worship","townhall","library","community_centre","fountain"].includes(rawType);
+    ["place_of_worship","townhall","library","community_centre","fountain","fire_station","police"].includes(rawType);
   if(!useful) return null;
 
   let score=40;
@@ -94,6 +96,7 @@ function makeReviewCandidate(element){
   if(tags.historic||tags.tourism) score+=15;
   if(tags.access==="yes"||tags.foot==="yes") score+=10;
   const radius=["castle","manor","archaeological_site"].includes(rawType) ? 140 :
+    ["fire_station","police"].includes(rawType) ? 90 :
     ["place_of_worship","townhall","museum"].includes(rawType) ? 60 : 35;
 
   return {
@@ -111,12 +114,21 @@ function makeReviewCandidate(element){
 
 function renderReviewMarkers(){
   clearReviewMarkers();
-  poiReviewCandidates.forEach(candidate=>{
+  poiReviewCandidates.forEach((candidate,index)=>{
     if(candidate.status==="rejected") return;
-    const icon=L.divIcon({className:"",html:`<div class="review-marker ${candidate.category} ${candidate.status}">🔎</div>`,iconSize:[30,30],iconAnchor:[15,15]});
+    const icon=L.divIcon({className:"",html:`<div class="review-marker ${candidate.category} ${candidate.status}"><span>${index+1}</span></div>`,iconSize:[38,38],iconAnchor:[19,19]});
     poiReviewMarkers[candidate.id]=L.marker([candidate.lat,candidate.lon],{icon,pane:"ravenForegroundPane"})
       .addTo(map).on("click",()=>selectReviewCandidate(candidate.id));
   });
+}
+
+function focusReviewCandidates(){
+  const visible=poiReviewCandidates.filter(candidate=>candidate.status!=="rejected");
+  if(!visible.length) return;
+  const bounds=L.latLngBounds(visible.map(candidate=>[candidate.lat,candidate.lon]));
+  internalMapMove=true;
+  map.fitBounds(bounds,{padding:[45,45],maxZoom:16,animate:true});
+  setTimeout(()=>internalMapMove=false,700);
 }
 
 function clearReviewMarkers(){
@@ -170,7 +182,7 @@ map.on("click",event=>{
 });
 
 function saveReviewCandidates(){
-  localStorage.setItem("ravenPoiReviewV27",JSON.stringify(poiReviewCandidates));
+  localStorage.setItem("ravenPoiReviewV27r3",JSON.stringify(poiReviewCandidates));
 }
 
 function setReviewStatus(text){ document.getElementById("reviewStatus").textContent=text; }
