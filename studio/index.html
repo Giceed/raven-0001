@@ -9,6 +9,7 @@
 :root{color-scheme:dark;--bg:#07090d;--panel:#0d1117;--line:#273142;--text:#f5f7fb;--muted:#8b98aa;--purple:#8b5cf6;--cyan:#06b6d4;--orange:#f97316;--green:#22c55e;--red:#ef4444}
 *{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif}button,input,select{font:inherit}
 .app{height:100%;display:grid;grid-template-rows:auto 1fr}.top{padding:12px 16px;border-bottom:1px solid var(--line);background:#090c12;display:flex;align-items:center;gap:14px;flex-wrap:wrap}.brand{font-weight:1000;letter-spacing:1.4px}.brand span{color:#c4b5fd}.toolbar{display:flex;gap:8px;flex:1;flex-wrap:wrap}.search{min-width:220px;flex:1}.top input,.top button,.top select,.editor input,.editor select,.editor button{border:1px solid var(--line);border-radius:9px;background:#111722;color:var(--text);padding:9px 11px}.top button,.editor button{cursor:pointer;font-weight:800}.primary{background:#6d28d9!important;border-color:#a78bfa!important}.good{background:#14532d!important;border-color:#22c55e!important}.bad{background:#451a1a!important;border-color:#ef4444!important}.layout{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 370px}.map-wrap{position:relative;min-height:400px}#map{height:100%;width:100%;background:#0a0d12}.legend{position:absolute;z-index:800;left:12px;bottom:12px;background:#0d1117e8;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:11px;line-height:1.7}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}.side{min-height:0;border-left:1px solid var(--line);background:var(--panel);display:grid;grid-template-rows:auto auto 1fr}.status{padding:12px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}.stats{display:flex;gap:12px;margin-top:7px;color:var(--text);font-weight:800}.editor{padding:14px;border-bottom:1px solid var(--line);display:grid;gap:9px}.editor[hidden]{display:none}.editor h2{font-size:18px;margin:0}.meta{font-size:11px;color:var(--muted);line-height:1.5}.field{display:grid;grid-template-columns:95px 1fr;align-items:center;gap:8px;font-size:12px}.range-row{display:grid;grid-template-columns:1fr 78px;gap:7px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.list{overflow:auto;padding:8px}.candidate{width:100%;text-align:left;margin-bottom:7px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#0a0e14;color:var(--text);cursor:pointer}.candidate:hover,.candidate.selected{border-color:#a78bfa}.candidate.approved{border-color:#166534;background:#052e161f}.candidate.rejected{opacity:.45}.candidate-name{font-weight:850;font-size:12px}.candidate-sub{font-size:10px;color:var(--muted);margin-top:4px}.marker{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:3px solid white;background:var(--cyan);box-shadow:0 0 0 6px #22d3ee4d,0 0 20px #22d3ee;color:white;font-weight:950}.marker.activity{background:var(--orange);box-shadow:0 0 0 6px #fb923c4d,0 0 20px #fb923c}.marker.approved{background:#15803d;box-shadow:none}.marker.rejected{background:#4b5563;box-shadow:none;opacity:.45}.empty{padding:24px;text-align:center;color:var(--muted);font-size:12px}@media(max-width:850px){.layout{grid-template-columns:1fr;grid-template-rows:58vh auto}.side{border-left:0;border-top:1px solid var(--line);min-height:500px}}
+.app{grid-template-rows:auto auto 1fr}.filters{display:flex;gap:7px;padding:9px 12px;overflow-x:auto;border-bottom:1px solid var(--line);background:#0b0f16}.filters button,.filters input,.filters select{white-space:nowrap;border:1px solid var(--line);border-radius:999px;background:#111722;color:var(--muted);padding:7px 11px;font-size:11px;font-weight:800}.filters button{cursor:pointer}.filters button.active{background:#6d28d9;color:white;border-color:#a78bfa}.filters input{min-width:190px;border-radius:9px;color:var(--text)}
 </style>
 </head>
 <body>
@@ -25,6 +26,9 @@
       <input id="importFile" type="file" accept="application/json" hidden onchange="importProject(event)">
     </div>
   </header>
+  <nav class="filters" id="filters">
+    <select id="areaType" onchange="populateAreaSelector()"><option value="all">Alle Gebiete</option><option value="8">Stadt/Gemeinde</option><option value="9">Stadtbezirk</option><option value="10">Ort/Ortsteil</option></select><select id="areaSelect" onchange="selectBoundaryArea()"><option value="">Gebiet auswählen …</option></select><button class="active" onclick="setPoiFilter('all',this)">Alle</button><button onclick="setPoiFilter('fountain',this)">⛲ Brunnen</button><button onclick="setPoiFilter('play',this)">🛝 Spielplätze</button><button onclick="setPoiFilter('sport',this)">⚽ Sport</button><button onclick="setPoiFilter('services',this)">🚒 Feuerwehr & Polizei</button><button onclick="setPoiFilter('education',this)">🏫 Schulen & Kitas</button><button onclick="setPoiFilter('rail',this)">🚉 Bahnhöfe</button><button onclick="setPoiFilter('airport',this)">✈ Flughäfen</button><button onclick="setPoiFilter('culture',this)">🏰 Kultur</button><button onclick="setPoiFilter('nature',this)">🥾 Natur</button><input id="pointSearch" placeholder="Punktname filtern …" oninput="applyPoiFilters()">
+  </nav>
   <main class="layout">
     <section class="map-wrap">
       <div id="map"></div>
@@ -49,6 +53,8 @@ const map=L.map("map",{preferCanvas:true}).setView([51.5157,8.741],14);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
 const state=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")||{center:{lat:51.5157,lon:8.741,name:"Fürstenberg, Bad Wünnenberg"},candidates:[]};
 let markers=new Map(),selectedId=null,radiusCircle=null,moveId=null;
+let activePoiGroup="all";
+const TEST_CENTER={lat:51.5157,lon:8.741,radius:100000};
 const endpoints=["https://overpass.kumi.systems/api/interpreter","https://overpass-api.de/api/interpreter"];
 
 const ravenBasePoints=[
@@ -75,7 +81,7 @@ function renderStats(){const count=s=>state.candidates.filter(c=>c.status===s).l
 async function searchPlace(){
   const query=placeSearch.value.trim();if(!query)return;
   setMessage("Ort wird gesucht …");
-  try{const response=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(query));const rows=await response.json();if(!rows.length)throw Error();state.center={lat:+rows[0].lat,lon:+rows[0].lon,name:rows[0].display_name};map.setView([state.center.lat,state.center.lon],14);save();setMessage("Ort gefunden: "+state.center.name);}catch(e){setMessage("Ort konnte gerade nicht gefunden werden.");}
+  try{const response=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(query));const rows=await response.json();if(!rows.length)throw Error();const found={lat:+rows[0].lat,lon:+rows[0].lon,name:rows[0].display_name};if(distanceMeters(found.lat,found.lon,TEST_CENTER.lat,TEST_CENTER.lon)>TEST_CENTER.radius){setMessage("Dieser Ort liegt außerhalb des aktuellen 100-km-Testkreises.");return;}state.center=found;map.setView([state.center.lat,state.center.lon],14);save();setMessage("Ort gefunden: "+state.center.name);}catch(e){setMessage("Ort konnte gerade nicht gefunden werden.");}
 }
 
 async function loadCandidates(){
@@ -90,6 +96,7 @@ async function loadCandidates(){
     nwr(around:${radius},${state.center.lat},${state.center.lon})[amenity=school];
     nwr(around:${radius},${state.center.lat},${state.center.lon})[amenity=kindergarten];
     nwr(around:${radius},${state.center.lat},${state.center.lon})[leisure=playground];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[leisure=park];
     nwr(around:${radius},${state.center.lat},${state.center.lon})[leisure=pitch];
     nwr(around:${radius},${state.center.lat},${state.center.lon})[leisure=sports_centre];
     nwr(around:${radius},${state.center.lat},${state.center.lon})[railway=station];
@@ -125,13 +132,16 @@ function makeCandidate(e){
   if(!activities.includes(raw)&&!explorations.includes(raw))return null;
   const category=activities.includes(raw)?"activity":"exploration";let score=40;if(t.wikidata||t.wikipedia)score+=25;if(t.historic||t.tourism)score+=15;if(t.access==="yes"||t.foot==="yes")score+=10;
   const radius=raw==="aerodrome"?500:raw==="terminal"?120:["school","kindergarten"].includes(raw)?120:["castle","manor","archaeological_site"].includes(raw)?140:["fire_station","police","tower","water_tower"].includes(raw)?90:["place_of_worship","townhall","museum","station","halt","post_office","information"].includes(raw)?60:["pitch","sports_centre","trailhead"].includes(raw)?45:35;
-  const fallbackNames={fountain:"Brunnen",playground:"Spielplatz",pitch:"Sportplatz",sports_centre:"Sportanlage",fire_station:"Feuerwehr",school:"Schule",kindergarten:"Kindergarten",station:"Bahnhof",halt:"Haltepunkt",aerodrome:"Flughafen",terminal:"Flughafen-Terminal",post_office:"Poststelle",information:"Information",trailhead:"Wanderstartpunkt",tower:"Aussichtsturm",water_tower:"Wasserturm"};
+  const fallbackNames={fountain:"Brunnen",playground:"Spielplatz",park:"Park",pitch:"Sportplatz",sports_centre:"Sportanlage",fire_station:"Feuerwehr",school:"Schule",kindergarten:"Kindergarten",station:"Bahnhof",halt:"Haltepunkt",aerodrome:"Flughafen",terminal:"Flughafen-Terminal",post_office:"Poststelle",information:"Information",trailhead:"Wanderstartpunkt",tower:"Aussichtsturm",water_tower:"Wasserturm"};
   const access=["school","kindergarten","fire_station","police","tower","water_tower"].includes(raw)?"Nur Außenradius – Gelände nicht betreten":["station","halt"].includes(raw)?"Nur öffentliche Bahnhofsbereiche – Gleise nicht betreten":["aerodrome","terminal"].includes(raw)?"Nur öffentliche Bereiche – keine Rollfelder oder Betriebsflächen":t.access||t.foot||"unbekannt";
   return{id:`osm-${e.type}-${e.id}`,name:t.name||fallbackNames[raw]||"Unbenannter Punkt",lat,lon,rawType:raw,category,radius,score,access,status:"pending",osmType:e.type,osmId:e.id,source:"OpenStreetMap"};
 }
 
-function renderMarkers(){markers.forEach(m=>map.removeLayer(m));markers.clear();state.candidates.forEach((c,i)=>{const icon=L.divIcon({className:"",html:`<div class="marker ${c.category} ${c.status}">${i+1}</div>`,iconSize:[34,34],iconAnchor:[17,17]});const marker=L.marker([c.lat,c.lon],{icon}).addTo(map).on("click",()=>selectCandidate(c.id));markers.set(c.id,marker);});}
-function renderList(){const list=document.getElementById("candidateList");if(!state.candidates.length){list.innerHTML='<div class="empty">Noch keine Kandidaten geladen.</div>';return;}list.innerHTML=state.candidates.map((c,i)=>`<button class="candidate ${c.status} ${c.id===selectedId?'selected':''}" onclick="selectCandidate('${c.id}')"><div class="candidate-name">${i+1}. ${esc(c.name)}</div><div class="candidate-sub">${c.category==='activity'?'Aktivität':'Erkundung'} · ${esc(c.rawType)} · ${c.radius} m · ${c.status}</div></button>`).join("");}
+function matchesPoiFilter(c){const groups={fountain:["fountain","foraging"],play:["playground"],sport:["sports_centre","pitch","fitness_station","swimming_pool"],services:["fire_station","police"],education:["school","kindergarten"],rail:["station","halt"],airport:["aerodrome","terminal"],culture:["castle","manor","memorial","monument","archaeological_site","attraction","museum","artwork","place_of_worship","townhall","library","community_centre","post_office","information","tower","water_tower"],nature:["park","picnic_site","trailhead","viewpoint"]};const groupOk=activePoiGroup==="all"||(groups[activePoiGroup]||[]).includes(c.rawType);const text=(document.getElementById("pointSearch")?.value||"").trim().toLowerCase();const areaOk=!selectedBoundary||pointInBoundary(c.lat,c.lon,selectedBoundary);return groupOk&&areaOk&&(!text||c.name.toLowerCase().includes(text));}
+function setPoiFilter(group,button){activePoiGroup=group;document.querySelectorAll("#filters button").forEach(b=>b.classList.remove("active"));button.classList.add("active");applyPoiFilters();}
+function applyPoiFilters(){renderMarkers();renderList();}
+function renderMarkers(){markers.forEach(m=>map.removeLayer(m));markers.clear();state.candidates.forEach((c,i)=>{if(!matchesPoiFilter(c))return;const icon=L.divIcon({className:"",html:`<div class="marker ${c.category} ${c.status}">${i+1}</div>`,iconSize:[34,34],iconAnchor:[17,17]});const marker=L.marker([c.lat,c.lon],{icon}).addTo(map).on("click",()=>selectCandidate(c.id));markers.set(c.id,marker);});}
+function renderList(){const list=document.getElementById("candidateList"),visible=state.candidates.filter(matchesPoiFilter);if(!visible.length){list.innerHTML='<div class="empty">Keine passenden Punkte in diesem Filter.</div>';return;}list.innerHTML=visible.map(c=>{const i=state.candidates.indexOf(c);return `<button class="candidate ${c.status} ${c.id===selectedId?'selected':''}" onclick="selectCandidate('${c.id}')"><div class="candidate-name">${i+1}. ${esc(c.name)}</div><div class="candidate-sub">${c.category==='activity'?'Aktivität':'Erkundung'} · ${esc(c.rawType)} · ${c.radius} m · ${c.status}</div></button>`}).join("");}
 function selectCandidate(id){const c=state.candidates.find(x=>x.id===id);if(!c)return;selectedId=id;editor.hidden=false;editName.textContent=c.name;editMeta.textContent=`${c.source||"OpenStreetMap"}${c.osmType?` · OSM ${c.osmType} ${c.osmId}`:""} · ${c.rawType} · Bewertung ${c.score}/100 · Zugang ${c.access}`;editCategory.value=c.category;editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);renderList();map.panTo([c.lat,c.lon]);}
 function showRadius(c){if(radiusCircle)map.removeLayer(radiusCircle);radiusCircle=L.circle([c.lat,c.lon],{radius:c.radius,color:c.category==="activity"?"#f97316":"#8b5cf6",weight:3,fillOpacity:.18,dashArray:"8 5"}).addTo(map);radiusCircle.bringToBack();}
 function syncRadius(value){const c=current();if(!c)return;c.radius=Math.max(15,Math.min(1000,+value||15));editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);save();}
@@ -142,10 +152,58 @@ function startMove(){const c=current();if(!c)return;moveId=c.id;setMessage("Auf 
 map.on("click",e=>{if(!moveId)return;const c=state.candidates.find(x=>x.id===moveId);c.lat=e.latlng.lat;c.lon=e.latlng.lng;moveId=null;save();renderMarkers();selectCandidate(c.id);setMessage("Punkt verschoben.");});
 function fitAll(){const visible=state.candidates.filter(c=>c.status!=="rejected");if(visible.length)map.fitBounds(visible.map(c=>[c.lat,c.lon]),{padding:[35,35],maxZoom:16});}
 
+function distanceMeters(a,b,c,d){const R=6371000,p=Math.PI/180,x=(c-a)*p,y=(d-b)*p*Math.cos((a+c)*p/2);return Math.sqrt(x*x+y*y)*R;}
+const testCircle=L.circle([TEST_CENTER.lat,TEST_CENTER.lon],{radius:TEST_CENTER.radius,color:"#a855f7",weight:2,dashArray:"9 7",fill:false,interactive:false}).addTo(map);
+const boundaryLayer=L.layerGroup().addTo(map);
+let boundaryData=null,selectedBoundary=null,selectedBoundaryLayer=null,boundaryTimer=null;
+
+async function ensureBoundaries(){
+  if(boundaryData)return boundaryData;
+  const manifest=await fetch("../data/boundaries/manifest.json").then(r=>r.json());
+  const parts=await Promise.all(manifest.files.map(file=>fetch("../data/boundaries/"+file).then(r=>r.text())));
+  const bytes=Uint8Array.from(atob(parts.join("")),char=>char.charCodeAt(0));
+  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+  boundaryData=await new Response(stream).json();
+  boundaryData.features.forEach((feature,index)=>feature.studioId=String(index));
+  populateAreaSelector();
+  return boundaryData;
+}
+
+function populateAreaSelector(){
+  const select=document.getElementById("areaSelect");
+  if(!boundaryData){select.innerHTML='<option value="">Grenzen werden geladen …</option>';return;}
+  const level=document.getElementById("areaType").value;
+  const features=boundaryData.features.filter(f=>level==="all"||String(f.level)===level).sort((a,b)=>a.name.localeCompare(b.name,"de"));
+  select.innerHTML='<option value="">Gebiet auswählen …</option>'+features.map(f=>`<option value="${f.studioId}">${esc(f.name)} · ${f.level===8?'Stadt/Gemeinde':f.level===9?'Stadtbezirk':'Ortsteil'}</option>`).join("");
+}
+
+function selectBoundaryArea(){
+  const id=document.getElementById("areaSelect").value;
+  selectedBoundary=id===""?null:boundaryData.features.find(f=>f.studioId===id);
+  if(selectedBoundaryLayer){map.removeLayer(selectedBoundaryLayer);selectedBoundaryLayer=null;}
+  if(selectedBoundary){
+    selectedBoundaryLayer=L.layerGroup().addTo(map);
+    selectedBoundary.lines.forEach(line=>L.polyline(line,{color:"#facc15",weight:5,opacity:.95,interactive:false}).addTo(selectedBoundaryLayer));
+    const points=selectedBoundary.lines.flat();if(points.length)map.fitBounds(points,{padding:[35,35],maxZoom:15});
+    setMessage(`${selectedBoundary.name} ausgewählt – nur Punkte innerhalb dieser Grenze.`);
+  }else setMessage("Alle Gebiete im 100-km-Testkreis.");
+  applyPoiFilters();
+}
+
+function pointInBoundary(lat,lon,feature){
+  return feature.lines.some(line=>{let inside=false;for(let i=0,j=line.length-1;i<line.length;j=i++){const yi=line[i][0],xi=line[i][1],yj=line[j][0],xj=line[j][1];if(((yi>lat)!==(yj>lat))&&(lon<(xj-xi)*(lat-yi)/(yj-yi)+xi))inside=!inside;}return inside;});
+}
+
+async function renderBoundaries(){
+  if(map.getZoom()<9){boundaryLayer.clearLayers();return;}
+  try{const data=await ensureBoundaries(),bounds=map.getBounds().pad(.12),levels=map.getZoom()>=13?new Set([8,9,10]):map.getZoom()>=11?new Set([8,9]):new Set([8]);boundaryLayer.clearLayers();data.features.forEach(feature=>{if(!levels.has(feature.level))return;feature.lines.forEach(line=>{if(!line.some(p=>bounds.contains(p)))return;L.polyline(line,{renderer:L.canvas(),color:feature.level>=10?"#22d3ee":feature.level===9?"#60a5fa":"#a855f7",weight:feature.level>=10?1.5:2,opacity:.68,dashArray:feature.level>=10?"5 5":null,interactive:false}).addTo(boundaryLayer);});});}catch(e){setMessage("Ortsgrenzen konnten gerade nicht geladen werden.");}
+}
+map.on("moveend zoomend",()=>{clearTimeout(boundaryTimer);boundaryTimer=setTimeout(renderBoundaries,300);});
+
 function exportProject(){const payload={format:"raven-poi-review",version:1,exportedAt:new Date().toISOString(),center:state.center,candidates:state.candidates};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="raven-pois-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(url);setMessage("Raven-Projekt exportiert.");}
 async function importProject(event){try{const data=JSON.parse(await event.target.files[0].text());if(!Array.isArray(data.candidates))throw Error();state.center=data.center||state.center;state.candidates=data.candidates;save();renderMarkers();fitAll();setMessage("Projekt importiert.");}catch(e){setMessage("Diese Datei ist kein gültiges Raven-Projekt.");}event.target.value="";}
 
-mergeRavenBasePoints();placeSearch.value=state.center.name;renderStats();renderList();renderMarkers();if(state.candidates.length)fitAll();
+mergeRavenBasePoints();placeSearch.value=state.center.name;renderStats();renderList();renderMarkers();if(state.candidates.length)fitAll();renderBoundaries();
 </script>
 </body>
 </html>
