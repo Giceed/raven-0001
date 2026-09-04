@@ -35,7 +35,7 @@
       <section class="editor" id="editor" hidden>
         <h2 id="editName"></h2><div class="meta" id="editMeta"></div>
         <label class="field"><span>Kategorie</span><select id="editCategory" onchange="updateSelected()"><option value="exploration">Erkundung</option><option value="activity">Aktivität</option></select></label>
-        <label class="field"><span>Radius</span><div class="range-row"><input id="editRadiusRange" type="range" min="15" max="250" step="5" oninput="syncRadius(this.value)"><input id="editRadius" type="number" min="15" max="250" step="5" onchange="syncRadius(this.value)"></div></label>
+        <label class="field"><span>Radius</span><div class="range-row"><input id="editRadiusRange" type="range" min="15" max="1000" step="5" oninput="syncRadius(this.value)"><input id="editRadius" type="number" min="15" max="1000" step="5" onchange="syncRadius(this.value)"></div></label>
         <div class="actions"><button onclick="startMove()">📍 Verschieben</button><button onclick="setStatusForSelected('pending')">↺ Offen</button><button class="good" onclick="setStatusForSelected('approved')">✓ Behalten</button><button class="bad" onclick="setStatusForSelected('rejected')">✕ Löschen</button></div>
       </section>
       <div class="list" id="candidateList"><div class="empty">Noch keine Kandidaten geladen.</div></div>
@@ -95,6 +95,13 @@ async function loadCandidates(){
     nwr(around:${radius},${state.center.lat},${state.center.lon})[railway=station];
     nwr(around:${radius},${state.center.lat},${state.center.lon})[railway=halt];
     nwr(around:${radius},${state.center.lat},${state.center.lon})[public_transport=station][name];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[aeroway=aerodrome][name];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[aeroway=terminal];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[amenity=post_office];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[tourism=information];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[highway=trailhead];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[man_made=tower][name];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[man_made=water_tower][name];
   );out center tags;`;
   let data=null;
   for(const endpoint of endpoints){try{const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:"data="+encodeURIComponent(q)});if(response.ok){data=await response.json();break;}}catch(e){}}
@@ -111,15 +118,15 @@ async function loadCandidates(){
 
 function makeCandidate(e){
   const t=e.tags||{},lat=e.lat??e.center?.lat,lon=e.lon??e.center?.lon;if(!Number.isFinite(lat)||!Number.isFinite(lon))return null;if(["private","no"].includes(t.access)||t.foot==="no")return null;
-  const raw=t.historic||t.tourism||t.leisure||t.amenity||t.railway||(t.public_transport==="station"?"station":null)||"poi";
+  const raw=t.historic||t.tourism||t.leisure||t.amenity||t.railway||t.aeroway||t.man_made||(t.highway==="trailhead"?"trailhead":null)||(t.public_transport==="station"?"station":null)||"poi";
   if(["grave_yard","cemetery","funeral_hall","crematorium"].includes(raw)||t.landuse==="cemetery")return null;
-  const activities=["playground","park","sports_centre","pitch","fitness_station","picnic_site","swimming_pool","fountain"];
-  const explorations=["castle","manor","memorial","monument","archaeological_site","attraction","viewpoint","museum","artwork","place_of_worship","townhall","library","community_centre","fire_station","police","school","kindergarten","station","halt"];
+  const activities=["playground","park","sports_centre","pitch","fitness_station","picnic_site","swimming_pool","fountain","trailhead"];
+  const explorations=["castle","manor","memorial","monument","archaeological_site","attraction","viewpoint","museum","artwork","place_of_worship","townhall","library","community_centre","fire_station","police","school","kindergarten","station","halt","aerodrome","terminal","post_office","information","tower","water_tower"];
   if(!activities.includes(raw)&&!explorations.includes(raw))return null;
   const category=activities.includes(raw)?"activity":"exploration";let score=40;if(t.wikidata||t.wikipedia)score+=25;if(t.historic||t.tourism)score+=15;if(t.access==="yes"||t.foot==="yes")score+=10;
-  const radius=["school","kindergarten"].includes(raw)?120:["castle","manor","archaeological_site"].includes(raw)?140:["fire_station","police"].includes(raw)?90:["place_of_worship","townhall","museum","station","halt"].includes(raw)?60:["pitch","sports_centre"].includes(raw)?45:35;
-  const fallbackNames={fountain:"Brunnen",playground:"Spielplatz",pitch:"Sportplatz",sports_centre:"Sportanlage",fire_station:"Feuerwehr",school:"Schule",kindergarten:"Kindergarten",station:"Bahnhof",halt:"Haltepunkt"};
-  const access=["school","kindergarten","fire_station","police"].includes(raw)?"Nur Außenradius – Gelände nicht betreten":["station","halt"].includes(raw)?"Nur öffentliche Bahnhofsbereiche – Gleise nicht betreten":t.access||t.foot||"unbekannt";
+  const radius=raw==="aerodrome"?500:raw==="terminal"?120:["school","kindergarten"].includes(raw)?120:["castle","manor","archaeological_site"].includes(raw)?140:["fire_station","police","tower","water_tower"].includes(raw)?90:["place_of_worship","townhall","museum","station","halt","post_office","information"].includes(raw)?60:["pitch","sports_centre","trailhead"].includes(raw)?45:35;
+  const fallbackNames={fountain:"Brunnen",playground:"Spielplatz",pitch:"Sportplatz",sports_centre:"Sportanlage",fire_station:"Feuerwehr",school:"Schule",kindergarten:"Kindergarten",station:"Bahnhof",halt:"Haltepunkt",aerodrome:"Flughafen",terminal:"Flughafen-Terminal",post_office:"Poststelle",information:"Information",trailhead:"Wanderstartpunkt",tower:"Aussichtsturm",water_tower:"Wasserturm"};
+  const access=["school","kindergarten","fire_station","police","tower","water_tower"].includes(raw)?"Nur Außenradius – Gelände nicht betreten":["station","halt"].includes(raw)?"Nur öffentliche Bahnhofsbereiche – Gleise nicht betreten":["aerodrome","terminal"].includes(raw)?"Nur öffentliche Bereiche – keine Rollfelder oder Betriebsflächen":t.access||t.foot||"unbekannt";
   return{id:`osm-${e.type}-${e.id}`,name:t.name||fallbackNames[raw]||"Unbenannter Punkt",lat,lon,rawType:raw,category,radius,score,access,status:"pending",osmType:e.type,osmId:e.id,source:"OpenStreetMap"};
 }
 
@@ -127,7 +134,7 @@ function renderMarkers(){markers.forEach(m=>map.removeLayer(m));markers.clear();
 function renderList(){const list=document.getElementById("candidateList");if(!state.candidates.length){list.innerHTML='<div class="empty">Noch keine Kandidaten geladen.</div>';return;}list.innerHTML=state.candidates.map((c,i)=>`<button class="candidate ${c.status} ${c.id===selectedId?'selected':''}" onclick="selectCandidate('${c.id}')"><div class="candidate-name">${i+1}. ${esc(c.name)}</div><div class="candidate-sub">${c.category==='activity'?'Aktivität':'Erkundung'} · ${esc(c.rawType)} · ${c.radius} m · ${c.status}</div></button>`).join("");}
 function selectCandidate(id){const c=state.candidates.find(x=>x.id===id);if(!c)return;selectedId=id;editor.hidden=false;editName.textContent=c.name;editMeta.textContent=`${c.source||"OpenStreetMap"}${c.osmType?` · OSM ${c.osmType} ${c.osmId}`:""} · ${c.rawType} · Bewertung ${c.score}/100 · Zugang ${c.access}`;editCategory.value=c.category;editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);renderList();map.panTo([c.lat,c.lon]);}
 function showRadius(c){if(radiusCircle)map.removeLayer(radiusCircle);radiusCircle=L.circle([c.lat,c.lon],{radius:c.radius,color:c.category==="activity"?"#f97316":"#8b5cf6",weight:3,fillOpacity:.18,dashArray:"8 5"}).addTo(map);radiusCircle.bringToBack();}
-function syncRadius(value){const c=current();if(!c)return;c.radius=Math.max(15,Math.min(250,+value||15));editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);save();}
+function syncRadius(value){const c=current();if(!c)return;c.radius=Math.max(15,Math.min(1000,+value||15));editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);save();}
 function updateSelected(){const c=current();if(!c)return;c.category=editCategory.value;showRadius(c);save();renderMarkers();}
 function setStatusForSelected(status){const c=current();if(!c)return;c.status=status;save();renderMarkers();selectCandidate(c.id);}
 function current(){return state.candidates.find(c=>c.id===selectedId);}
