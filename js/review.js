@@ -17,12 +17,12 @@ const REVIEW_ENDPOINTS=[
 function togglePoiReview(){
   poiReviewEnabled=!poiReviewEnabled;
   document.getElementById("reviewToggle").textContent=
-    poiReviewEnabled ? "âœ• POI-PRÃœFMODUS BEENDEN" : "ðŸ§­ POI-PRÃœFMODUS STARTEN";
+    poiReviewEnabled ? "✕ POI-PRÜFMODUS BEENDEN" : "🧭 POI-PRÜFMODUS STARTEN";
 
   if(!poiReviewEnabled){
     clearReviewMarkers();
     document.getElementById("reviewEditor").hidden=true;
-    setReviewStatus("PrÃ¼fmodus pausiert. Deine Entscheidungen sind gespeichert.");
+    setReviewStatus("Prüfmodus pausiert. Deine Entscheidungen sind gespeichert.");
     return;
   }
 
@@ -35,7 +35,7 @@ function togglePoiReview(){
 }
 
 async function loadOsmReviewCandidates(){
-  setReviewStatus("â³ OpenStreetMap-VorschlÃ¤ge fÃ¼r FÃ¼rstenberg werden geladen â€¦");
+  setReviewStatus("⏳ OpenStreetMap-Vorschläge für Fürstenberg werden geladen …");
   const query=`[out:json][timeout:25];(
     nwr(around:3000,${TEST_REGION.centerLat},${TEST_REGION.centerLon})[tourism][name];
     nwr(around:3000,${TEST_REGION.centerLat},${TEST_REGION.centerLon})[historic][name];
@@ -56,7 +56,7 @@ async function loadOsmReviewCandidates(){
   }
 
   if(!data){
-    setReviewStatus("âš  OSM-Server gerade nicht erreichbar. SpÃ¤ter erneut versuchen.");
+    setReviewStatus("⚠ OSM-Server gerade nicht erreichbar. Später erneut versuchen.");
     return;
   }
 
@@ -113,7 +113,7 @@ function renderReviewMarkers(){
   clearReviewMarkers();
   poiReviewCandidates.forEach(candidate=>{
     if(candidate.status==="rejected") return;
-    const icon=L.divIcon({className:"",html:`<div class="review-marker ${candidate.category} ${candidate.status}">ðŸ”Ž</div>`,iconSize:[30,30],iconAnchor:[15,15]});
+    const icon=L.divIcon({className:"",html:`<div class="review-marker ${candidate.category} ${candidate.status}">🔎</div>`,iconSize:[30,30],iconAnchor:[15,15]});
     poiReviewMarkers[candidate.id]=L.marker([candidate.lat,candidate.lon],{icon,pane:"ravenForegroundPane"})
       .addTo(map).on("click",()=>selectReviewCandidate(candidate.id));
   });
@@ -131,7 +131,7 @@ function selectReviewCandidate(id){
   document.getElementById("reviewEditor").hidden=false;
   document.getElementById("reviewName").textContent=candidate.name;
   document.getElementById("reviewMeta").textContent=
-    `${candidate.category==="activity"?"AktivitÃ¤t":"Erkundung"} Â· ${candidate.rawType} Â· Radius ${candidate.radius} m Â· Bewertung ${candidate.score}/100 Â· Zugang ${candidate.access}`;
+    `${candidate.category==="activity"?"Aktivität":"Erkundung"} · ${candidate.rawType} · Radius ${candidate.radius} m · Bewertung ${candidate.score}/100 · Zugang ${candidate.access}`;
 }
 
 function currentReviewCandidate(){
@@ -158,7 +158,7 @@ function rejectReviewCandidate(){
 function moveReviewCandidate(){
   const candidate=currentReviewCandidate(); if(!candidate) return;
   movingReviewId=candidate.id;
-  setReviewStatus(`ðŸ“ Tippe auf der Karte auf die neue Position fÃ¼r ${candidate.name}.`);
+  setReviewStatus(`📍 Tippe auf der Karte auf die neue Position für ${candidate.name}.`);
 }
 
 map.on("click",event=>{
@@ -179,6 +179,6 @@ function updateReviewSummary(){
   const approved=poiReviewCandidates.filter(item=>item.status==="approved").length;
   const pending=poiReviewCandidates.filter(item=>item.status==="pending").length;
   const rejected=poiReviewCandidates.filter(item=>item.status==="rejected").length;
-  setReviewStatus(`${pending} zu prÃ¼fen Â· ${approved} behalten Â· ${rejected} gelÃ¶scht`);
+  setReviewStatus(`${pending} zu prüfen · ${approved} behalten · ${rejected} gelöscht`);
 }
 
