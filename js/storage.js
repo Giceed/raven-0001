@@ -41,6 +41,10 @@ localStorage.setItem("ravenDiscoveredPlaces",JSON.stringify(discoveredPlaces));
 let mapMode =
   localStorage.getItem("ravenMapMode") || "explore";
 
+/* Die normale Spielansicht beginnt immer im Erkundungsmodus. */
+mapMode="explore";
+localStorage.setItem("ravenMapMode","explore");
+
 if(!localStorage.getItem("ravenV27FuerstenbergFogResetDone")){
   exploredPoints=[];
   travelHistory=[];
