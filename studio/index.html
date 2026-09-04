@@ -80,7 +80,19 @@ async function searchPlace(){
 
 async function loadCandidates(){
   const radius=+searchRadius.value;setMessage("OSM-Kandidaten werden geladen …");
-  const q=`[out:json][timeout:25];(nwr(around:${radius},${state.center.lat},${state.center.lon})[tourism][name];nwr(around:${radius},${state.center.lat},${state.center.lon})[historic][name];nwr(around:${radius},${state.center.lat},${state.center.lon})[amenity][name];nwr(around:${radius},${state.center.lat},${state.center.lon})[leisure][name];);out center tags;`;
+  const q=`[out:json][timeout:25];(
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[tourism][name];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[historic][name];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[amenity][name];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[leisure][name];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[amenity=fountain];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[amenity=fire_station];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[amenity=school];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[amenity=kindergarten];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[leisure=playground];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[leisure=pitch];
+    nwr(around:${radius},${state.center.lat},${state.center.lon})[leisure=sports_centre];
+  );out center tags;`;
   let data=null;
   for(const endpoint of endpoints){try{const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:"data="+encodeURIComponent(q)});if(response.ok){data=await response.json();break;}}catch(e){}}
   if(!data){setMessage("OSM-Server nicht erreichbar. Bitte später erneut versuchen.");return;}
@@ -95,14 +107,17 @@ async function loadCandidates(){
 }
 
 function makeCandidate(e){
-  const t=e.tags||{},lat=e.lat??e.center?.lat,lon=e.lon??e.center?.lon;if(!Number.isFinite(lat)||!Number.isFinite(lon)||!t.name)return null;if(["private","no"].includes(t.access)||t.foot==="no")return null;
+  const t=e.tags||{},lat=e.lat??e.center?.lat,lon=e.lon??e.center?.lon;if(!Number.isFinite(lat)||!Number.isFinite(lon))return null;if(["private","no"].includes(t.access)||t.foot==="no")return null;
   const raw=t.historic||t.tourism||t.leisure||t.amenity||"poi";
-  const activities=["playground","park","sports_centre","pitch","fitness_station","picnic_site","swimming_pool"];
-  const explorations=["castle","manor","memorial","monument","archaeological_site","attraction","viewpoint","museum","artwork","place_of_worship","townhall","library","community_centre","fountain","fire_station","police"];
+  if(["grave_yard","cemetery","funeral_hall","crematorium"].includes(raw)||t.landuse==="cemetery")return null;
+  const activities=["playground","park","sports_centre","pitch","fitness_station","picnic_site","swimming_pool","fountain"];
+  const explorations=["castle","manor","memorial","monument","archaeological_site","attraction","viewpoint","museum","artwork","place_of_worship","townhall","library","community_centre","fire_station","police","school","kindergarten"];
   if(!activities.includes(raw)&&!explorations.includes(raw))return null;
   const category=activities.includes(raw)?"activity":"exploration";let score=40;if(t.wikidata||t.wikipedia)score+=25;if(t.historic||t.tourism)score+=15;if(t.access==="yes"||t.foot==="yes")score+=10;
-  const radius=["castle","manor","archaeological_site"].includes(raw)?140:["fire_station","police"].includes(raw)?90:["place_of_worship","townhall","museum"].includes(raw)?60:35;
-  return{id:`osm-${e.type}-${e.id}`,name:t.name,lat,lon,rawType:raw,category,radius,score,access:t.access||t.foot||"unbekannt",status:"pending",osmType:e.type,osmId:e.id,source:"OpenStreetMap"};
+  const radius=["school","kindergarten"].includes(raw)?120:["castle","manor","archaeological_site"].includes(raw)?140:["fire_station","police"].includes(raw)?90:["place_of_worship","townhall","museum"].includes(raw)?60:["pitch","sports_centre"].includes(raw)?45:35;
+  const fallbackNames={fountain:"Brunnen",playground:"Spielplatz",pitch:"Sportplatz",sports_centre:"Sportanlage",fire_station:"Feuerwehr",school:"Schule",kindergarten:"Kindergarten"};
+  const access=["school","kindergarten","fire_station","police"].includes(raw)?"Nur Außenradius – Gelände nicht betreten":t.access||t.foot||"unbekannt";
+  return{id:`osm-${e.type}-${e.id}`,name:t.name||fallbackNames[raw]||"Unbenannter Punkt",lat,lon,rawType:raw,category,radius,score,access,status:"pending",osmType:e.type,osmId:e.id,source:"OpenStreetMap"};
 }
 
 function renderMarkers(){markers.forEach(m=>map.removeLayer(m));markers.clear();state.candidates.forEach((c,i)=>{const icon=L.divIcon({className:"",html:`<div class="marker ${c.category} ${c.status}">${i+1}</div>`,iconSize:[34,34],iconAnchor:[17,17]});const marker=L.marker([c.lat,c.lon],{icon}).addTo(map).on("click",()=>selectCandidate(c.id));markers.set(c.id,marker);});}
