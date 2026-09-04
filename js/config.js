@@ -75,6 +75,9 @@ const FUERSTENBERG = {
       icon:"🏰",
       lat:51.5155802,
       lon:8.7367807,
+      discoveryRadius:160,
+      access:"view_only",
+      accessHint:"Betreten nicht erforderlich – die Nähe auf öffentlichen Wegen reicht.",
       devOnly:true
     },
 
@@ -84,7 +87,10 @@ const FUERSTENBERG = {
       name:"St. Marien / Sintfeld-Dom",
       icon:"⛪",
       lat:51.5157079,
-      lon:8.7397917
+      lon:8.7397917,
+      discoveryRadius:50,
+      access:"public_surroundings",
+      accessHint:"Vom öffentlichen Umfeld der Kirche aus entdeckbar."
     },
 
     {
@@ -93,7 +99,10 @@ const FUERSTENBERG = {
       name:"Rathaus",
       icon:"🏛️",
       lat:51.5164455,
-      lon:8.7449286
+      lon:8.7449286,
+      discoveryRadius:50,
+      access:"public_surroundings",
+      accessHint:"Vom öffentlichen Straßenraum aus entdeckbar."
     }
 
   ],
@@ -106,7 +115,9 @@ const FUERSTENBERG = {
       name:"Beerenstelle",
       icon:"🫐",
       lat:51.51325,
-      lon:8.74215
+      lon:8.74215,
+      discoveryRadius:35,
+      access:"outdoor"
     },
 
     {
@@ -115,7 +126,9 @@ const FUERSTENBERG = {
       name:"Spielplatz",
       icon:"🛝",
       lat:51.51845,
-      lon:8.74730
+      lon:8.74730,
+      discoveryRadius:35,
+      access:"outdoor"
     }
 
   ]
