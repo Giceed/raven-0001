@@ -1,0 +1,542 @@
+/* ==========================================================
+   POI MARKER
+   ========================================================== */
+
+function isDiscovered(point){
+
+  return point.type==="activity"
+    ? fuerstenbergMission.visitedActivities.includes(point.id)
+    : fuerstenbergMission.visitedPOIs.includes(point.id);
+}
+
+function updateAllPointStates(lat,lon){
+
+  ALL_POINTS.forEach(point=>{
+
+    const distance=haversineDistance(
+      lat,
+      lon,
+      point.lat,
+      point.lon
+    );
+
+    const discovered=isDiscovered(point);
+    const inRange=distance<=FUERSTENBERG.visitRadius;
+
+    renderPointMarker(
+      point,
+      discovered,
+      inRange,
+      distance
+    );
+  });
+
+  renderMainLists();
+}
+
+function renderPointMarker(point,discovered,inRange,distance){
+
+  let css="poi-marker";
+
+  if(point.type==="activity"){
+    css+=" activity";
+  }
+
+  if(discovered){
+    css+=" done";
+  }else if(inRange){
+    css+=" range";
+  }
+
+  const content =
+    discovered
+      ? point.icon
+      : "?";
+
+  const icon=L.divIcon({
+    className:"",
+    html:`<div class="${css}">${content}</div>`,
+    iconSize:[28,28],
+    iconAnchor:[14,14]
+  });
+
+  if(!pointMarkers[point.id]){
+
+    pointMarkers[point.id]=
+      L.marker(
+        [point.lat,point.lon],
+        {icon,pane:"ravenForegroundPane"}
+      )
+      .addTo(map)
+      .on("click",()=>tryOpenPoint(point));
+
+  }else{
+
+    pointMarkers[point.id].setIcon(icon);
+  }
+}
+
+function tryOpenPoint(point){
+
+  if(isDiscovered(point)){
+
+    setTemporaryMessage(
+      `${point.icon} ${point.name} wurde bereits entdeckt.`
+    );
+
+    return;
+  }
+
+  if(currentLat===null || currentLon===null){
+
+    setTemporaryMessage(
+      "📍 Raven kennt seine Position noch nicht."
+    );
+
+    return;
+  }
+
+  const distance=haversineDistance(
+    currentLat,
+    currentLon,
+    point.lat,
+    point.lon
+  );
+
+  if(distance>FUERSTENBERG.visitRadius){
+
+    setTemporaryMessage(
+      `? Dieser Punkt ist noch ${Math.round(distance)} m entfernt.`
+    );
+
+    return;
+  }
+
+  openScratch(point);
+}
+
+
+/* ==========================================================
+   HAUPTLISTEN
+   ========================================================== */
+
+function renderMainLists(){
+
+  renderPointList(
+    "explorationList",
+    FUERSTENBERG.explorationPOIs
+  );
+
+  renderPointList(
+    "activityList",
+    FUERSTENBERG.activityPOIs
+  );
+
+  updateMissionUI();
+}
+
+function renderPointList(elementId,points){
+
+  const container=document.getElementById(elementId);
+
+  container.innerHTML="";
+
+  points.forEach(point=>{
+
+    const discovered=isDiscovered(point);
+
+    const row=document.createElement("div");
+
+    row.className=
+      "poi-row " +
+      (point.type==="activity" ? "activity " : "") +
+      (discovered ? "done" : "");
+
+    row.innerHTML=`
+      <div class="poi-name">
+        ${discovered
+          ? `${point.icon} ${escapeHTML(point.name)}`
+          : "? Unbekannter " +
+            (point.type==="activity"
+              ? "Aktivitätspunkt"
+              : "Erkundungspunkt")
+        }
+      </div>
+
+      <div class="poi-state">
+        ${discovered ? "ENTDECKT ✓" : "UNBEKANNT"}
+      </div>
+    `;
+
+    row.onclick=()=>tryOpenPoint(point);
+
+    container.appendChild(row);
+  });
+}
+
+/* ==========================================================
+   RUBBELN
+   ========================================================== */
+
+let scratchPoint=null;
+let scratching=false;
+let scratchCompleted=false;
+let scratchCheckCounter=0;
+
+const scratchOverlay=
+  document.getElementById("scratchOverlay");
+
+const scratchCanvas=
+  document.getElementById("scratchCanvas");
+
+const scratchContext=
+  scratchCanvas.getContext("2d");
+
+function openScratch(point){
+
+  scratchPoint=point;
+  scratchCompleted=false;
+  scratchCheckCounter=0;
+
+  document.getElementById("scratchTitle").textContent =
+    point.type==="activity"
+      ? "🐦‍⬛ Aktivität entdeckt?"
+      : "🐦‍⬛ Erkundungspunkt";
+
+  document.getElementById("scratchIcon").textContent =
+    point.icon;
+
+  document.getElementById("scratchName").textContent =
+    point.name;
+
+  scratchOverlay.style.display="flex";
+
+  document.getElementById("scratchClose").textContent =
+    "Schließen";
+
+  requestAnimationFrame(setupScratchCanvas);
+}
+
+function setupScratchCanvas(){
+
+  const rect=
+    scratchCanvas.getBoundingClientRect();
+
+  const dpr=
+    window.devicePixelRatio || 1;
+
+  scratchCanvas.width=
+    Math.round(rect.width*dpr);
+
+  scratchCanvas.height=
+    Math.round(rect.height*dpr);
+
+  scratchContext.setTransform(
+    dpr,0,0,dpr,0,0
+  );
+
+  scratchContext.globalCompositeOperation=
+    "source-over";
+
+  const gradient=
+    scratchContext.createLinearGradient(
+      0,0,rect.width,rect.height
+    );
+
+  gradient.addColorStop(0,"#3f3f46");
+  gradient.addColorStop(.5,"#71717a");
+  gradient.addColorStop(1,"#27272a");
+
+  scratchContext.fillStyle=gradient;
+
+  scratchContext.fillRect(
+    0,0,rect.width,rect.height
+  );
+
+  scratchContext.fillStyle="#e4e4e7";
+  scratchContext.font="bold 16px Arial";
+  scratchContext.textAlign="center";
+  scratchContext.textBaseline="middle";
+
+  scratchContext.fillText(
+    "RUBBEL MICH FREI",
+    rect.width/2,
+    rect.height/2
+  );
+}
+
+function scratchAt(clientX,clientY){
+
+  if(scratchCompleted) return;
+
+  const rect=
+    scratchCanvas.getBoundingClientRect();
+
+  const x=clientX-rect.left;
+  const y=clientY-rect.top;
+
+  scratchContext.globalCompositeOperation=
+    "destination-out";
+
+  scratchContext.beginPath();
+
+  scratchContext.arc(
+    x,y,22,0,Math.PI*2
+  );
+
+  scratchContext.fill();
+
+  scratchCheckCounter++;
+
+  if(scratchCheckCounter%12===0){
+    checkScratchProgress();
+  }
+}
+
+function checkScratchProgress(){
+
+  if(scratchCompleted) return;
+
+  const image=
+    scratchContext.getImageData(
+      0,
+      0,
+      scratchCanvas.width,
+      scratchCanvas.height
+    );
+
+  let transparent=0;
+  let checked=0;
+
+  for(
+    let i=3;
+    i<image.data.length;
+    i+=4*20
+  ){
+
+    checked++;
+
+    if(image.data[i]<40){
+      transparent++;
+    }
+  }
+
+  if(transparent/checked>=.45){
+    completeScratch();
+  }
+}
+
+function completeScratch(){
+
+  if(scratchCompleted || !scratchPoint) return;
+
+  scratchCompleted=true;
+
+  scratchContext.clearRect(
+    0,
+    0,
+    scratchCanvas.width,
+    scratchCanvas.height
+  );
+
+  discoverPoint(scratchPoint);
+
+  document.getElementById("scratchClose").textContent =
+    "Weiter";
+}
+
+function closeScratch(){
+
+  scratchOverlay.style.display="none";
+  scratchPoint=null;
+  scratching=false;
+}
+
+scratchCanvas.addEventListener(
+  "pointerdown",
+  event=>{
+
+    scratching=true;
+
+    scratchAt(
+      event.clientX,
+      event.clientY
+    );
+  }
+);
+
+scratchCanvas.addEventListener(
+  "pointermove",
+  event=>{
+
+    if(!scratching) return;
+
+    scratchAt(
+      event.clientX,
+      event.clientY
+    );
+  }
+);
+
+window.addEventListener(
+  "pointerup",
+  ()=>scratching=false
+);
+
+
+/* ==========================================================
+   PUNKT ENTDECKEN
+   ========================================================== */
+
+function discoverPoint(point){
+
+  if(isDiscovered(point)) return;
+
+  if(point.type==="activity"){
+
+    fuerstenbergMission
+      .visitedActivities
+      .push(point.id);
+
+    addXP(FUERSTENBERG.activityXP);
+
+    setTemporaryMessage(
+      `✨ ${point.name} entdeckt! +${FUERSTENBERG.activityXP} XP`,
+      4500
+    );
+
+  }else{
+
+    fuerstenbergMission
+      .visitedPOIs
+      .push(point.id);
+
+    addXP(FUERSTENBERG.poiXP);
+
+    const allDone=
+      FUERSTENBERG.explorationPOIs
+        .every(point =>
+          fuerstenbergMission
+            .visitedPOIs
+            .includes(point.id)
+        );
+
+    if(
+      allDone &&
+      !fuerstenbergMission.completed
+    ){
+
+      fuerstenbergMission.completed=true;
+
+      addXP(
+        FUERSTENBERG.completionXP
+      );
+
+      setTemporaryMessage(
+        `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP`,
+        5000
+      );
+
+    }else{
+
+      setTemporaryMessage(
+        `✨ ${point.name} entdeckt! +${FUERSTENBERG.poiXP} XP`,
+        4500
+      );
+    }
+  }
+
+  saveMission();
+
+  renderMainLists();
+  renderTravelBook();
+  updateMissionUI();
+
+  if(
+    currentLat!==null &&
+    currentLon!==null
+  ){
+
+    updateAllPointStates(
+      currentLat,
+      currentLon
+    );
+  }
+
+  updateBoundaryOutline();
+  redrawFog();
+}
+
+function saveMission(){
+
+  localStorage.setItem(
+    "ravenFuerstenbergMission",
+    JSON.stringify(fuerstenbergMission)
+  );
+}
+
+function isFuerstenbergDiscovered(){
+
+  return discoveredPlaces.some(place =>
+    normalizePlaceName(place.name).includes("fürstenberg")
+  );
+}
+
+function updateMissionUI(){
+
+  const placeKnown=isFuerstenbergDiscovered();
+
+  document.getElementById("missionTitle").textContent =
+    placeKnown ? "📍 Standort: Fürstenberg" : "📍 Standort";
+
+  const visited=
+    fuerstenbergMission.visitedPOIs.length;
+
+  const total=
+    FUERSTENBERG.explorationPOIs.length;
+
+  const activities=
+    fuerstenbergMission.visitedActivities.length;
+
+  const activityTotal=
+    FUERSTENBERG.activityPOIs.length;
+
+  document.getElementById("missionText").textContent =
+    !placeKnown
+
+      ? `${visited} / ${total} Erkundungspunkte vorbereitet · Aktivitäten ${activities}/${activityTotal} · Starte GPS, um den Ort zu entdecken.`
+
+      : fuerstenbergMission.completed
+
+        ? `Fürstenberg ist vollständig erkundet · ${visited}/${total} · Aktivitäten ${activities}/${activityTotal}.`
+
+        : `${visited} / ${total} Erkundungspunkte entdeckt · Aktivitäten ${activities}/${activityTotal}.`;
+}
+
+
+/* ==========================================================
+   XP
+   ========================================================== */
+
+function addXP(amount){
+
+  xp+=amount;
+
+  while(xp>=100){
+
+    xp-=100;
+    level++;
+  }
+
+  localStorage.setItem(
+    "ravenXP",
+    xp
+  );
+
+  localStorage.setItem(
+    "ravenLevel",
+    level
+  );
+
+  updateUI();
+}
