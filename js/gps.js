@@ -199,10 +199,8 @@ function handlePosition(position){
 
   lastPosition={lat,lon};
 
-  if(preciseEnoughForExploration){
-    saveExploredPoint(lat,lon);
-    updateAllPointStates(lat,lon);
-  }
+  saveExploredPoint(lat,lon);
+  updateAllPointStates(lat,lon);
 
   maybeReverseGeocode(lat,lon);
 
