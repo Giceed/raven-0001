@@ -36,6 +36,9 @@ L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   {
     maxZoom:19,
+    noWrap:true,
+    bounds:BAD_WUENNENBERG_BOUNDS.pad(.15),
+    keepBuffer:2,
     attribution:"© OpenStreetMap"
   }
 ).addTo(map);
@@ -236,8 +239,10 @@ async function toggleGodModeView(){
 
     data.features.forEach(feature=>{
       feature.lines.forEach(line=>{
-        allPoints.push(...line);
-        L.polyline(line,{
+        const visibleLine=line.filter(point=>BAD_WUENNENBERG_BOUNDS.contains(point));
+        if(visibleLine.length<2) return;
+        allPoints.push(...visibleLine);
+        L.polyline(visibleLine,{
           pane:"ravenForegroundPane",
           color:feature.level===8 ? "#facc15" : "#c084fc",
           weight:feature.level===8 ? 5 : 4,
