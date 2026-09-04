@@ -1,5 +1,5 @@
 /* ==========================================================
-   V2.5 TEST-RESET
+   V2.6 TESTSTAND
    - Fürstenberg ist als aktueller Standort und Reiseeintrag bekannt.
    - 2 Erkundungspunkte + 2 Aktivitäten sind für schnelle Tests
      bereits freigeschaltet.
