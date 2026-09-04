@@ -17,8 +17,7 @@ let discoveredPlaces =
 
 /* Alte Testreisen außerhalb des aktuellen Stadtgebiets entfernen. */
 const ravenAllowedDistricts=new Set([
-  "bad wünnenberg","wünnenberg","bleiwäsche","elisenhof",
-  "fürstenberg","haaren","helmern","leiberg"
+  "fürstenberg"
 ]);
 discoveredPlaces=discoveredPlaces.filter(place=>
   ravenAllowedDistricts.has(String(place.name||"").trim().toLowerCase())
@@ -32,6 +31,10 @@ if(!localStorage.getItem("ravenV27HiddenPlacesResetDone")){
 if(!localStorage.getItem("ravenV27PlayerViewResetDone")){
   discoveredPlaces=[];
   localStorage.setItem("ravenV27PlayerViewResetDone","1");
+}
+if(!localStorage.getItem("ravenV27FuerstenbergOnlyResetDone")){
+  discoveredPlaces=[];
+  localStorage.setItem("ravenV27FuerstenbergOnlyResetDone","1");
 }
 localStorage.setItem("ravenDiscoveredPlaces",JSON.stringify(discoveredPlaces));
 
