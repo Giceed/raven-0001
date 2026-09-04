@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <meta name="raven-version" content="2.7-poi-review">
+  <meta name="raven-version" content="2.7-fuerstenberg-test">
 <title>RAVEN #0001</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -18,27 +18,6 @@
 <div class="topbar">
   <div class="brand">RAVEN</div>
   <div class="online">● ONLINE</div>
-</div>
-
-<div class="card review-card">
-  <button class="secondary" id="reviewToggle" onclick="togglePoiReview()">
-    🧭 POI-PRÜFMODUS STARTEN
-  </button>
-  <div class="review-status" id="reviewStatus">
-    Noch keine OSM-Vorschläge geladen.
-  </div>
-  <div class="review-editor" id="reviewEditor" hidden>
-    <div class="review-kicker">RAVEN-VORSCHLAG</div>
-    <div class="review-name" id="reviewName"></div>
-    <div class="review-meta" id="reviewMeta"></div>
-    <div class="review-actions">
-      <button onclick="changeReviewRadius(-10)">−10 m</button>
-      <button onclick="changeReviewRadius(10)">+10 m</button>
-      <button onclick="moveReviewCandidate()">📍 Verschieben</button>
-      <button onclick="approveReviewCandidate()">✓ Behalten</button>
-      <button class="danger" onclick="rejectReviewCandidate()">✕ Löschen</button>
-    </div>
-  </div>
 </div>
 
 <div class="card">
@@ -216,15 +195,14 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script src="js/city-concept-points.js?v=27citypois1"></script>
-<script src="js/config.js?v=27location1"></script>
-<script src="js/storage.js?v=27playerview1"></script>
-<script src="js/map.js?v=27playerview1"></script>
+<script src="js/city-concept-points.js?v=27fuerstenberg1"></script>
+<script src="js/config.js?v=27fuerstenberg1"></script>
+<script src="js/storage.js?v=27fuerstenberg1"></script>
+<script src="js/map.js?v=27fuerstenberg1"></script>
 <script src="js/fog.js?v=27bw1"></script>
 <script src="js/gps.js?v=27bw1"></script>
-<script src="js/poi.js?v=27playerview1"></script>
-<script src="js/review.js?v=27r3"></script>
-<script src="js/travelbook.js?v=27playerview1"></script>
+<script src="js/poi.js?v=27fuerstenberg1"></script>
+<script src="js/travelbook.js?v=27fuerstenberg1"></script>
 <script src="js/app.js?v=27bw1"></script>
 
 </body>
