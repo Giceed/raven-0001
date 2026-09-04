@@ -109,7 +109,14 @@ async function maybeReverseGeocode(lat,lon,force=false){
       return;
     }
 
-    const name=district || municipality;
+    const detectedName=district || municipality;
+    const name=normalizePlaceName(detectedName)==="wünnenberg"
+      ? "Bad Wünnenberg"
+      : detectedName;
+
+    currentRavenDistrict=allowedOrtschaften.has(name)
+      ? name
+      : (municipality.includes("Bad Wünnenberg") ? "Bad Wünnenberg" : null);
 
     const region=
       address.state || address.county || "";
@@ -169,6 +176,8 @@ async function maybeReverseGeocode(lat,lon,force=false){
       [district && municipality!==district ? municipality : "",region,country]
         .filter(Boolean)
         .join(" · ");
+
+    renderMainLists();
 
     const exists=discoveredPlaces.some(
       place =>
