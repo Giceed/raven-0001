@@ -1,11 +1,11 @@
 /* ==========================================================
-   V2.4 TEST-RESET
+   V2.5 TEST-RESET
    - Fürstenberg ist als aktueller Standort und Reiseeintrag bekannt.
    - 2 Erkundungspunkte + 2 Aktivitäten sind für schnelle Tests
      bereits freigeschaltet.
    ========================================================== */
 
-if (!localStorage.getItem("ravenV24RegionResetDone2")) {
+if (!localStorage.getItem("ravenV25DistrictResetDone")) {
 
   localStorage.removeItem("ravenExploredPoints");
   localStorage.removeItem("ravenTravelHistory");
@@ -16,6 +16,8 @@ if (!localStorage.getItem("ravenV24RegionResetDone2")) {
     "ravenDiscoveredPlaces",
     JSON.stringify([{
       name:"Fürstenberg",
+      district:"Fürstenberg",
+      municipality:"Bad Wünnenberg",
       region:"Nordrhein-Westfalen",
       country:"Deutschland",
       discoveredAt:Date.now()
@@ -32,7 +34,7 @@ if (!localStorage.getItem("ravenV24RegionResetDone2")) {
   );
 
   localStorage.setItem("ravenMapMode","explore");
-  localStorage.setItem("ravenV24RegionResetDone2","1");
+  localStorage.setItem("ravenV25DistrictResetDone","1");
 }
 
 /* ==========================================================
@@ -149,3 +151,4 @@ if (
 ) {
   fuerstenbergMission.completed = true;
 }
+
