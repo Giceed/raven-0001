@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Raven Studio</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{color-scheme:dark;--bg:#07090d;--panel:#0d1117;--line:#273142;--text:#f5f7fb;--muted:#8b98aa;--purple:#8b5cf6;--cyan:#06b6d4;--orange:#f97316;--green:#22c55e;--red:#ef4444}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif}button,input,select{font:inherit}
+.app{height:100%;display:grid;grid-template-rows:auto 1fr}.top{padding:12px 16px;border-bottom:1px solid var(--line);background:#090c12;display:flex;align-items:center;gap:14px;flex-wrap:wrap}.brand{font-weight:1000;letter-spacing:1.4px}.brand span{color:#c4b5fd}.toolbar{display:flex;gap:8px;flex:1;flex-wrap:wrap}.search{min-width:220px;flex:1}.top input,.top button,.top select,.editor input,.editor select,.editor button{border:1px solid var(--line);border-radius:9px;background:#111722;color:var(--text);padding:9px 11px}.top button,.editor button{cursor:pointer;font-weight:800}.primary{background:#6d28d9!important;border-color:#a78bfa!important}.good{background:#14532d!important;border-color:#22c55e!important}.bad{background:#451a1a!important;border-color:#ef4444!important}.layout{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 370px}.map-wrap{position:relative;min-height:400px}#map{height:100%;width:100%;background:#0a0d12}.legend{position:absolute;z-index:800;left:12px;bottom:12px;background:#0d1117e8;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:11px;line-height:1.7}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}.side{min-height:0;border-left:1px solid var(--line);background:var(--panel);display:grid;grid-template-rows:auto auto 1fr}.status{padding:12px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}.stats{display:flex;gap:12px;margin-top:7px;color:var(--text);font-weight:800}.editor{padding:14px;border-bottom:1px solid var(--line);display:grid;gap:9px}.editor[hidden]{display:none}.editor h2{font-size:18px;margin:0}.meta{font-size:11px;color:var(--muted);line-height:1.5}.field{display:grid;grid-template-columns:95px 1fr;align-items:center;gap:8px;font-size:12px}.range-row{display:grid;grid-template-columns:1fr 78px;gap:7px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.list{overflow:auto;padding:8px}.candidate{width:100%;text-align:left;margin-bottom:7px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#0a0e14;color:var(--text);cursor:pointer}.candidate:hover,.candidate.selected{border-color:#a78bfa}.candidate.approved{border-color:#166534;background:#052e161f}.candidate.rejected{opacity:.45}.candidate-name{font-weight:850;font-size:12px}.candidate-sub{font-size:10px;color:var(--muted);margin-top:4px}.marker{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:3px solid white;background:var(--cyan);box-shadow:0 0 0 6px #22d3ee4d,0 0 20px #22d3ee;color:white;font-weight:950}.marker.activity{background:var(--orange);box-shadow:0 0 0 6px #fb923c4d,0 0 20px #fb923c}.marker.approved{background:#15803d;box-shadow:none}.marker.rejected{background:#4b5563;box-shadow:none;opacity:.45}.empty{padding:24px;text-align:center;color:var(--muted);font-size:12px}@media(max-width:850px){.layout{grid-template-columns:1fr;grid-template-rows:58vh auto}.side{border-left:0;border-top:1px solid var(--line);min-height:500px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">🐦‍⬛ <span>RAVEN STUDIO</span> V1</div>
+    <div class="toolbar">
+      <input class="search" id="placeSearch" value="Fürstenberg, Bad Wünnenberg" placeholder="Ort suchen">
+      <button onclick="searchPlace()">🔎 Ort suchen</button>
+      <select id="searchRadius" title="Suchradius"><option value="1500">1,5 km</option><option value="3000" selected>3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select>
+      <button class="primary" onclick="loadCandidates()">OSM-Punkte laden</button>
+      <button onclick="exportProject()">⬇ Export</button>
+      <button onclick="document.getElementById('importFile').click()">⬆ Import</button>
+      <input id="importFile" type="file" accept="application/json" hidden onchange="importProject(event)">
+    </div>
+  </header>
+  <main class="layout">
+    <section class="map-wrap">
+      <div id="map"></div>
+      <div class="legend"><div><i class="dot" style="background:#06b6d4"></i>Erkundung</div><div><i class="dot" style="background:#f97316"></i>Aktivität</div><div><i class="dot" style="background:#22c55e"></i>Behalten</div></div>
+    </section>
+    <aside class="side">
+      <div class="status"><div id="status">Bereit. Ort suchen oder OSM-Punkte laden.</div><div class="stats"><span id="pending">0 zu prüfen</span><span id="approved">0 behalten</span><span id="rejected">0 gelöscht</span></div></div>
+      <section class="editor" id="editor" hidden>
+        <h2 id="editName"></h2><div class="meta" id="editMeta"></div>
+        <label class="field"><span>Kategorie</span><select id="editCategory" onchange="updateSelected()"><option value="exploration">Erkundung</option><option value="activity">Aktivität</option></select></label>
+        <label class="field"><span>Radius</span><div class="range-row"><input id="editRadiusRange" type="range" min="15" max="250" step="5" oninput="syncRadius(this.value)"><input id="editRadius" type="number" min="15" max="250" step="5" onchange="syncRadius(this.value)"></div></label>
+        <div class="actions"><button onclick="startMove()">📍 Verschieben</button><button onclick="setStatusForSelected('pending')">↺ Offen</button><button class="good" onclick="setStatusForSelected('approved')">✓ Behalten</button><button class="bad" onclick="setStatusForSelected('rejected')">✕ Löschen</button></div>
+      </section>
+      <div class="list" id="candidateList"><div class="empty">Noch keine Kandidaten geladen.</div></div>
+    </aside>
+  </main>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const STORAGE_KEY="ravenStudioV1";
+const map=L.map("map",{preferCanvas:true}).setView([51.5157,8.741],14);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+const state=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")||{center:{lat:51.5157,lon:8.741,name:"Fürstenberg, Bad Wünnenberg"},candidates:[]};
+let markers=new Map(),selectedId=null,radiusCircle=null,moveId=null;
+const endpoints=["https://overpass.kumi.systems/api/interpreter","https://overpass-api.de/api/interpreter"];
+
+function esc(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderStats();renderList();}
+function setMessage(text){document.getElementById("status").textContent=text;}
+function renderStats(){const count=s=>state.candidates.filter(c=>c.status===s).length;pending.textContent=count("pending")+" zu prüfen";approved.textContent=count("approved")+" behalten";rejected.textContent=count("rejected")+" gelöscht";}
+
+async function searchPlace(){
+  const query=placeSearch.value.trim();if(!query)return;
+  setMessage("Ort wird gesucht …");
+  try{const response=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(query));const rows=await response.json();if(!rows.length)throw Error();state.center={lat:+rows[0].lat,lon:+rows[0].lon,name:rows[0].display_name};map.setView([state.center.lat,state.center.lon],14);save();setMessage("Ort gefunden: "+state.center.name);}catch(e){setMessage("Ort konnte gerade nicht gefunden werden.");}
+}
+
+async function loadCandidates(){
+  const radius=+searchRadius.value;setMessage("OSM-Kandidaten werden geladen …");
+  const q=`[out:json][timeout:25];(nwr(around:${radius},${state.center.lat},${state.center.lon})[tourism][name];nwr(around:${radius},${state.center.lat},${state.center.lon})[historic][name];nwr(around:${radius},${state.center.lat},${state.center.lon})[amenity][name];nwr(around:${radius},${state.center.lat},${state.center.lon})[leisure][name];);out center tags;`;
+  let data=null;
+  for(const endpoint of endpoints){try{const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:"data="+encodeURIComponent(q)});if(response.ok){data=await response.json();break;}}catch(e){}}
+  if(!data){setMessage("OSM-Server nicht erreichbar. Bitte später erneut versuchen.");return;}
+  const previous=new Map(state.candidates.map(c=>[c.id,c]));
+  state.candidates=data.elements.map(makeCandidate).filter(Boolean).map(c=>previous.has(c.id)?{...c,...previous.get(c.id)}:c).sort((a,b)=>b.score-a.score).slice(0,120);
+  save();renderMarkers();fitAll();setMessage(state.candidates.length+" geeignete Vorschläge geladen.");
+}
+
+function makeCandidate(e){
+  const t=e.tags||{},lat=e.lat??e.center?.lat,lon=e.lon??e.center?.lon;if(!Number.isFinite(lat)||!Number.isFinite(lon)||!t.name)return null;if(["private","no"].includes(t.access)||t.foot==="no")return null;
+  const raw=t.historic||t.tourism||t.leisure||t.amenity||"poi";
+  const activities=["playground","park","sports_centre","pitch","fitness_station","picnic_site","swimming_pool"];
+  const explorations=["castle","manor","memorial","monument","archaeological_site","attraction","viewpoint","museum","artwork","place_of_worship","townhall","library","community_centre","fountain","fire_station","police"];
+  if(!activities.includes(raw)&&!explorations.includes(raw))return null;
+  const category=activities.includes(raw)?"activity":"exploration";let score=40;if(t.wikidata||t.wikipedia)score+=25;if(t.historic||t.tourism)score+=15;if(t.access==="yes"||t.foot==="yes")score+=10;
+  const radius=["castle","manor","archaeological_site"].includes(raw)?140:["fire_station","police"].includes(raw)?90:["place_of_worship","townhall","museum"].includes(raw)?60:35;
+  return{id:`osm-${e.type}-${e.id}`,name:t.name,lat,lon,rawType:raw,category,radius,score,access:t.access||t.foot||"unbekannt",status:"pending",osmType:e.type,osmId:e.id};
+}
+
+function renderMarkers(){markers.forEach(m=>map.removeLayer(m));markers.clear();state.candidates.forEach((c,i)=>{const icon=L.divIcon({className:"",html:`<div class="marker ${c.category} ${c.status}">${i+1}</div>`,iconSize:[34,34],iconAnchor:[17,17]});const marker=L.marker([c.lat,c.lon],{icon}).addTo(map).on("click",()=>selectCandidate(c.id));markers.set(c.id,marker);});}
+function renderList(){const list=document.getElementById("candidateList");if(!state.candidates.length){list.innerHTML='<div class="empty">Noch keine Kandidaten geladen.</div>';return;}list.innerHTML=state.candidates.map((c,i)=>`<button class="candidate ${c.status} ${c.id===selectedId?'selected':''}" onclick="selectCandidate('${c.id}')"><div class="candidate-name">${i+1}. ${esc(c.name)}</div><div class="candidate-sub">${c.category==='activity'?'Aktivität':'Erkundung'} · ${esc(c.rawType)} · ${c.radius} m · ${c.status}</div></button>`).join("");}
+function selectCandidate(id){const c=state.candidates.find(x=>x.id===id);if(!c)return;selectedId=id;editor.hidden=false;editName.textContent=c.name;editMeta.textContent=`OSM ${c.osmType} ${c.osmId} · ${c.rawType} · Bewertung ${c.score}/100 · Zugang ${c.access}`;editCategory.value=c.category;editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);renderList();map.panTo([c.lat,c.lon]);}
+function showRadius(c){if(radiusCircle)map.removeLayer(radiusCircle);radiusCircle=L.circle([c.lat,c.lon],{radius:c.radius,color:c.category==="activity"?"#f97316":"#8b5cf6",weight:3,fillOpacity:.18,dashArray:"8 5"}).addTo(map);radiusCircle.bringToBack();}
+function syncRadius(value){const c=current();if(!c)return;c.radius=Math.max(15,Math.min(250,+value||15));editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);save();}
+function updateSelected(){const c=current();if(!c)return;c.category=editCategory.value;showRadius(c);save();renderMarkers();}
+function setStatusForSelected(status){const c=current();if(!c)return;c.status=status;save();renderMarkers();selectCandidate(c.id);}
+function current(){return state.candidates.find(c=>c.id===selectedId);}
+function startMove(){const c=current();if(!c)return;moveId=c.id;setMessage("Auf die neue Kartenposition für „"+c.name+"“ klicken.");}
+map.on("click",e=>{if(!moveId)return;const c=state.candidates.find(x=>x.id===moveId);c.lat=e.latlng.lat;c.lon=e.latlng.lng;moveId=null;save();renderMarkers();selectCandidate(c.id);setMessage("Punkt verschoben.");});
+function fitAll(){const visible=state.candidates.filter(c=>c.status!=="rejected");if(visible.length)map.fitBounds(visible.map(c=>[c.lat,c.lon]),{padding:[35,35],maxZoom:16});}
+
+function exportProject(){const payload={format:"raven-poi-review",version:1,exportedAt:new Date().toISOString(),center:state.center,candidates:state.candidates};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="raven-pois-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(url);setMessage("Raven-Projekt exportiert.");}
+async function importProject(event){try{const data=JSON.parse(await event.target.files[0].text());if(!Array.isArray(data.candidates))throw Error();state.center=data.center||state.center;state.candidates=data.candidates;save();renderMarkers();fitAll();setMessage("Projekt importiert.");}catch(e){setMessage("Diese Datei ist kein gültiges Raven-Projekt.");}event.target.value="";}
+
+placeSearch.value=state.center.name;renderStats();renderList();renderMarkers();if(state.candidates.length)fitAll();
+</script>
+</body>
+</html>
+
