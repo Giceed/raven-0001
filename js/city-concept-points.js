@@ -66,19 +66,6 @@ const CITY_CONCEPT_POINTS=[
     "conceptOnly": true
   },
   {
-    "id": "concept-osm-node-5079038501",
-    "type": "exploration",
-    "name": "Hochwasserrückhaltebecken Gollentaler Grund-Ringelsbruch",
-    "icon": "ℹ️",
-    "lat": 51.5325602,
-    "lon": 8.7280878,
-    "discoveryRadius": 60,
-    "access": "concept_review",
-    "accessHint": "Vor Ort prüfen",
-    "district": "Fürstenberg",
-    "conceptOnly": true
-  },
-  {
     "id": "concept-osm-node-12779747481",
     "type": "exploration",
     "name": "Katholische Pfarrkirche St. Marien",
