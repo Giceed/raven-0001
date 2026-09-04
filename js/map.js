@@ -2,8 +2,16 @@
    KARTE
    ========================================================== */
 
+const BAD_WUENNENBERG_BOUNDS = L.latLngBounds(
+  [51.447216,8.625182],
+  [51.615433,8.846116]
+);
+
 const map = L.map("map",{
-  zoomControl:false
+  zoomControl:false,
+  minZoom:11,
+  maxBounds:BAD_WUENNENBERG_BOUNDS.pad(0.03),
+  maxBoundsViscosity:1
 }).setView([51.5157,8.741],15);
 
 /* Marker liegen bewusst über dem Erkundungsnebel. */
