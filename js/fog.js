@@ -17,7 +17,9 @@ function createFogLayer(){
 
   fogSvg.classList.add("raven-fog-svg");
 
-  map.getPane("ravenFogPane").appendChild(fogSvg);
+  /* Direkt über dem Kartenfenster platzieren. Dadurch bleibt der Fog
+     unabhängig von Leaflets Pane-Transformationen stabil sichtbar. */
+  map.getContainer().appendChild(fogSvg);
 
   redrawFog();
 }
@@ -35,18 +37,6 @@ function redrawFog(){
   fogSvg.style.display="block";
 
   const size=map.getSize();
-
-  /* Das SVG sitzt in einer Leaflet-Pane. Deren Koordinaten bewegen
-     sich beim Zoomen und Verschieben mit der Karte. Deshalb wird der
-     Nebel vor jedem Zeichnen wieder exakt auf die sichtbare linke
-     obere Ecke des Kartenfensters gesetzt. */
-  const viewportOrigin=
-    map.containerPointToLayerPoint([0,0]);
-
-  L.DomUtil.setPosition(
-    fogSvg,
-    viewportOrigin
-  );
 
   fogSvg.setAttribute("width",size.x);
   fogSvg.setAttribute("height",size.y);
