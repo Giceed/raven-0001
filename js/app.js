@@ -207,6 +207,8 @@ createFogLayer();
 
 drawTestRegion();
 
+loadVisibleAdministrativeBoundaries();
+
 loadFuerstenbergBoundary();
 
 /* Marker sofort erzeugen */
@@ -225,3 +227,4 @@ setTimeout(()=>{
   redrawFog();
 
 },400);
+
