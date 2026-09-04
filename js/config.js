@@ -55,6 +55,23 @@ if (!localStorage.getItem("ravenV26RadiusTestResetDone")) {
   localStorage.setItem("ravenV26RadiusTestResetDone","1");
 }
 
+/* Zweiter V2.6-Testreset: Schloss und Rathaus bleiben offen. */
+if (!localStorage.getItem("ravenV26RadiusTestReset2Done")) {
+  const mission = JSON.parse(
+    localStorage.getItem("ravenFuerstenbergMission") || "{}"
+  );
+
+  mission.visitedPOIs = (mission.visitedPOIs || [])
+    .filter(id => id !== "schloss" && id !== "rathaus");
+  mission.completed = false;
+
+  localStorage.setItem(
+    "ravenFuerstenbergMission",
+    JSON.stringify(mission)
+  );
+  localStorage.setItem("ravenV26RadiusTestReset2Done","1");
+}
+
 /* ==========================================================
    TESTGEBIET
    Ganz Deutschland bleibt auf der Karte erreichbar. Für die
