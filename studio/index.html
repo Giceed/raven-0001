@@ -21,6 +21,7 @@
       <div class="place-search-wrap"><input class="search" id="placeSearch" value="Fürstenberg" placeholder="Ortsteil suchen" oninput="renderLocalPlaceSuggestions(this.value)" autocomplete="off"><div class="place-suggestions" id="placeSuggestions"></div></div>
       <button onclick="searchPlace()">🔎 Ort suchen</button>
       <button onclick="showWholeCity()">🏙 Alle Ortsteile</button>
+      <button id="studioGodViewButton" onclick="toggleStudioGodView()">👁 GOD VIEW</button>
       <select id="searchRadius" title="Suchradius"><option value="1500">1,5 km</option><option value="3000" selected>3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select>
       <button class="primary" onclick="loadCandidates()">OSM-Punkte laden</button>
       <button onclick="exportProject()">⬇ Export</button>
@@ -89,6 +90,22 @@ function showWholeCity(){
   map.fitBounds(BAD_WUENNENBERG_BOUNDS,{padding:[25,25]});
   applyPoiFilters();
   setMessage("Gesamtes Stadtgebiet Bad Wünnenberg mit allen Ortsteilen.");
+}
+
+let studioGodViewLayer=null;
+async function toggleStudioGodView(){
+  const button=document.getElementById("studioGodViewButton");
+  if(studioGodViewLayer){map.removeLayer(studioGodViewLayer);studioGodViewLayer=null;button.classList.remove("primary");setMessage("God View ausgeschaltet.");return;}
+  try{
+    const response=await fetch("../data/bad-wuennenberg-boundaries.json?v=3"),data=await response.json();
+    studioGodViewLayer=L.layerGroup().addTo(map);
+    data.features.forEach(feature=>feature.lines.forEach(line=>{
+      const visible=line.filter(point=>BAD_WUENNENBERG_BOUNDS.contains(point));
+      if(visible.length<2)return;
+      L.polyline(visible,{color:feature.level===8?"#facc15":"#c084fc",weight:feature.level===8?5:4,opacity:.98,dashArray:feature.level===8?null:"8 6",interactive:false}).addTo(studioGodViewLayer);
+    }));
+    button.classList.add("primary");showWholeCity();setMessage("God View aktiv – Stadtgrenze gelb, Ortsteile lila.");
+  }catch(error){setMessage("God View konnte nicht geladen werden.");}
 }
 const endpoints=["https://overpass.kumi.systems/api/interpreter","https://overpass-api.de/api/interpreter"];
 
