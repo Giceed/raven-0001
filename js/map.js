@@ -35,6 +35,8 @@ let boundaryLayer = null;
 let fuerstenbergBoundary = null;
 let currentPlaceBoundaryLayer = null;
 let testRegionLayer = null;
+let godViewLayer = null;
+let godViewEnabled = false;
 
 function drawTestRegion(){
   if(testRegionLayer) return;
@@ -153,6 +155,8 @@ function toggleGodMode(){
 
   }else{
 
+    disableGodModeView();
+
     document.getElementById("statusText").textContent =
       tracking ? "Aktiv" : "Bereit";
 
@@ -165,6 +169,55 @@ function toggleGodMode(){
 
   updateFollowUI();
   updateUserMarker();
+}
+
+async function toggleGodModeView(){
+  if(!godMode){
+    setTemporaryMessage("👁 GOD MODE VIEW ist nur im GOD MODE verfügbar.");
+    return;
+  }
+  if(godViewEnabled){disableGodModeView();return;}
+
+  try{
+    setTemporaryMessage("👁 Grenzen von Bad Wünnenberg werden geladen …",5000);
+    const response=await fetch("data/bad-wuennenberg-boundaries.json?v=1");
+    if(!response.ok) throw new Error();
+    const data=await response.json();
+    godViewLayer=L.layerGroup().addTo(map);
+    const allPoints=[];
+
+    data.features.forEach(feature=>{
+      feature.lines.forEach(line=>{
+        allPoints.push(...line);
+        L.polyline(line,{
+          pane:"ravenForegroundPane",
+          color:"#facc15",
+          weight:feature.level===8 ? 5 : 3,
+          opacity:.98,
+          dashArray:feature.level===8 ? null : "8 6",
+          interactive:true
+        }).bindTooltip(feature.name,{sticky:true,direction:"top"})
+          .addTo(godViewLayer);
+      });
+    });
+
+    godViewEnabled=true;
+    document.getElementById("godViewButton").classList.add("active");
+    if(allPoints.length){
+      internalMapMove=true;
+      map.fitBounds(allPoints,{padding:[25,25],maxZoom:12});
+      setTimeout(()=>internalMapMove=false,600);
+    }
+    setTemporaryMessage("👁 GOD MODE VIEW aktiv – Grenzen sind gelb.",5000);
+  }catch(error){
+    setTemporaryMessage("⚠ GOD MODE VIEW konnte nicht geladen werden.");
+  }
+}
+
+function disableGodModeView(){
+  if(godViewLayer){map.removeLayer(godViewLayer);godViewLayer=null;}
+  godViewEnabled=false;
+  document.getElementById("godViewButton")?.classList.remove("active");
 }
 
 map.on("click",event=>{
