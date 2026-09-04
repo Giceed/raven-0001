@@ -72,6 +72,23 @@ if (!localStorage.getItem("ravenV26RadiusTestReset2Done")) {
   localStorage.setItem("ravenV26RadiusTestReset2Done","1");
 }
 
+/* V2.6 r4: Teststand auch in getrennten Browser-Speichern herstellen. */
+if (!localStorage.getItem("ravenV26RadiusTestR4Done")) {
+  const mission = JSON.parse(
+    localStorage.getItem("ravenFuerstenbergMission") || "{}"
+  );
+
+  mission.visitedPOIs = ["st_marien"];
+  mission.visitedActivities = mission.visitedActivities || [];
+  mission.completed = false;
+
+  localStorage.setItem(
+    "ravenFuerstenbergMission",
+    JSON.stringify(mission)
+  );
+  localStorage.setItem("ravenV26RadiusTestR4Done","1");
+}
+
 /* ==========================================================
    TESTGEBIET
    Ganz Deutschland bleibt auf der Karte erreichbar. Für die
