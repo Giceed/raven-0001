@@ -506,6 +506,2551 @@ button{
 </div>
 
 <div class="version">
+RAVEN PROTOTYPE V2.2 · DEV
+</div>
+
+</div>
+
+<div class="scratch-overlay" id="scratchOverlay">
+
+<div class="scratch-card">
+
+<div class="scratch-title" id="scratchTitle">🐦‍⬛ Erkundungspunkt</div>
+<div class="scratch-text">Rubbel den Punkt frei.</div>
+
+<div class="scratch-area">
+
+<div class="scratch-reveal">
+  <div class="scratch-icon" id="scratchIcon">?</div>
+  <div class="scratch-name" id="scratchName">Unbekannt</div>
+</div>
+
+<canvas id="scratchCanvas"></canvas>
+
+</div>
+
+<button class="secondary scratch-close" id="scratchClose" onclick="closeScratch()">
+  Schließen
+</button>
+
+</div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+/* ==========================================================
+   V2.2 TEST-RESET
+   - Fürstenberg ist als aktueller Standort und Reiseeintrag bekannt.
+   - 2 Erkundungspunkte + 2 Aktivitäten sind für schnelle Tests
+     bereits freigeschaltet.
+   ========================================================== */
+
+if (!localStorage.getItem("ravenV22ResetDone")) {
+
+  localStorage.removeItem("ravenExploredPoints");
+  localStorage.removeItem("ravenTravelHistory");
+  localStorage.removeItem("ravenDiscoveredPlaces");
+  localStorage.removeItem("ravenFuerstenbergMission");
+
+  localStorage.setItem(
+    "ravenDiscoveredPlaces",
+    JSON.stringify([{
+      name:"Fürstenberg",
+      region:"Nordrhein-Westfalen",
+      country:"Deutschland",
+      discoveredAt:Date.now()
+    }])
+  );
+
+  localStorage.setItem(
+    "ravenFuerstenbergMission",
+    JSON.stringify({
+      visitedPOIs:["schloss","st_marien"],
+      visitedActivities:["beerenstelle_dev","spielplatz_dev"],
+      completed:false
+    })
+  );
+
+  localStorage.setItem("ravenMapMode","explore");
+  localStorage.setItem("ravenV22ResetDone","1");
+}
+
+
+/* ==========================================================
+   SPEICHER
+   ========================================================== */
+
+let xp = Number(localStorage.getItem("ravenXP")) || 0;
+let level = Number(localStorage.getItem("ravenLevel")) || 1;
+let totalDistance = Number(localStorage.getItem("ravenDistance")) || 0;
+
+let exploredPoints =
+  JSON.parse(localStorage.getItem("ravenExploredPoints")) || [];
+
+let travelHistory =
+  JSON.parse(localStorage.getItem("ravenTravelHistory")) || [];
+
+let discoveredPlaces =
+  JSON.parse(localStorage.getItem("ravenDiscoveredPlaces")) || [];
+
+let mapMode =
+  localStorage.getItem("ravenMapMode") || "explore";
+
+
+/* ==========================================================
+   FÜRSTENBERG
+   ========================================================== */
+
+const FUERSTENBERG = {
+
+  boundaryObjectId:"DE052926",
+
+  visitRadius:60,
+
+  poiXP:25,
+  activityXP:10,
+  completionXP:100,
+
+  explorationPOIs:[
+
+    {
+      id:"schloss",
+      type:"exploration",
+      name:"Schloss Fürstenberg",
+      icon:"🏰",
+      lat:51.5155802,
+      lon:8.7367807,
+      devOnly:true
+    },
+
+    {
+      id:"st_marien",
+      type:"exploration",
+      name:"St. Marien / Sintfeld-Dom",
+      icon:"⛪",
+      lat:51.5157079,
+      lon:8.7397917
+    },
+
+    {
+      id:"rathaus",
+      type:"exploration",
+      name:"Rathaus",
+      icon:"🏛️",
+      lat:51.5164455,
+      lon:8.7449286
+    }
+
+  ],
+
+  activityPOIs:[
+
+    {
+      id:"beerenstelle_dev",
+      type:"activity",
+      name:"Beerenstelle",
+      icon:"🫐",
+      lat:51.51325,
+      lon:8.74215
+    },
+
+    {
+      id:"spielplatz_dev",
+      type:"activity",
+      name:"Spielplatz",
+      icon:"🛝",
+      lat:51.51845,
+      lon:8.74730
+    }
+
+  ]
+
+};
+
+const ALL_POINTS = [
+  ...FUERSTENBERG.explorationPOIs,
+  ...FUERSTENBERG.activityPOIs
+];
+
+let fuerstenbergMission =
+  JSON.parse(localStorage.getItem("ravenFuerstenbergMission")) || {
+    visitedPOIs:[],
+    visitedActivities:[],
+    completed:false
+  };
+
+fuerstenbergMission.visitedPOIs =
+  (fuerstenbergMission.visitedPOIs || []).filter(id =>
+    FUERSTENBERG.explorationPOIs.some(p => p.id === id)
+  );
+
+fuerstenbergMission.visitedActivities =
+  (fuerstenbergMission.visitedActivities || []).filter(id =>
+    FUERSTENBERG.activityPOIs.some(p => p.id === id)
+  );
+
+if (
+  FUERSTENBERG.explorationPOIs.every(p =>
+    fuerstenbergMission.visitedPOIs.includes(p.id)
+  )
+) {
+  fuerstenbergMission.completed = true;
+}
+
+saveMission();
+
+
+/* ==========================================================
+   KARTE
+   ========================================================== */
+
+const map = L.map("map",{
+  zoomControl:false
+}).setView([51.5157,8.741],15);
+
+/* Marker liegen bewusst über dem Erkundungsnebel. */
+map.createPane("ravenFogPane");
+map.getPane("ravenFogPane").style.zIndex="450";
+map.getPane("ravenFogPane").style.pointerEvents="none";
+
+map.createPane("ravenForegroundPane");
+map.getPane("ravenForegroundPane").style.zIndex="700";
+
+L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    maxZoom:19,
+    attribution:"© OpenStreetMap"
+  }
+).addTo(map);
+
+L.control.zoom({position:"topright"}).addTo(map);
+
+let userMarker = null;
+let pointMarkers = {};
+let boundaryLayer = null;
+let fuerstenbergBoundary = null;
+
+let followUser = true;
+let internalMapMove = false;
+
+let tracking = false;
+let watchId = null;
+let lastPosition = null;
+let sessionDistance = 0;
+
+let currentLat = null;
+let currentLon = null;
+let currentAccuracy = null;
+
+let firstValidFix = false;
+let godMode = false;
+
+
+/* ==========================================================
+   USER MARKER
+   ========================================================== */
+
+function updateUserMarker(){
+
+  if(currentLat === null || currentLon === null) return;
+
+  const html =
+    `<div class="raven-user-marker ${godMode ? "god" : ""}"></div>`;
+
+  const icon = L.divIcon({
+    className:"",
+    html,
+    iconSize:[22,22],
+    iconAnchor:[11,11]
+  });
+
+  if(!userMarker){
+
+    userMarker = L.marker(
+      [currentLat,currentLon],
+      {icon,pane:"ravenForegroundPane",zIndexOffset:1000}
+    ).addTo(map);
+
+  }else{
+
+    userMarker.setLatLng([currentLat,currentLon]);
+    userMarker.setIcon(icon);
+
+  }
+}
+
+
+/* ==========================================================
+   GOD MODE
+   ========================================================== */
+
+function toggleGodMode(){
+
+  godMode = !godMode;
+
+  document
+    .getElementById("godBox")
+    .classList.toggle("active",godMode);
+
+  if(godMode){
+
+    followUser = false;
+
+    document.getElementById("statusText").textContent="GOD";
+    document.getElementById("gpsInfo").textContent="GOD MODE";
+
+    setTemporaryMessage(
+      "🛠 GOD MODE aktiv – tippe auf die Karte, um Raven zu teleportieren.",
+      5000
+    );
+
+  }else{
+
+    document.getElementById("statusText").textContent =
+      tracking ? "Aktiv" : "Bereit";
+
+    document.getElementById("gpsInfo").textContent =
+      tracking ? "GPS aktiv" : "GPS pausiert";
+
+    setTemporaryMessage("🛠 GOD MODE beendet.");
+
+  }
+
+  updateFollowUI();
+  updateUserMarker();
+}
+
+map.on("click",event=>{
+
+  if(!godMode) return;
+
+  currentLat = event.latlng.lat;
+  currentLon = event.latlng.lng;
+
+  updateUserMarker();
+  updateAllPointStates(currentLat,currentLon);
+
+  internalMapMove=true;
+  map.panTo([currentLat,currentLon]);
+
+  setTimeout(()=>internalMapMove=false,300);
+
+  setTemporaryMessage("⚡ Raven wurde teleportiert.");
+});
+
+
+/* ==========================================================
+   FOLLOW MODE
+   ========================================================== */
+
+map.on("dragstart",()=>{
+
+  if(internalMapMove) return;
+
+  followUser=false;
+  updateFollowUI();
+});
+
+map.on("zoomstart",()=>{
+
+  if(internalMapMove) return;
+
+  followUser=false;
+  updateFollowUI();
+});
+
+function updateFollowUI(){
+
+  document.getElementById("followState").textContent =
+    followUser
+      ? "📍 RAVEN FOLGT DIR"
+      : "🗺️ FREIE KARTE";
+}
+
+function recenterMap(){
+
+  if(currentLat === null || currentLon === null){
+
+    setTemporaryMessage("📍 Noch keine Position vorhanden.");
+    return;
+  }
+
+  followUser=true;
+  updateFollowUI();
+
+  internalMapMove=true;
+
+  map.setView(
+    [currentLat,currentLon],
+    Math.max(map.getZoom(),16),
+    {animate:true}
+  );
+
+  setTimeout(()=>internalMapMove=false,500);
+}
+
+
+/* ==========================================================
+   REISE / ERKUNDUNG
+   ========================================================== */
+
+function setMapMode(mode){
+
+  mapMode=mode;
+
+  localStorage.setItem("ravenMapMode",mode);
+
+  updateMapModeUI();
+  redrawFog();
+}
+
+function updateMapModeUI(){
+
+  document
+    .getElementById("travelModeButton")
+    .classList.toggle("active",mapMode==="travel");
+
+  document
+    .getElementById("exploreModeButton")
+    .classList.toggle("active",mapMode==="explore");
+}
+
+
+/* ==========================================================
+   FOG OF WAR
+   ========================================================== */
+
+const REVEAL_RADIUS_METERS=40;
+
+let fogSvg=null;
+
+function createFogLayer(){
+
+  if(fogSvg) fogSvg.remove();
+
+  fogSvg=document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+
+  fogSvg.classList.add("raven-fog-svg");
+
+  map.getPane("ravenFogPane").appendChild(fogSvg);
+
+  redrawFog();
+}
+
+function redrawFog(){
+
+  if(!fogSvg) return;
+
+  if(mapMode!=="explore"){
+
+    fogSvg.style.display="none";
+    return;
+  }
+
+  fogSvg.style.display="block";
+
+  const size=map.getSize();
+
+  /* Das SVG sitzt in einer Leaflet-Pane. Deren Koordinaten bewegen
+     sich beim Zoomen und Verschieben mit der Karte. Deshalb wird der
+     Nebel vor jedem Zeichnen wieder exakt auf die sichtbare linke
+     obere Ecke des Kartenfensters gesetzt. */
+  const viewportOrigin=
+    map.containerPointToLayerPoint([0,0]);
+
+  L.DomUtil.setPosition(
+    fogSvg,
+    viewportOrigin
+  );
+
+  fogSvg.setAttribute("width",size.x);
+  fogSvg.setAttribute("height",size.y);
+  fogSvg.setAttribute("viewBox",`0 0 ${size.x} ${size.y}`);
+
+  fogSvg.innerHTML="";
+
+  const defs=document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "defs"
+  );
+
+  const mask=document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "mask"
+  );
+
+  mask.setAttribute("id","ravenFogMask");
+
+  const base=document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "rect"
+  );
+
+  base.setAttribute("width","100%");
+  base.setAttribute("height","100%");
+  base.setAttribute("fill","white");
+
+  mask.appendChild(base);
+
+  exploredPoints.forEach(point=>{
+
+    appendRevealCircle(
+      mask,
+      point.lat,
+      point.lon,
+      REVEAL_RADIUS_METERS
+    );
+
+  });
+
+  if(fuerstenbergMission.completed && fuerstenbergBoundary){
+
+    appendGeoJSONGeometryToMask(
+      mask,
+      fuerstenbergBoundary.geometry
+    );
+  }
+
+  defs.appendChild(mask);
+  fogSvg.appendChild(defs);
+
+  const darkness=document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "rect"
+  );
+
+  darkness.setAttribute("width","100%");
+  darkness.setAttribute("height","100%");
+  darkness.setAttribute("fill","rgba(0,0,0,.94)");
+  darkness.setAttribute("mask","url(#ravenFogMask)");
+
+  fogSvg.appendChild(darkness);
+}
+
+function appendRevealCircle(mask,lat,lon,radiusMeters){
+
+  const center=map.latLngToContainerPoint([lat,lon]);
+
+  const edge=destinationPoint(
+    lat,
+    lon,
+    radiusMeters,
+    90
+  );
+
+  const edgePoint=
+    map.latLngToContainerPoint(edge);
+
+  const radius=
+    Math.abs(edgePoint.x-center.x);
+
+  const circle=document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle"
+  );
+
+  circle.setAttribute("cx",center.x);
+  circle.setAttribute("cy",center.y);
+  circle.setAttribute("r",Math.max(radius,1));
+  circle.setAttribute("fill","black");
+
+  mask.appendChild(circle);
+}
+
+function appendGeoJSONGeometryToMask(mask,geometry){
+
+  if(!geometry) return;
+
+  if(geometry.type==="Polygon"){
+
+    appendPolygonToMask(mask,geometry.coordinates);
+
+  }else if(geometry.type==="MultiPolygon"){
+
+    geometry.coordinates.forEach(polygon=>
+      appendPolygonToMask(mask,polygon)
+    );
+  }
+}
+
+function appendPolygonToMask(mask,polygon){
+
+  if(!polygon || !polygon[0]) return;
+
+  const ring=polygon[0];
+
+  let pathData="";
+
+  ring.forEach((coordinate,index)=>{
+
+    const point=
+      map.latLngToContainerPoint([
+        coordinate[1],
+        coordinate[0]
+      ]);
+
+    pathData +=
+      `${index===0 ? "M" : "L"} ${point.x} ${point.y} `;
+  });
+
+  pathData+="Z";
+
+  const path=document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "path"
+  );
+
+  path.setAttribute("d",pathData);
+  path.setAttribute("fill","black");
+
+  mask.appendChild(path);
+}
+
+map.on("move zoom resize",redrawFog);
+
+
+/* ==========================================================
+   GRENZE FÜRSTENBERG
+   ========================================================== */
+
+async function loadFuerstenbergBoundary(){
+
+  const crs=encodeURIComponent(
+    "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+  );
+
+  const url=
+    "https://ogc-api.nrw.de/lika/v1/collections/" +
+    "katasterbezirk/items/" +
+    FUERSTENBERG.boundaryObjectId +
+    "?f=json&crs=" + crs;
+
+  try{
+
+    const response=await fetch(url);
+
+    if(!response.ok) throw new Error();
+
+    const data=await response.json();
+
+    fuerstenbergBoundary =
+      data.type==="Feature"
+        ? data
+        : data.features?.[0];
+
+    if(!fuerstenbergBoundary) throw new Error();
+
+    if (isFuerstenbergDiscovered()) {
+      document.getElementById("boundaryStatus").textContent =
+        "✓ Amtliche Gemarkungsgrenze geladen";
+
+      document
+        .getElementById("boundaryStatus")
+        .classList.add("ok");
+    } else {
+      document.getElementById("boundaryStatus").textContent =
+        "Ortsgrenze wird nach Entdeckung verfügbar …";
+    }
+
+    updateBoundaryOutline();
+    redrawFog();
+
+  }catch(error){
+
+    document.getElementById("boundaryStatus").textContent =
+      "⚠ Gemarkungsgrenze konnte nicht geladen werden.";
+  }
+}
+
+function updateBoundaryOutline(){
+
+  if(boundaryLayer){
+
+    map.removeLayer(boundaryLayer);
+    boundaryLayer=null;
+  }
+
+  if(
+    !fuerstenbergMission.completed ||
+    !fuerstenbergBoundary
+  ) return;
+
+  boundaryLayer=L.geoJSON(
+    fuerstenbergBoundary,
+    {
+      style:{
+        color:"#22c55e",
+        weight:2,
+        opacity:.8,
+        fillOpacity:0
+      }
+    }
+  ).addTo(map);
+}
+
+
+/* ==========================================================
+   GPS
+   ========================================================== */
+
+function toggleExploration(){
+
+  if(tracking){
+    stopExploration();
+  }else{
+    startExploration();
+  }
+}
+
+function startExploration(){
+
+  if(!navigator.geolocation){
+
+    setMessage("GPS wird von diesem Gerät nicht unterstützt.");
+    return;
+  }
+
+  tracking=true;
+  sessionDistance=0;
+  lastPosition=null;
+
+  document.getElementById("exploreButton").textContent =
+    "Erkundung beenden";
+
+  document.getElementById("exploreButton").className =
+    "danger";
+
+  document.getElementById("statusText").textContent =
+    "Unterwegs";
+
+  document.getElementById("gpsInfo").textContent =
+    "GPS wird gestartet …";
+
+  setMessage("📡 Raven sucht deine Position …");
+
+  watchId=navigator.geolocation.watchPosition(
+
+    handlePosition,
+
+    ()=>{
+
+      tracking=false;
+
+      document.getElementById("exploreButton").textContent =
+        "Erkundung starten";
+
+      document.getElementById("exploreButton").className =
+        "primary";
+
+      document.getElementById("statusText").textContent =
+        "Bereit";
+
+      document.getElementById("gpsInfo").textContent =
+        "GPS-Fehler";
+
+      setMessage("GPS-Fehler. Standortzugriff prüfen.");
+    },
+
+    {
+      enableHighAccuracy:true,
+      maximumAge:0,
+      timeout:20000
+    }
+  );
+}
+
+function stopExploration(){
+
+  tracking=false;
+
+  if(watchId!==null){
+
+    navigator.geolocation.clearWatch(watchId);
+    watchId=null;
+  }
+
+  document.getElementById("statusText").textContent =
+    "Bereit";
+
+  document.getElementById("gpsInfo").textContent =
+    "GPS pausiert";
+
+  document.getElementById("exploreButton").textContent =
+    "Erkundung starten";
+
+  document.getElementById("exploreButton").className =
+    "primary";
+
+  setMessage(
+    sessionDistance>0
+      ? `🐦‍⬛ Erkundung beendet – ${(sessionDistance/1000).toFixed(2)} km zurückgelegt.`
+      : "Erkundung beendet."
+  );
+
+  sessionDistance=0;
+  updateUI();
+}
+
+function handlePosition(position){
+
+  if(!tracking || godMode) return;
+
+  const coords=position.coords;
+
+  const lat=coords.latitude;
+  const lon=coords.longitude;
+  const accuracy=coords.accuracy;
+
+  if(accuracy && accuracy>35){
+
+    document.getElementById("gpsInfo").textContent =
+      `GPS ungenau ±${Math.round(accuracy)} m`;
+
+    return;
+  }
+
+  currentLat=lat;
+  currentLon=lon;
+  currentAccuracy=accuracy;
+
+  if(!firstValidFix){
+
+    firstValidFix=true;
+
+    document.getElementById("statusText").textContent =
+      "Aktiv";
+
+    setMessage("📍 GPS aktiv – Raven folgt dir.");
+  }
+
+  document.getElementById("gpsInfo").textContent =
+    accuracy
+      ? `GPS aktiv · ±${Math.round(accuracy)} m`
+      : "GPS aktiv";
+
+  updateUserMarker();
+
+  if(followUser){
+
+    internalMapMove=true;
+
+    map.setView(
+      [lat,lon],
+      Math.max(map.getZoom(),16),
+      {animate:true}
+    );
+
+    setTimeout(()=>internalMapMove=false,500);
+  }
+
+  if(lastPosition){
+
+    const moved=haversineDistance(
+      lastPosition.lat,
+      lastPosition.lon,
+      lat,
+      lon
+    );
+
+    if(moved>=3 && moved<150){
+
+      totalDistance+=moved;
+      sessionDistance+=moved;
+
+      localStorage.setItem(
+        "ravenDistance",
+        totalDistance
+      );
+
+      travelHistory.push({
+        lat,
+        lon,
+        time:Date.now()
+      });
+
+      if(travelHistory.length>12000){
+        travelHistory=travelHistory.slice(-12000);
+      }
+
+      localStorage.setItem(
+        "ravenTravelHistory",
+        JSON.stringify(travelHistory)
+      );
+    }
+  }
+
+  lastPosition={lat,lon};
+
+  saveExploredPoint(lat,lon);
+
+  updateAllPointStates(lat,lon);
+
+  maybeReverseGeocode(lat,lon);
+
+  updateUI();
+  redrawFog();
+}
+
+function saveExploredPoint(lat,lon){
+
+  const last=exploredPoints.at(-1);
+
+  if(last){
+
+    const distance=haversineDistance(
+      last.lat,
+      last.lon,
+      lat,
+      lon
+    );
+
+    if(distance<20) return;
+  }
+
+  exploredPoints.push({
+    lat,
+    lon,
+    time:Date.now()
+  });
+
+  if(exploredPoints.length>12000){
+    exploredPoints=exploredPoints.slice(-12000);
+  }
+
+  localStorage.setItem(
+    "ravenExploredPoints",
+    JSON.stringify(exploredPoints)
+  );
+}
+
+
+/* ==========================================================
+   POI MARKER
+   ========================================================== */
+
+function isDiscovered(point){
+
+  return point.type==="activity"
+    ? fuerstenbergMission.visitedActivities.includes(point.id)
+    : fuerstenbergMission.visitedPOIs.includes(point.id);
+}
+
+function updateAllPointStates(lat,lon){
+
+  ALL_POINTS.forEach(point=>{
+
+    const distance=haversineDistance(
+      lat,
+      lon,
+      point.lat,
+      point.lon
+    );
+
+    const discovered=isDiscovered(point);
+    const inRange=distance<=FUERSTENBERG.visitRadius;
+
+    renderPointMarker(
+      point,
+      discovered,
+      inRange,
+      distance
+    );
+  });
+
+  renderMainLists();
+}
+
+function renderPointMarker(point,discovered,inRange,distance){
+
+  let css="poi-marker";
+
+  if(point.type==="activity"){
+    css+=" activity";
+  }
+
+  if(discovered){
+    css+=" done";
+  }else if(inRange){
+    css+=" range";
+  }
+
+  const content =
+    discovered
+      ? point.icon
+      : "?";
+
+  const icon=L.divIcon({
+    className:"",
+    html:`<div class="${css}">${content}</div>`,
+    iconSize:[28,28],
+    iconAnchor:[14,14]
+  });
+
+  if(!pointMarkers[point.id]){
+
+    pointMarkers[point.id]=
+      L.marker(
+        [point.lat,point.lon],
+        {icon,pane:"ravenForegroundPane"}
+      )
+      .addTo(map)
+      .on("click",()=>tryOpenPoint(point));
+
+  }else{
+
+    pointMarkers[point.id].setIcon(icon);
+  }
+}
+
+function tryOpenPoint(point){
+
+  if(isDiscovered(point)){
+
+    setTemporaryMessage(
+      `${point.icon} ${point.name} wurde bereits entdeckt.`
+    );
+
+    return;
+  }
+
+  if(currentLat===null || currentLon===null){
+
+    setTemporaryMessage(
+      "📍 Raven kennt seine Position noch nicht."
+    );
+
+    return;
+  }
+
+  const distance=haversineDistance(
+    currentLat,
+    currentLon,
+    point.lat,
+    point.lon
+  );
+
+  if(distance>FUERSTENBERG.visitRadius){
+
+    setTemporaryMessage(
+      `? Dieser Punkt ist noch ${Math.round(distance)} m entfernt.`
+    );
+
+    return;
+  }
+
+  openScratch(point);
+}
+
+
+/* ==========================================================
+   HAUPTLISTEN
+   ========================================================== */
+
+function renderMainLists(){
+
+  renderPointList(
+    "explorationList",
+    FUERSTENBERG.explorationPOIs
+  );
+
+  renderPointList(
+    "activityList",
+    FUERSTENBERG.activityPOIs
+  );
+
+  updateMissionUI();
+}
+
+function renderPointList(elementId,points){
+
+  const container=document.getElementById(elementId);
+
+  container.innerHTML="";
+
+  points.forEach(point=>{
+
+    const discovered=isDiscovered(point);
+
+    const row=document.createElement("div");
+
+    row.className=
+      "poi-row " +
+      (point.type==="activity" ? "activity " : "") +
+      (discovered ? "done" : "");
+
+    row.innerHTML=`
+      <div class="poi-name">
+        ${discovered
+          ? `${point.icon} ${escapeHTML(point.name)}`
+          : "? Unbekannter " +
+            (point.type==="activity"
+              ? "Aktivitätspunkt"
+              : "Erkundungspunkt")
+        }
+      </div>
+
+      <div class="poi-state">
+        ${discovered ? "ENTDECKT ✓" : "UNBEKANNT"}
+      </div>
+    `;
+
+    row.onclick=()=>tryOpenPoint(point);
+
+    container.appendChild(row);
+  });
+}
+
+
+/* ==========================================================
+   REVERSE GEOCODING
+   ========================================================== */
+
+let lastGeocodeTime=0;
+let lastGeocodePosition=null;
+
+async function maybeReverseGeocode(lat,lon,force=false){
+
+  const now=Date.now();
+
+  if(!force){
+
+    if(now-lastGeocodeTime<60000) return;
+
+    if(lastGeocodePosition){
+
+      const moved=haversineDistance(
+        lastGeocodePosition.lat,
+        lastGeocodePosition.lon,
+        lat,
+        lon
+      );
+
+      if(moved<100) return;
+    }
+  }
+
+  lastGeocodeTime=now;
+  lastGeocodePosition={lat,lon};
+
+  try{
+
+    const url=
+      "https://api.bigdatacloud.net/data/reverse-geocode-client" +
+      "?latitude=" + encodeURIComponent(lat) +
+      "&longitude=" + encodeURIComponent(lon) +
+      "&localityLanguage=de";
+
+    const response=await fetch(url);
+
+    if(!response.ok) return;
+
+    const data=await response.json();
+
+    const name=
+      data.locality ||
+      data.city ||
+      data.principalSubdivision ||
+      "Unbekannter Ort";
+
+    const region=
+      data.principalSubdivision || "";
+
+    const country=
+      data.countryName || "";
+
+    document.getElementById("locationName").textContent =
+      name;
+
+    document.getElementById("locationRegion").textContent =
+      [region,country].filter(Boolean).join(" · ");
+
+    const exists=discoveredPlaces.some(
+      place =>
+        normalizePlaceName(place.name) ===
+        normalizePlaceName(name)
+    );
+
+    if(!exists && name!=="Unbekannter Ort"){
+
+      discoveredPlaces.push({
+        name,
+        region,
+        country,
+        discoveredAt:Date.now()
+      });
+
+      localStorage.setItem(
+        "ravenDiscoveredPlaces",
+        JSON.stringify(discoveredPlaces)
+      );
+
+      addXP(25);
+
+      setTemporaryMessage(
+        `🗺️ Neuer Ort entdeckt: ${name} · +25 XP`
+      );
+
+      renderTravelBook();
+      updateMissionUI();
+
+      if (isFuerstenbergDiscovered() && fuerstenbergBoundary) {
+        document.getElementById("boundaryStatus").textContent =
+          "✓ Amtliche Gemarkungsgrenze geladen";
+        document.getElementById("boundaryStatus").classList.add("ok");
+      }
+    }
+
+    updateUI();
+
+  }catch(error){}
+}
+
+
+/* ==========================================================
+   REISEBUCH
+   ========================================================== */
+
+function renderTravelBook(){
+
+  const list=document.getElementById("travelList");
+
+  list.innerHTML="";
+
+  const countries=
+    new Set(
+      discoveredPlaces
+        .map(p=>p.country)
+        .filter(Boolean)
+    ).size;
+
+  const regions=
+    new Set(
+      discoveredPlaces
+        .map(p=>p.region)
+        .filter(Boolean)
+    ).size;
+
+  document.getElementById("travelSummary").textContent =
+    `${discoveredPlaces.length} Orte · ${regions} Regionen · ${countries} Länder`;
+
+  [...discoveredPlaces]
+    .reverse()
+    .forEach(place=>{
+
+      const element=document.createElement("div");
+
+      element.className="place";
+
+      element.innerHTML=`
+        <div class="place-row">
+
+          <div>
+            <div class="place-name">
+              📍 ${escapeHTML(place.name)}
+            </div>
+
+            <div class="place-meta">
+              ${escapeHTML(
+                [place.region,place.country]
+                  .filter(Boolean)
+                  .join(" · ")
+              )}
+            </div>
+          </div>
+
+          <div class="place-arrow">›</div>
+
+        </div>
+      `;
+
+      element.onclick=()=>openPlaceDetail(place);
+
+      list.appendChild(element);
+    });
+}
+
+function openPlaceDetail(place){
+
+  document
+    .getElementById("travelOverview")
+    .classList.add("hidden");
+
+  const detail=
+    document.getElementById("travelDetail");
+
+  detail.classList.add("active");
+
+  const isFuerstenberg =
+    normalizePlaceName(place.name)
+      .includes("fürstenberg");
+
+  if(!isFuerstenberg){
+
+    detail.innerHTML=`
+
+      <div class="detail-header">
+
+        <div class="detail-place-name">
+          📍 ${escapeHTML(place.name)}
+        </div>
+
+        <div class="detail-meta">
+          ${escapeHTML(
+            [place.region,place.country]
+              .filter(Boolean)
+              .join(" · ")
+          )}
+        </div>
+
+        <div class="detail-status">
+          ENTDECKT
+        </div>
+
+      </div>
+
+      <div class="message">
+        Für diesen Ort sind in V1.8 noch keine
+        Erkundungspunkte hinterlegt.
+      </div>
+
+      <button
+        class="secondary back-button"
+        onclick="closePlaceDetail()">
+        ← Zurück zu Ravens Reisen
+      </button>
+    `;
+
+    return;
+  }
+
+  const requiredRows=
+    FUERSTENBERG.explorationPOIs
+      .map(point=>detailPointHTML(point))
+      .join("");
+
+  const activityRows=
+    FUERSTENBERG.activityPOIs
+      .map(point=>detailPointHTML(point))
+      .join("");
+
+  detail.innerHTML=`
+
+    <div class="detail-header">
+
+      <div class="detail-place-name">
+        🏘️ Fürstenberg
+      </div>
+
+      <div class="detail-meta">
+        Nordrhein-Westfalen · Deutschland
+      </div>
+
+      <div class="detail-status">
+        ${fuerstenbergMission.completed
+          ? "ERKUNDET ✓"
+          : `${fuerstenbergMission.visitedPOIs.length}/${FUERSTENBERG.explorationPOIs.length} ERKUNDUNGSPUNKTE`
+        }
+      </div>
+
+    </div>
+
+    <div class="section-label">
+      ERKUNDUNGSPUNKTE
+    </div>
+
+    <div class="poi-list">
+      ${requiredRows}
+    </div>
+
+    <div class="section-label">
+      AKTIVITÄTEN
+    </div>
+
+    <div class="poi-list">
+      ${activityRows}
+    </div>
+
+    <button
+      class="secondary back-button"
+      onclick="closePlaceDetail()">
+      ← Zurück zu Ravens Reisen
+    </button>
+  `;
+
+  detail.querySelectorAll("[data-point-id]")
+    .forEach(row=>{
+
+      row.onclick=()=>{
+
+        const point=
+          ALL_POINTS.find(
+            p=>p.id===row.dataset.pointId
+          );
+
+        if(point) tryOpenPoint(point);
+      };
+    });
+}
+
+function detailPointHTML(point){
+
+  const discovered=isDiscovered(point);
+
+  return `
+    <div
+      class="poi-row ${discovered ? "done" : ""}"
+      data-point-id="${point.id}">
+
+      <div class="poi-name">
+
+        ${discovered
+          ? `${point.icon} ${escapeHTML(point.name)}`
+          : "? Unbekannter Punkt"
+        }
+
+      </div>
+
+      <div class="poi-state">
+
+        ${discovered
+          ? "ENTDECKT ✓"
+          : "UNBEKANNT"
+        }
+
+      </div>
+
+    </div>
+  `;
+}
+
+function closePlaceDetail(){
+
+  document
+    .getElementById("travelDetail")
+    .classList.remove("active");
+
+  document
+    .getElementById("travelOverview")
+    .classList.remove("hidden");
+}
+
+function normalizePlaceName(value){
+
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+}
+
+
+/* ==========================================================
+   RUBBELN
+   ========================================================== */
+
+let scratchPoint=null;
+let scratching=false;
+let scratchCompleted=false;
+let scratchCheckCounter=0;
+
+const scratchOverlay=
+  document.getElementById("scratchOverlay");
+
+const scratchCanvas=
+  document.getElementById("scratchCanvas");
+
+const scratchContext=
+  scratchCanvas.getContext("2d");
+
+function openScratch(point){
+
+  scratchPoint=point;
+  scratchCompleted=false;
+  scratchCheckCounter=0;
+
+  document.getElementById("scratchTitle").textContent =
+    point.type==="activity"
+      ? "🐦‍⬛ Aktivität entdeckt?"
+      : "🐦‍⬛ Erkundungspunkt";
+
+  document.getElementById("scratchIcon").textContent =
+    point.icon;
+
+  document.getElementById("scratchName").textContent =
+    point.name;
+
+  scratchOverlay.style.display="flex";
+
+  document.getElementById("scratchClose").textContent =
+    "Schließen";
+
+  requestAnimationFrame(setupScratchCanvas);
+}
+
+function setupScratchCanvas(){
+
+  const rect=
+    scratchCanvas.getBoundingClientRect();
+
+  const dpr=
+    window.devicePixelRatio || 1;
+
+  scratchCanvas.width=
+    Math.round(rect.width*dpr);
+
+  scratchCanvas.height=
+    Math.round(rect.height*dpr);
+
+  scratchContext.setTransform(
+    dpr,0,0,dpr,0,0
+  );
+
+  scratchContext.globalCompositeOperation=
+    "source-over";
+
+  const gradient=
+    scratchContext.createLinearGradient(
+      0,0,rect.width,rect.height
+    );
+
+  gradient.addColorStop(0,"#3f3f46");
+  gradient.addColorStop(.5,"#71717a");
+  gradient.addColorStop(1,"#27272a");
+
+  scratchContext.fillStyle=gradient;
+
+  scratchContext.fillRect(
+    0,0,rect.width,rect.height
+  );
+
+  scratchContext.fillStyle="#e4e4e7";
+  scratchContext.font="bold 16px Arial";
+  scratchContext.textAlign="center";
+  scratchContext.textBaseline="middle";
+
+  scratchContext.fillText(
+    "RUBBEL MICH FREI",
+    rect.width/2,
+    rect.height/2
+  );
+}
+
+function scratchAt(clientX,clientY){
+
+  if(scratchCompleted) return;
+
+  const rect=
+    scratchCanvas.getBoundingClientRect();
+
+  const x=clientX-rect.left;
+  const y=clientY-rect.top;
+
+  scratchContext.globalCompositeOperation=
+    "destination-out";
+
+  scratchContext.beginPath();
+
+  scratchContext.arc(
+    x,y,22,0,Math.PI*2
+  );
+
+  scratchContext.fill();
+
+  scratchCheckCounter++;
+
+  if(scratchCheckCounter%12===0){
+    checkScratchProgress();
+  }
+}
+
+function checkScratchProgress(){
+
+  if(scratchCompleted) return;
+
+  const image=
+    scratchContext.getImageData(
+      0,
+      0,
+      scratchCanvas.width,
+      scratchCanvas.height
+    );
+
+  let transparent=0;
+  let checked=0;
+
+  for(
+    let i=3;
+    i<image.data.length;
+    i+=4*20
+  ){
+
+    checked++;
+
+    if(image.data[i]<40){
+      transparent++;
+    }
+  }
+
+  if(transparent/checked>=.45){
+    completeScratch();
+  }
+}
+
+function completeScratch(){
+
+  if(scratchCompleted || !scratchPoint) return;
+
+  scratchCompleted=true;
+
+  scratchContext.clearRect(
+    0,
+    0,
+    scratchCanvas.width,
+    scratchCanvas.height
+  );
+
+  discoverPoint(scratchPoint);
+
+  document.getElementById("scratchClose").textContent =
+    "Weiter";
+}
+
+function closeScratch(){
+
+  scratchOverlay.style.display="none";
+  scratchPoint=null;
+  scratching=false;
+}
+
+scratchCanvas.addEventListener(
+  "pointerdown",
+  event=>{
+
+    scratching=true;
+
+    scratchAt(
+      event.clientX,
+      event.clientY
+    );
+  }
+);
+
+scratchCanvas.addEventListener(
+  "pointermove",
+  event=>{
+
+    if(!scratching) return;
+
+    scratchAt(
+      event.clientX,
+      event.clientY
+    );
+  }
+);
+
+window.addEventListener(
+  "pointerup",
+  ()=>scratching=false
+);
+
+
+/* ==========================================================
+   PUNKT ENTDECKEN
+   ========================================================== */
+
+function discoverPoint(point){
+
+  if(isDiscovered(point)) return;
+
+  if(point.type==="activity"){
+
+    fuerstenbergMission
+      .visitedActivities
+      .push(point.id);
+
+    addXP(FUERSTENBERG.activityXP);
+
+    setTemporaryMessage(
+      `✨ ${point.name} entdeckt! +${FUERSTENBERG.activityXP} XP`,
+      4500
+    );
+
+  }else{
+
+    fuerstenbergMission
+      .visitedPOIs
+      .push(point.id);
+
+    addXP(FUERSTENBERG.poiXP);
+
+    const allDone=
+      FUERSTENBERG.explorationPOIs
+        .every(point =>
+          fuerstenbergMission
+            .visitedPOIs
+            .includes(point.id)
+        );
+
+    if(
+      allDone &&
+      !fuerstenbergMission.completed
+    ){
+
+      fuerstenbergMission.completed=true;
+
+      addXP(
+        FUERSTENBERG.completionXP
+      );
+
+      setTemporaryMessage(
+        `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP`,
+        5000
+      );
+
+    }else{
+
+      setTemporaryMessage(
+        `✨ ${point.name} entdeckt! +${FUERSTENBERG.poiXP} XP`,
+        4500
+      );
+    }
+  }
+
+  saveMission();
+
+  renderMainLists();
+  renderTravelBook();
+  updateMissionUI();
+
+  if(
+    currentLat!==null &&
+    currentLon!==null
+  ){
+
+    updateAllPointStates(
+      currentLat,
+      currentLon
+    );
+  }
+
+  updateBoundaryOutline();
+  redrawFog();
+}
+
+function saveMission(){
+
+  localStorage.setItem(
+    "ravenFuerstenbergMission",
+    JSON.stringify(fuerstenbergMission)
+  );
+}
+
+function isFuerstenbergDiscovered(){
+
+  return discoveredPlaces.some(place =>
+    normalizePlaceName(place.name).includes("fürstenberg")
+  );
+}
+
+function updateMissionUI(){
+
+  const placeKnown=isFuerstenbergDiscovered();
+
+  document.getElementById("missionTitle").textContent =
+    placeKnown ? "📍 Standort: Fürstenberg" : "📍 Standort";
+
+  const visited=
+    fuerstenbergMission.visitedPOIs.length;
+
+  const total=
+    FUERSTENBERG.explorationPOIs.length;
+
+  const activities=
+    fuerstenbergMission.visitedActivities.length;
+
+  const activityTotal=
+    FUERSTENBERG.activityPOIs.length;
+
+  document.getElementById("missionText").textContent =
+    !placeKnown
+
+      ? `${visited} / ${total} Erkundungspunkte vorbereitet · Aktivitäten ${activities}/${activityTotal} · Starte GPS, um den Ort zu entdecken.`
+
+      : fuerstenbergMission.completed
+
+        ? `Fürstenberg ist vollständig erkundet · ${visited}/${total} · Aktivitäten ${activities}/${activityTotal}.`
+
+        : `${visited} / ${total} Erkundungspunkte entdeckt · Aktivitäten ${activities}/${activityTotal}.`;
+}
+
+
+/* ==========================================================
+   XP
+   ========================================================== */
+
+function addXP(amount){
+
+  xp+=amount;
+
+  while(xp>=100){
+
+    xp-=100;
+    level++;
+  }
+
+  localStorage.setItem(
+    "ravenXP",
+    xp
+  );
+
+  localStorage.setItem(
+    "ravenLevel",
+    level
+  );
+
+  updateUI();
+}
+
+
+/* ==========================================================
+   NACHRICHTEN
+   ========================================================== */
+
+let messageTimer=null;
+
+function setMessage(text){
+
+  if(messageTimer){
+
+    clearTimeout(messageTimer);
+    messageTimer=null;
+  }
+
+  document.getElementById("message").textContent =
+    text;
+}
+
+function setTemporaryMessage(
+  text,
+  duration=3500
+){
+
+  if(messageTimer){
+    clearTimeout(messageTimer);
+  }
+
+  document.getElementById("message").textContent =
+    text;
+
+  messageTimer=setTimeout(()=>{
+
+    if(godMode){
+
+      document.getElementById("message").textContent =
+        "🛠 GOD MODE aktiv – tippe auf die Karte.";
+
+    }else if(tracking && firstValidFix){
+
+      document.getElementById("message").textContent =
+        "📍 GPS aktiv – Raven folgt dir.";
+
+    }else if(tracking){
+
+      document.getElementById("message").textContent =
+        "📡 Raven sucht deine Position …";
+
+    }else{
+
+      document.getElementById("message").textContent =
+        "Dein Raven wartet auf sein nächstes Abenteuer.";
+    }
+
+    messageTimer=null;
+
+  },duration);
+}
+
+
+/* ==========================================================
+   UI
+   ========================================================== */
+
+function updateUI(){
+
+  document.getElementById("xp").textContent=xp;
+
+  document.getElementById("level").textContent=level;
+
+  document.getElementById("xpfill").style.width=
+    Math.min(xp,100)+"%";
+
+  document.getElementById("distance").textContent=
+    (totalDistance/1000).toFixed(2);
+
+  document.getElementById("sessionDistance").textContent=
+    Math.round(sessionDistance);
+
+  document.getElementById("areas").textContent=
+    discoveredPlaces.length;
+}
+
+
+/* ==========================================================
+   ENTFERNUNG
+   ========================================================== */
+
+function haversineDistance(
+  lat1,
+  lon1,
+  lat2,
+  lon2
+){
+
+  const R=6371000;
+
+  const toRad=
+    value=>value*Math.PI/180;
+
+  const dLat=
+    toRad(lat2-lat1);
+
+  const dLon=
+    toRad(lon2-lon1);
+
+  const a=
+    Math.sin(dLat/2)**2 +
+    Math.cos(toRad(lat1)) *
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon/2)**2;
+
+  const c=
+    2*Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1-a)
+    );
+
+  return R*c;
+}
+
+function destinationPoint(
+  lat,
+  lon,
+  distance,
+  bearing
+){
+
+  const R=6371000;
+
+  const bearingRad=
+    bearing*Math.PI/180;
+
+  const lat1=
+    lat*Math.PI/180;
+
+  const lon1=
+    lon*Math.PI/180;
+
+  const angularDistance=
+    distance/R;
+
+  const lat2=
+    Math.asin(
+      Math.sin(lat1) *
+      Math.cos(angularDistance) +
+
+      Math.cos(lat1) *
+      Math.sin(angularDistance) *
+      Math.cos(bearingRad)
+    );
+
+  const lon2=
+    lon1 +
+    Math.atan2(
+
+      Math.sin(bearingRad) *
+      Math.sin(angularDistance) *
+      Math.cos(lat1),
+
+      Math.cos(angularDistance) -
+      Math.sin(lat1) *
+      Math.sin(lat2)
+    );
+
+  return[
+    lat2*180/Math.PI,
+    lon2*180/Math.PI
+  ];
+}
+
+
+/* ==========================================================
+   SICHERE TEXTE
+   ========================================================== */
+
+function escapeHTML(value){
+
+  return String(value)
+
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+/* ==========================================================
+   START
+   ========================================================== */
+
+updateUI();
+
+updateMapModeUI();
+
+updateFollowUI();
+
+updateMissionUI();
+
+renderMainLists();
+
+renderTravelBook();
+
+createFogLayer();
+
+loadFuerstenbergBoundary();
+
+/* Marker sofort erzeugen */
+ALL_POINTS.forEach(point=>{
+  renderPointMarker(
+    point,
+    isDiscovered(point),
+    false,
+    Infinity
+  );
+});
+
+setTimeout(()=>{
+
+  map.invalidateSize();
+  redrawFog();
+
+},400);
+
+</script>
+
+</body>
+</html><html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>RAVEN #0001</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  min-height:100%;
+  background:#080a0d;
+  color:#e6edf3;
+  font-family:Arial,Helvetica,sans-serif
+}
+body{padding-bottom:40px}
+.app{max-width:650px;margin:auto;padding:16px}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px
+}
+.brand{font-weight:900;letter-spacing:4px}
+.online{color:#4ade80;font-size:11px;font-weight:bold}
+
+.card{
+  background:#0d1117;
+  border:1px solid #21262d;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:14px
+}
+
+.raven{text-align:center;font-size:56px}
+h1{text-align:center;font-size:23px;margin:5px 0}
+.generation{text-align:center;color:#8b949e;font-size:12px;margin-bottom:20px}
+
+.level-line{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  margin-bottom:7px
+}
+
+.xpbar{
+  height:9px;
+  background:#21262d;
+  border-radius:20px;
+  overflow:hidden
+}
+.xpfill{
+  height:100%;
+  background:linear-gradient(90deg,#6d28d9,#a855f7);
+  width:0
+}
+.xptext{text-align:right;color:#8b949e;font-size:11px;margin-top:6px}
+
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:18px
+}
+.stat{
+  background:#090c10;
+  border:1px solid #21262d;
+  border-radius:12px;
+  padding:12px
+}
+.label{color:#6e7681;font-size:9px;letter-spacing:1px}
+.value{font-size:16px;font-weight:bold;margin-top:5px}
+
+button{
+  width:100%;
+  padding:13px;
+  border:0;
+  border-radius:11px;
+  font-weight:bold;
+  cursor:pointer
+}
+.primary{background:linear-gradient(90deg,#6d28d9,#9333ea);color:white}
+.danger{background:#4c1d1d;color:#fca5a5}
+.secondary{
+  background:transparent;
+  border:1px solid #30363d;
+  color:#c9d1d9
+}
+
+.map-card{padding:0;overflow:hidden}
+.map-header{padding:14px}
+.map-title-row{display:flex;justify-content:space-between}
+.map-title{font-weight:bold}
+.gps-small{font-size:10px;color:#8b949e}
+
+.mode-switch{
+  margin-top:11px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  background:#090c10;
+  border:1px solid #21262d;
+  border-radius:11px;
+  padding:3px;
+  gap:3px
+}
+.mode-btn{
+  background:transparent;
+  color:#6e7681;
+  padding:9px;
+  font-size:11px
+}
+.mode-btn.active{background:#21262d;color:white}
+
+.location-box{
+  margin-top:13px;
+  background:#090c10;
+  border:1px solid #21262d;
+  border-radius:12px;
+  padding:12px
+}
+.location-label{font-size:9px;color:#6e7681}
+.location-name{font-size:17px;font-weight:bold;margin-top:5px}
+.location-region{font-size:11px;color:#8b949e;margin-top:3px}
+
+#map{
+  width:100%;
+  height:420px;
+  background:#090c10;
+  position:relative;
+  overflow:hidden
+}
+
+.follow-state{
+  position:absolute;
+  z-index:1000;
+  left:10px;
+  bottom:19px;
+  background:#0d1117ee;
+  border:1px solid #30363d;
+  border-radius:20px;
+  padding:7px 10px;
+  font-size:9px
+}
+
+.map-controls{
+  position:absolute;
+  z-index:1000;
+  right:10px;
+  bottom:20px
+}
+.recenter{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  padding:0;
+  background:#0d1117ee;
+  border:1px solid #30363d;
+  color:white;
+  font-size:19px
+}
+
+.god-box{
+  position:absolute;
+  z-index:1100;
+  left:10px;
+  top:10px;
+  background:#0d1117f2;
+  border:1px solid #8b5cf6;
+  border-radius:9px;
+  overflow:hidden;
+  background:#3b0764ee;
+  box-shadow:0 0 14px #7c3aed88
+}
+.god-button{
+  width:auto;
+  padding:8px 10px;
+  border-radius:0;
+  background:transparent;
+  color:#e9d5ff;
+  font-size:9px
+}
+.god-hint{
+  display:none;
+  padding:6px 9px;
+  font-size:8px;
+  color:#fbbf24
+}
+.god-box.active{border-color:#f59e0b;background:#451a03ee;box-shadow:0 0 16px #f59e0b99}
+.god-box.active .god-button{color:#fbbf24}
+.god-box.active .god-hint{display:block}
+
+.raven-fog-svg{
+  position:absolute;
+  inset:0;
+  z-index:450;
+  pointer-events:none
+}
+
+.raven-user-marker{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#a855f7;
+  border:4px solid white;
+  box-shadow:0 0 0 8px #a855f738,0 0 18px #a855f7
+}
+.raven-user-marker.god{
+  background:#f59e0b;
+  box-shadow:0 0 0 8px #f59e0b38
+}
+
+.poi-marker{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:#6d28d9;
+  border:2px solid white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  box-shadow:0 0 14px #6d28d9
+}
+.poi-marker.range{background:#ca8a04;box-shadow:0 0 14px #ca8a04}
+.poi-marker.done{background:#15803d;box-shadow:0 0 14px #15803d}
+.poi-marker.activity.done{background:#075985;box-shadow:0 0 14px #0ea5e9}
+
+.message{
+  text-align:center;
+  min-height:20px;
+  margin-top:12px;
+  font-size:12px;
+  color:#8b949e
+}
+
+.mission-title,.travel-title{font-size:16px;font-weight:800}
+.mission-subtitle,.travel-summary{
+  color:#8b949e;
+  font-size:11px;
+  line-height:1.45;
+  margin-top:4px
+}
+
+.section-label{
+  margin:15px 0 8px;
+  color:#8b949e;
+  font-size:9px;
+  letter-spacing:1px;
+  font-weight:bold
+}
+
+.poi-list,.travel-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px
+}
+
+.poi-row,.place{
+  background:#090c10;
+  border:1px solid #21262d;
+  border-radius:11px;
+  padding:11px;
+  cursor:pointer
+}
+
+.poi-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px
+}
+.poi-name{font-size:12px;font-weight:bold}
+.poi-state{font-size:10px;color:#8b949e}
+.poi-row.done{border-color:#22c55e73;background:#1665341a}
+.poi-row.done .poi-state{color:#4ade80}
+
+.place-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center
+}
+.place-name{font-size:13px;font-weight:bold}
+.place-meta{font-size:10px;color:#8b949e;margin-top:4px}
+.place-arrow{color:#6e7681;font-size:18px}
+
+.boundary-status{margin-top:11px;font-size:10px;color:#8b949e}
+.boundary-status.ok{color:#4ade80}
+
+.travel-detail{display:none;margin-top:12px}
+.travel-detail.active{display:block}
+.travel-overview.hidden{display:none}
+.detail-header{
+  background:#090c10;
+  border:1px solid #21262d;
+  border-radius:12px;
+  padding:13px
+}
+.detail-place-name{font-size:18px;font-weight:900}
+.detail-meta{font-size:10px;color:#8b949e;margin-top:5px}
+.detail-status{font-size:11px;color:#a78bfa;margin-top:10px}
+.back-button{margin-top:12px}
+
+.version{
+  text-align:center;
+  color:#484f58;
+  font-size:10px;
+  letter-spacing:2px;
+  padding:8px 0 25px
+}
+
+/* RUBBELKARTE */
+
+.scratch-overlay{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  background:#000d;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px
+}
+.scratch-card{
+  width:min(390px,100%);
+  background:#0d1117;
+  border:1px solid #30363d;
+  border-radius:18px;
+  padding:16px;
+  text-align:center
+}
+.scratch-title{font-size:17px;font-weight:900}
+.scratch-text{color:#8b949e;font-size:11px;margin:6px 0 13px}
+
+.scratch-area{
+  position:relative;
+  width:100%;
+  aspect-ratio:1.8/1;
+  border-radius:14px;
+  overflow:hidden;
+  background:#111827
+}
+.scratch-reveal{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center
+}
+.scratch-icon{font-size:45px}
+.scratch-name{font-size:16px;font-weight:900;margin-top:7px}
+#scratchCanvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  touch-action:none
+}
+.scratch-close{margin-top:13px}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="topbar">
+  <div class="brand">RAVEN</div>
+  <div class="online">● ONLINE</div>
+</div>
+
+<div class="card">
+
+<div class="raven">🐦‍⬛</div>
+<h1>RAVEN #0001</h1>
+<div class="generation">Generation 1</div>
+
+<div class="level-line">
+  <span>Level <strong id="level">1</strong></span>
+  <span>Nächstes Level</span>
+</div>
+
+<div class="xpbar">
+  <div class="xpfill" id="xpfill"></div>
+</div>
+
+<div class="xptext"><span id="xp">0</span> / 100 XP</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="label">STRECKE</div>
+    <div class="value"><span id="distance">0.00</span> km</div>
+  </div>
+
+  <div class="stat">
+    <div class="label">ENTDECKTE ORTE</div>
+    <div class="value" id="areas">0</div>
+  </div>
+
+  <div class="stat">
+    <div class="label">SESSION</div>
+    <div class="value"><span id="sessionDistance">0</span> m</div>
+  </div>
+
+  <div class="stat">
+    <div class="label">STATUS</div>
+    <div class="value" id="statusText">Bereit</div>
+  </div>
+</div>
+
+</div>
+
+<div class="card map-card">
+
+<div class="map-header">
+
+<div class="map-title-row">
+  <div class="map-title">Ravens Welt</div>
+  <div class="gps-small" id="gpsInfo">GPS pausiert</div>
+</div>
+
+<div class="mode-switch">
+  <button class="mode-btn" id="travelModeButton" onclick="setMapMode('travel')">
+    🗺️ REISE
+  </button>
+
+  <button class="mode-btn" id="exploreModeButton" onclick="setMapMode('explore')">
+    🌑 ERKUNDUNG
+  </button>
+</div>
+
+<div class="location-box">
+  <div class="location-label">AKTUELLER ORT</div>
+  <div class="location-name" id="locationName">Fürstenberg</div>
+  <div class="location-region" id="locationRegion">Nordrhein-Westfalen · Deutschland</div>
+</div>
+
+</div>
+
+<div id="map">
+
+  <div class="god-box" id="godBox">
+    <button class="god-button" onclick="toggleGodMode()">🛠 GOD MODE</button>
+    <div class="god-hint">Karte antippen = teleportieren</div>
+  </div>
+
+  <div class="follow-state" id="followState">📍 RAVEN FOLGT DIR</div>
+
+  <div class="map-controls">
+    <button class="recenter" onclick="recenterMap()">📍</button>
+  </div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<button class="primary" id="exploreButton" onclick="toggleExploration()">
+  Erkundung starten
+</button>
+
+<div class="message" id="message">
+  Dein Raven wartet auf sein nächstes Abenteuer.
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="mission-title" id="missionTitle">📍 Standort: Fürstenberg</div>
+
+<div class="mission-subtitle" id="missionText">
+  Erkundungspunkte werden geladen …
+</div>
+
+<div class="section-label">ERKUNDUNGSPUNKTE · ZÄHLEN FÜR DEN ORT</div>
+<div class="poi-list" id="explorationList"></div>
+
+<div class="section-label">AKTIVITÄTEN · OPTIONAL</div>
+<div class="poi-list" id="activityList"></div>
+
+<div class="boundary-status" id="boundaryStatus">
+  Ortsgrenze wird nach Entdeckung verfügbar …
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="travel-overview" id="travelOverview">
+
+<div class="travel-title">📖 RAVENS REISEN</div>
+<div class="travel-summary" id="travelSummary"></div>
+
+<div class="travel-list" id="travelList"></div>
+
+</div>
+
+<div class="travel-detail" id="travelDetail"></div>
+
+</div>
+
+<div class="version">
 RAVEN PROTOTYPE V2.1 · DEV
 </div>
 
