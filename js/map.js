@@ -14,6 +14,11 @@ map.getPane("ravenFogPane").style.pointerEvents="none";
 map.createPane("ravenForegroundPane");
 map.getPane("ravenForegroundPane").style.zIndex="700";
 
+/* Der eigene Standort bleibt immer über Grenzen, Fog und POIs sichtbar. */
+map.createPane("ravenUserPane");
+map.getPane("ravenUserPane").style.zIndex="850";
+map.getPane("ravenUserPane").style.pointerEvents="none";
+
 L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   {
@@ -110,7 +115,7 @@ function updateUserMarker(){
 
     userMarker = L.marker(
       [currentLat,currentLon],
-      {icon,pane:"ravenForegroundPane",zIndexOffset:1000}
+      {icon,pane:"ravenUserPane",zIndexOffset:1000}
     ).addTo(map);
 
   }else{
@@ -258,3 +263,4 @@ function updateMapModeUI(){
     .getElementById("exploreModeButton")
     .classList.toggle("active",mapMode==="explore");
 }
+
