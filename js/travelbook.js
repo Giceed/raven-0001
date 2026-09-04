@@ -222,87 +222,37 @@ async function maybeReverseGeocode(lat,lon,force=false){
    ========================================================== */
 
 function renderTravelBook(){
-
   const list=document.getElementById("travelList");
-
   list.innerHTML="";
+  const districtNames=["Bad Wünnenberg","Bleiwäsche","Elisenhof","Fürstenberg","Haaren","Helmern","Leiberg"];
+  const group=document.createElement("div");
+  group.className="municipality-group";
+  const title=document.createElement("div");
+  title.className="municipality-title";
+  title.textContent="🏙️ Stadt Bad Wünnenberg";
+  group.appendChild(title);
 
-  const countries=
-    new Set(
-      discoveredPlaces
-        .map(p=>p.country)
-        .filter(Boolean)
-    ).size;
-
-  const regions=
-    new Set(
-      discoveredPlaces
-        .map(p=>p.region)
-        .filter(Boolean)
-    ).size;
-
-  document.getElementById("travelSummary").textContent =
-    `${discoveredPlaces.length} Orte · ${regions} Regionen · ${countries} Länder`;
-
-  const groups=new Map();
-
-  discoveredPlaces.forEach(place=>{
-    const municipality=place.municipality ||
-      (normalizePlaceName(place.name).includes("fürstenberg")
-        ? "Bad Wünnenberg"
-        : place.name);
-
-    if(!groups.has(municipality)) groups.set(municipality,[]);
-    groups.get(municipality).push(place);
+  let knownCount=0;
+  districtNames.forEach(name=>{
+    const saved=discoveredPlaces.find(place=>normalizePlaceName(place.name)===normalizePlaceName(name));
+    const place=saved||{name,district:name,municipality:"Bad Wünnenberg",region:"Nordrhein-Westfalen",country:"Deutschland",unknown:true};
+    if(saved)knownCount++;
+    const points=pointsForTravelPlace(name);
+    const found=points.filter(isDiscovered).length;
+    const element=document.createElement("div");
+    element.className="place";
+    element.innerHTML=`<div class="place-row"><div><div class="place-name district-indent">${saved?"📍":"❔"} ${escapeHTML(name)}</div><div class="place-meta">${saved?"ORT ENTDECKT":"ORT UNBEKANNT"} · ${found}/${points.length} Punkte entdeckt · ${points.length-found} unbekannt</div></div><div class="place-arrow">›</div></div>`;
+    element.onclick=()=>openPlaceDetail(place);
+    group.appendChild(element);
   });
+  list.appendChild(group);
+  document.getElementById("travelSummary").textContent=`${knownCount}/7 Orte entdeckt · ${ALL_POINTS.length} Punkte im Testgebiet`;
+}
 
-  [...groups.entries()]
-    .reverse()
-    .forEach(([municipality,places])=>{
-
-      const group=document.createElement("div");
-      group.className="municipality-group";
-
-      const title=document.createElement("div");
-      title.className="municipality-title";
-      title.textContent=`🏙️ ${municipality}`;
-      group.appendChild(title);
-
-      [...places].reverse().forEach(place=>{
-
-      const element=document.createElement("div");
-
-      element.className="place";
-
-      element.innerHTML=`
-        <div class="place-row">
-
-          <div>
-            <div class="place-name district-indent">
-              📍 ${escapeHTML(place.name)}
-            </div>
-
-            <div class="place-meta">
-              ${escapeHTML(
-                [place.region,place.country]
-                  .filter(Boolean)
-                  .join(" · ")
-              )}
-            </div>
-          </div>
-
-          <div class="place-arrow">›</div>
-
-        </div>
-      `;
-
-      element.onclick=()=>openPlaceDetail(place);
-
-      group.appendChild(element);
-      });
-
-      list.appendChild(group);
-    });
+function pointsForTravelPlace(name){
+  return ALL_POINTS.filter(point=>
+    normalizePlaceName(point.district||(point.id.startsWith("concept-")?"":"Fürstenberg"))===normalizePlaceName(name)
+  );
 }
 
 function openPlaceDetail(place){
@@ -316,76 +266,28 @@ function openPlaceDetail(place){
 
   detail.classList.add("active");
 
-  const isFuerstenberg =
-    normalizePlaceName(place.name)
-      .includes("fürstenberg");
-
-  if(!isFuerstenberg){
-
-    detail.innerHTML=`
-
-      <div class="detail-header">
-
-        <div class="detail-place-name">
-          📍 ${escapeHTML(place.name)}
-        </div>
-
-        <div class="detail-meta">
-          ${escapeHTML(
-            [place.region,place.country]
-              .filter(Boolean)
-              .join(" · ")
-          )}
-        </div>
-
-        <div class="detail-status">
-          ENTDECKT
-        </div>
-
-      </div>
-
-      <div class="message">
-        Die Ortsgrenze ist erfasst. Eigene Erkundungspunkte
-        folgen in einer späteren Version.
-      </div>
-
-      <button
-        class="secondary back-button"
-        onclick="closePlaceDetail()">
-        ← Zurück zu Ravens Reisen
-      </button>
-    `;
-
-    return;
-  }
-
-  const requiredRows=
-    FUERSTENBERG.explorationPOIs
-      .map(point=>detailPointHTML(point))
-      .join("");
-
-  const activityRows=
-    FUERSTENBERG.activityPOIs
-      .map(point=>detailPointHTML(point))
-      .join("");
+  const placePoints=pointsForTravelPlace(place.name);
+  const explorationPoints=placePoints.filter(point=>point.type==="exploration");
+  const activityPoints=placePoints.filter(point=>point.type==="activity");
+  const requiredRows=explorationPoints.map(point=>detailPointHTML(point)).join("");
+  const activityRows=activityPoints.map(point=>detailPointHTML(point)).join("");
+  const foundExploration=explorationPoints.filter(isDiscovered).length;
+  const foundActivities=activityPoints.filter(isDiscovered).length;
 
   detail.innerHTML=`
 
     <div class="detail-header">
 
       <div class="detail-place-name">
-        🏘️ Fürstenberg
+        ${place.unknown?"❔":"📍"} ${escapeHTML(place.name)}
       </div>
 
       <div class="detail-meta">
-        Nordrhein-Westfalen · Deutschland
+        ${place.unknown?"ORT NOCH UNBEKANNT · ":""}Nordrhein-Westfalen · Deutschland
       </div>
 
       <div class="detail-status">
-        ${fuerstenbergMission.completed
-          ? "ERKUNDET ✓"
-          : `${fuerstenbergMission.visitedPOIs.length}/${FUERSTENBERG.explorationPOIs.length} ERKUNDUNGSPUNKTE`
-        }
+        ${foundExploration}/${explorationPoints.length} ERKUNDUNGSPUNKTE · ${foundActivities}/${activityPoints.length} AKTIVITÄTEN
       </div>
 
     </div>
