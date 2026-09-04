@@ -82,6 +82,16 @@ if (!localStorage.getItem("ravenV26RadiusTestR4Done")) {
   localStorage.setItem("ravenV26RadiusTestR4Done","1");
 }
 
+/* Fürstenberg-Konzeptstand: Alle Punkte beginnen wieder unbekannt. */
+if(!localStorage.getItem("ravenV27AllUnknownResetDone")){
+  localStorage.setItem("ravenFuerstenbergMission",JSON.stringify({
+    visitedPOIs:[],
+    visitedActivities:[],
+    completed:false
+  }));
+  localStorage.setItem("ravenV27AllUnknownResetDone","1");
+}
+
 /* ==========================================================
    TESTGEBIET
    Ganz Deutschland bleibt auf der Karte erreichbar. Für die
