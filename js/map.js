@@ -9,7 +9,7 @@ const BAD_WUENNENBERG_BOUNDS = L.latLngBounds(
 
 const map = L.map("map",{
   zoomControl:false,
-  minZoom:11,
+  minZoom:14,
   maxBounds:BAD_WUENNENBERG_BOUNDS,
   maxBoundsViscosity:1
 }).setView([51.5157,8.741],15);
@@ -194,6 +194,8 @@ function toggleGodMode(){
 
   if(godMode){
 
+    map.setMinZoom(11);
+
     followUser = false;
 
     document.getElementById("statusText").textContent="GOD";
@@ -205,6 +207,9 @@ function toggleGodMode(){
     );
 
   }else{
+
+    map.setMinZoom(14);
+    if(map.getZoom()<14) map.setZoom(14);
 
     disableGodModeView();
 
@@ -220,6 +225,7 @@ function toggleGodMode(){
 
   updateFollowUI();
   updateUserMarker();
+  updateAllPointStates(currentLat??TEST_REGION.centerLat,currentLon??TEST_REGION.centerLon);
 }
 
 async function toggleGodModeView(){
