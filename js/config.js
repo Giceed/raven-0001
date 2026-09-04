@@ -37,6 +37,24 @@ if (!localStorage.getItem("ravenV25DistrictResetDone")) {
   localStorage.setItem("ravenV25DistrictResetDone","1");
 }
 
+/* V2.6: Einen Pflichtpunkt für Radius- und God-Mode-Tests offenhalten. */
+if (!localStorage.getItem("ravenV26RadiusTestResetDone")) {
+  const mission = JSON.parse(
+    localStorage.getItem("ravenFuerstenbergMission") || "{}"
+  );
+
+  mission.visitedPOIs = (mission.visitedPOIs || [])
+    .filter(id => id !== "rathaus");
+  mission.visitedActivities = mission.visitedActivities || [];
+  mission.completed = false;
+
+  localStorage.setItem(
+    "ravenFuerstenbergMission",
+    JSON.stringify(mission)
+  );
+  localStorage.setItem("ravenV26RadiusTestResetDone","1");
+}
+
 /* ==========================================================
    TESTGEBIET
    Ganz Deutschland bleibt auf der Karte erreichbar. Für die
