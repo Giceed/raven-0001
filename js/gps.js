@@ -22,6 +22,8 @@ function startExploration(){
   tracking=true;
   sessionDistance=0;
   lastPosition=null;
+  followUser=true;
+  updateFollowUI();
 
   document.getElementById("exploreButton").textContent =
     "Erkundung beenden";
@@ -130,6 +132,11 @@ function handlePosition(position){
       "Aktiv";
 
     setMessage("📍 GPS aktiv – Raven folgt dir.");
+
+    /* Nach einem God-Mode-Test sofort zum echten Standort zurückkehren. */
+    internalMapMove=true;
+    map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true});
+    setTimeout(()=>internalMapMove=false,500);
   }
 
   document.getElementById("gpsInfo").textContent =
@@ -231,3 +238,4 @@ function saveExploredPoint(lat,lon){
     JSON.stringify(exploredPoints)
   );
 }
+
