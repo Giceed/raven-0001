@@ -28,6 +28,49 @@ let userMarker = null;
 let pointMarkers = {};
 let boundaryLayer = null;
 let fuerstenbergBoundary = null;
+let currentPlaceBoundaryLayer = null;
+let testRegionLayer = null;
+
+function drawTestRegion(){
+  if(testRegionLayer) return;
+
+  testRegionLayer=L.circle(
+    [TEST_REGION.centerLat,TEST_REGION.centerLon],
+    {
+      radius:TEST_REGION.radiusMeters,
+      pane:"ravenForegroundPane",
+      color:"#a855f7",
+      weight:2,
+      opacity:.7,
+      dashArray:"8 8",
+      fill:false,
+      interactive:false
+    }
+  ).addTo(map);
+}
+
+function showCurrentPlaceBoundary(geojson){
+  if(currentPlaceBoundaryLayer){
+    map.removeLayer(currentPlaceBoundaryLayer);
+    currentPlaceBoundaryLayer=null;
+  }
+
+  if(!geojson || !["Polygon","MultiPolygon"].includes(geojson.type)) return false;
+
+  currentPlaceBoundaryLayer=L.geoJSON(geojson,{
+    pane:"ravenForegroundPane",
+    interactive:false,
+    style:{
+      color:"#c084fc",
+      weight:3,
+      opacity:.95,
+      fillColor:"#7e22ce",
+      fillOpacity:.04
+    }
+  }).addTo(map);
+
+  return true;
+}
 
 let followUser = true;
 let internalMapMove = false;
@@ -133,6 +176,8 @@ map.on("click",event=>{
   map.panTo([currentLat,currentLon]);
 
   setTimeout(()=>internalMapMove=false,300);
+
+  maybeReverseGeocode(currentLat,currentLon,true);
 
   setTemporaryMessage("⚡ Raven wurde teleportiert.");
 });

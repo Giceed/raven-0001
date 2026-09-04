@@ -1,11 +1,11 @@
 /* ==========================================================
-   V2.3 TEST-RESET
+   V2.4 TEST-RESET
    - Fürstenberg ist als aktueller Standort und Reiseeintrag bekannt.
    - 2 Erkundungspunkte + 2 Aktivitäten sind für schnelle Tests
      bereits freigeschaltet.
    ========================================================== */
 
-if (!localStorage.getItem("ravenV23SplitResetDone")) {
+if (!localStorage.getItem("ravenV24RegionResetDone2")) {
 
   localStorage.removeItem("ravenExploredPoints");
   localStorage.removeItem("ravenTravelHistory");
@@ -32,8 +32,23 @@ if (!localStorage.getItem("ravenV23SplitResetDone")) {
   );
 
   localStorage.setItem("ravenMapMode","explore");
-  localStorage.setItem("ravenV23SplitResetDone","1");
+  localStorage.setItem("ravenV24RegionResetDone2","1");
 }
+
+/* ==========================================================
+   TESTGEBIET
+   Ganz Deutschland bleibt auf der Karte erreichbar. Für die
+   erste Testphase werden Orte im 100-km-Kreis um Fürstenberg
+   automatisch erkannt und mit ihrer OSM-Ortsgrenze versehen.
+   ========================================================== */
+
+const TEST_REGION = {
+  name:"100 km um Fürstenberg",
+  centerLat:51.5157,
+  centerLon:8.741,
+  radiusMeters:100000,
+  countryCode:"de"
+};
 
 /* ==========================================================
    FÜRSTENBERG

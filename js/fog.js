@@ -232,6 +232,10 @@ async function loadFuerstenbergBoundary(){
       document
         .getElementById("boundaryStatus")
         .classList.add("ok");
+
+      if(!fuerstenbergMission.completed){
+        showCurrentPlaceBoundary(fuerstenbergBoundary.geometry);
+      }
     } else {
       document.getElementById("boundaryStatus").textContent =
         "Ortsgrenze wird nach Entdeckung verfügbar …";
@@ -259,6 +263,11 @@ function updateBoundaryOutline(){
     !fuerstenbergMission.completed ||
     !fuerstenbergBoundary
   ) return;
+
+  if(currentPlaceBoundaryLayer){
+    map.removeLayer(currentPlaceBoundaryLayer);
+    currentPlaceBoundaryLayer=null;
+  }
 
   boundaryLayer=L.geoJSON(
     fuerstenbergBoundary,
