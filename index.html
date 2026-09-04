@@ -169,16 +169,18 @@ button{
   left:10px;
   top:10px;
   background:#0d1117f2;
-  border:1px solid #30363d;
+  border:1px solid #8b5cf6;
   border-radius:9px;
-  overflow:hidden
+  overflow:hidden;
+  background:#3b0764ee;
+  box-shadow:0 0 14px #7c3aed88
 }
 .god-button{
   width:auto;
   padding:8px 10px;
   border-radius:0;
   background:transparent;
-  color:#8b949e;
+  color:#e9d5ff;
   font-size:9px
 }
 .god-hint{
@@ -187,7 +189,7 @@ button{
   font-size:8px;
   color:#fbbf24
 }
-.god-box.active{border-color:#f59e0b}
+.god-box.active{border-color:#f59e0b;background:#451a03ee;box-shadow:0 0 16px #f59e0b99}
 .god-box.active .god-button{color:#fbbf24}
 .god-box.active .god-hint{display:block}
 
@@ -504,7 +506,7 @@ button{
 </div>
 
 <div class="version">
-RAVEN PROTOTYPE V2.0 · DEV
+RAVEN PROTOTYPE V2.1 · DEV
 </div>
 
 </div>
@@ -710,6 +712,10 @@ const map = L.map("map",{
 }).setView([51.5157,8.741],15);
 
 /* Marker liegen bewusst über dem Erkundungsnebel. */
+map.createPane("ravenFogPane");
+map.getPane("ravenFogPane").style.zIndex="450";
+map.getPane("ravenFogPane").style.pointerEvents="none";
+
 map.createPane("ravenForegroundPane");
 map.getPane("ravenForegroundPane").style.zIndex="700";
 
@@ -933,7 +939,7 @@ function createFogLayer(){
 
   fogSvg.classList.add("raven-fog-svg");
 
-  document.getElementById("map").appendChild(fogSvg);
+  map.getPane("ravenFogPane").appendChild(fogSvg);
 
   redrawFog();
 }
