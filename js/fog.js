@@ -199,29 +199,19 @@ map.on("move zoom resize",redrawFog);
    ========================================================== */
 
 async function loadFuerstenbergBoundary(){
-
-  const crs=encodeURIComponent(
-    "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-  );
-
-  const url=
-    "https://ogc-api.nrw.de/lika/v1/collections/" +
-    "katasterbezirk/items/" +
-    FUERSTENBERG.boundaryObjectId +
-    "?f=json&crs=" + crs;
-
   try{
 
-    const response=await fetch(url);
+    const response=await fetch("data/fuerstenberg-boundary.json?v=1");
 
     if(!response.ok) throw new Error();
 
     const data=await response.json();
 
-    fuerstenbergBoundary =
-      data.type==="Feature"
-        ? data
-        : data.features?.[0];
+    fuerstenbergBoundary={
+      type:"Feature",
+      properties:{name:"Fürstenberg"},
+      geometry:data.geojson
+    };
 
     if(!fuerstenbergBoundary) throw new Error();
 
@@ -281,3 +271,4 @@ function updateBoundaryOutline(){
     }
   ).addTo(map);
 }
+
