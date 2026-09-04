@@ -20,6 +20,7 @@
     <div class="toolbar">
       <div class="place-search-wrap"><input class="search" id="placeSearch" value="Fürstenberg" placeholder="Ortsteil suchen" oninput="renderLocalPlaceSuggestions(this.value)" autocomplete="off"><div class="place-suggestions" id="placeSuggestions"></div></div>
       <button onclick="searchPlace()">🔎 Ort suchen</button>
+      <button onclick="showWholeCity()">🏙 Alle Ortsteile</button>
       <select id="searchRadius" title="Suchradius"><option value="1500">1,5 km</option><option value="3000" selected>3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select>
       <button class="primary" onclick="loadCandidates()">OSM-Punkte laden</button>
       <button onclick="exportProject()">⬇ Export</button>
@@ -80,6 +81,15 @@ function chooseLocalPlace(name){
   document.getElementById("placeSuggestions").classList.remove("open");
   searchPlace();
 }
+
+function showWholeCity(){
+  selectedGeojson=null;
+  if(selectedAreaLayer){map.removeLayer(selectedAreaLayer);selectedAreaLayer=null;}
+  document.getElementById("placeSearch").value="";
+  map.fitBounds(BAD_WUENNENBERG_BOUNDS,{padding:[25,25]});
+  applyPoiFilters();
+  setMessage("Gesamtes Stadtgebiet Bad Wünnenberg mit allen Ortsteilen.");
+}
 const endpoints=["https://overpass.kumi.systems/api/interpreter","https://overpass-api.de/api/interpreter"];
 
 const ravenBasePoints=[
@@ -96,6 +106,22 @@ function mergeRavenBasePoints(){
     if(!existing.has(point.id)) state.candidates.unshift({...point});
   });
   localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+}
+
+async function mergeCityPoiCatalog(){
+  try{
+    const response=await fetch("../data/bad-wuennenberg-pois.json?v=1");
+    if(!response.ok)throw new Error();
+    const catalog=await response.json();
+    const previous=new Map(state.candidates.map(candidate=>[candidate.id,candidate]));
+    catalog.points.forEach(point=>{
+      const saved=previous.get(point.id);
+      if(saved)Object.assign(saved,{...point,status:saved.status,lat:saved.lat,lon:saved.lon,radius:saved.radius,category:saved.category});
+      else state.candidates.push(point);
+    });
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+    return catalog.points.length;
+  }catch(error){setMessage("Der Bad-Wünnenberg-Punktkatalog konnte nicht geladen werden.");return 0;}
 }
 
 function esc(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));}
@@ -180,7 +206,7 @@ function matchesPoiFilter(c){const groups={fountain:["fountain","foraging"],play
 function setPoiFilter(group,button){activePoiGroup=group;document.querySelectorAll("#filters button").forEach(b=>b.classList.remove("active"));button.classList.add("active");applyPoiFilters();}
 function applyPoiFilters(){renderMarkers();renderList();}
 function renderMarkers(){markers.forEach(m=>map.removeLayer(m));markers.clear();state.candidates.forEach((c,i)=>{if(!matchesPoiFilter(c))return;const icon=L.divIcon({className:"",html:`<div class="marker ${c.category} ${c.status}">${i+1}</div>`,iconSize:[34,34],iconAnchor:[17,17]});const marker=L.marker([c.lat,c.lon],{icon}).addTo(map).on("click",()=>selectCandidate(c.id));markers.set(c.id,marker);});}
-function renderList(){const list=document.getElementById("candidateList"),visible=state.candidates.filter(matchesPoiFilter);if(!visible.length){list.innerHTML='<div class="empty">Keine passenden Punkte in diesem Filter.</div>';return;}list.innerHTML=visible.map(c=>{const i=state.candidates.indexOf(c);return `<button class="candidate ${c.status} ${c.id===selectedId?'selected':''}" onclick="selectCandidate('${c.id}')"><div class="candidate-name">${i+1}. ${esc(c.name)}</div><div class="candidate-sub">${c.category==='activity'?'Aktivität':'Erkundung'} · ${esc(c.rawType)} · ${c.radius} m · ${c.status}</div></button>`}).join("");}
+function renderList(){const list=document.getElementById("candidateList"),visible=state.candidates.filter(matchesPoiFilter);if(!visible.length){list.innerHTML='<div class="empty">Keine passenden Punkte in diesem Filter.</div>';return;}list.innerHTML=visible.map(c=>{const i=state.candidates.indexOf(c);return `<button class="candidate ${c.status} ${c.id===selectedId?'selected':''}" onclick="selectCandidate('${c.id}')"><div class="candidate-name">${i+1}. ${esc(c.name)}</div><div class="candidate-sub">${esc(c.district||'Fürstenberg')} · ${c.category==='activity'?'Aktivität':'Erkundung'} · ${esc(c.rawType)} · ${c.radius} m · ${c.status}</div></button>`}).join("");}
 function selectCandidate(id){const c=state.candidates.find(x=>x.id===id);if(!c)return;selectedId=id;editor.hidden=false;editName.textContent=c.name;editMeta.textContent=`${c.source||"OpenStreetMap"}${c.osmType?` · OSM ${c.osmType} ${c.osmId}`:""} · ${c.rawType} · Bewertung ${c.score}/100 · Zugang ${c.access}`;editCategory.value=c.category;editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);renderList();map.panTo([c.lat,c.lon]);}
 function showRadius(c){if(radiusCircle)map.removeLayer(radiusCircle);radiusCircle=L.circle([c.lat,c.lon],{radius:c.radius,color:c.category==="activity"?"#f97316":"#8b5cf6",weight:3,fillOpacity:.18,dashArray:"8 5"}).addTo(map);radiusCircle.bringToBack();}
 function syncRadius(value){const c=current();if(!c)return;c.radius=Math.max(15,Math.min(1000,+value||15));editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);save();}
@@ -241,7 +267,8 @@ async function renderBoundaries(){
 function exportProject(){const payload={format:"raven-poi-review",version:1,exportedAt:new Date().toISOString(),center:state.center,candidates:state.candidates};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="raven-pois-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(url);setMessage("Raven-Projekt exportiert.");}
 async function importProject(event){try{const data=JSON.parse(await event.target.files[0].text());if(!Array.isArray(data.candidates))throw Error();state.center=data.center||state.center;state.candidates=data.candidates;save();renderMarkers();fitAll();setMessage("Projekt importiert.");}catch(e){setMessage("Diese Datei ist kein gültiges Raven-Projekt.");}event.target.value="";}
 
-mergeRavenBasePoints();if(!BAD_WUENNENBERG_PLACES.includes(state.center.name))state.center={lat:51.5157,lon:8.741,name:"Fürstenberg"};placeSearch.value=state.center.name;renderStats();renderList();renderMarkers();if(state.candidates.length)fitAll();
+async function initializeStudio(){mergeRavenBasePoints();const loaded=await mergeCityPoiCatalog();if(!BAD_WUENNENBERG_PLACES.includes(state.center.name))state.center={lat:51.5157,lon:8.741,name:"Fürstenberg"};placeSearch.value=state.center.name;renderStats();renderList();renderMarkers();showWholeCity();setMessage(`${loaded} OSM-Punkte für Bad Wünnenberg und seine Ortsteile geladen.`);}
+initializeStudio();
 </script>
 </body>
 </html>
