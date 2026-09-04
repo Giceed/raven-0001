@@ -40,6 +40,16 @@ function updateAllPointStates(lat,lon){
 
 function renderPointMarker(point,discovered,inRange,distance){
 
+  const district=point.district||(point.id.startsWith("concept-")?"":"Fürstenberg");
+  const districtKnown=discoveredPlaces.some(place=>normalizePlaceName(place.name)===normalizePlaceName(district));
+  if(!godMode&&!districtKnown){
+    if(pointMarkers[point.id]){
+      map.removeLayer(pointMarkers[point.id]);
+      delete pointMarkers[point.id];
+    }
+    return;
+  }
+
   let css="poi-marker";
 
   if(point.type==="activity"){
