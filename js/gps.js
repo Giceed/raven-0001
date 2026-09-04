@@ -112,13 +112,15 @@ function handlePosition(position){
   const lon=coords.longitude;
   const accuracy=coords.accuracy;
 
-  if(accuracy && accuracy>35){
+  const preciseEnoughForExploration = !accuracy || accuracy<=100;
 
-    document.getElementById("gpsInfo").textContent =
-      `GPS ungenau ±${Math.round(accuracy)} m`;
-
-    return;
-  }
+  /* Desktop-Browser liefern den Standort oft nur grob über WLAN/IP.
+     Die Position trotzdem anzeigen, aber damit nichts entdecken. */
+  const locationZoom =
+    accuracy>3000 ? 10 :
+    accuracy>1000 ? 11 :
+    accuracy>300  ? 13 :
+    accuracy>100  ? 14 : 16;
 
   currentLat=lat;
   currentLon=lon;
@@ -135,7 +137,7 @@ function handlePosition(position){
 
     /* Nach einem God-Mode-Test sofort zum echten Standort zurückkehren. */
     internalMapMove=true;
-    map.setView([lat,lon],Math.max(map.getZoom(),16),{animate:true});
+    map.setView([lat,lon],locationZoom,{animate:true});
     setTimeout(()=>internalMapMove=false,500);
   }
 
@@ -152,14 +154,14 @@ function handlePosition(position){
 
     map.setView(
       [lat,lon],
-      Math.max(map.getZoom(),16),
+      locationZoom,
       {animate:true}
     );
 
     setTimeout(()=>internalMapMove=false,500);
   }
 
-  if(lastPosition){
+  if(preciseEnoughForExploration && lastPosition){
 
     const moved=haversineDistance(
       lastPosition.lat,
@@ -197,9 +199,10 @@ function handlePosition(position){
 
   lastPosition={lat,lon};
 
-  saveExploredPoint(lat,lon);
-
-  updateAllPointStates(lat,lon);
+  if(preciseEnoughForExploration){
+    saveExploredPoint(lat,lon);
+    updateAllPointStates(lat,lon);
+  }
 
   maybeReverseGeocode(lat,lon);
 
