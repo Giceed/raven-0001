@@ -68,19 +68,6 @@ async function cutMapToBadWuennenberg(){
       fillRule:"evenodd",interactive:false
     }).addTo(map);
 
-    /* Alle verfügbaren Ortsteilgrenzen sind in der normalen Karte lila sichtbar. */
-    data.features.forEach(feature=>{
-      feature.lines.forEach(line=>{
-        L.polyline(line,{
-          pane:"ravenForegroundPane",
-          color:"#c084fc",
-          weight:feature.level===8 ? 4 : 3,
-          opacity:.95,
-          dashArray:feature.level===8 ? null : "7 6",
-          interactive:false
-        }).addTo(map);
-      });
-    });
   }catch(error){
     console.warn("Stadtgrenzen-Ausschnitt konnte nicht geladen werden.",error);
   }
