@@ -93,5 +93,5 @@ async function loadVisibleAdministrativeBoundaries(){
   }
 }
 
-map.on("moveend zoomend",scheduleBoundaryLoad);
+/* Der große 100-km-Grenzdatensatz bleibt im reduzierten Teststand deaktiviert. */
 
