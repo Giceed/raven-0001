@@ -9,8 +9,8 @@ const BAD_WUENNENBERG_BOUNDS = L.latLngBounds(
 
 const map = L.map("map",{
   zoomControl:false,
-  minZoom:11,
-  maxBounds:BAD_WUENNENBERG_BOUNDS.pad(0.03),
+  minZoom:13,
+  maxBounds:BAD_WUENNENBERG_BOUNDS,
   maxBoundsViscosity:1
 }).setView([51.5157,8.741],15);
 
