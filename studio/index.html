@@ -50,7 +50,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const STORAGE_KEY="ravenStudioV1";
-const map=L.map("map",{preferCanvas:true}).setView([51.5157,8.741],14);
+const BAD_WUENNENBERG_BOUNDS=L.latLngBounds([51.447216,8.625182],[51.615433,8.846116]);
+const map=L.map("map",{preferCanvas:true,minZoom:11,maxBounds:BAD_WUENNENBERG_BOUNDS.pad(.03),maxBoundsViscosity:1}).setView([51.5157,8.741],14);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
 const state=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")||{center:{lat:51.5157,lon:8.741,name:"Fürstenberg, Bad Wünnenberg"},candidates:[]};
 let markers=new Map(),selectedId=null,radiusCircle=null,moveId=null;
