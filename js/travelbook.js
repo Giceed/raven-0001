@@ -4,6 +4,7 @@
 
 let lastGeocodeTime=0;
 let lastGeocodePosition=null;
+const placeBoundaryCache=new Map();
 
 async function maybeReverseGeocode(lat,lon,force=false){
 
@@ -29,13 +30,44 @@ async function maybeReverseGeocode(lat,lon,force=false){
   lastGeocodeTime=now;
   lastGeocodePosition={lat,lon};
 
+  const distanceFromCenter=haversineDistance(
+    TEST_REGION.centerLat,
+    TEST_REGION.centerLon,
+    lat,
+    lon
+  );
+
+  const inTestRegion=distanceFromCenter<=TEST_REGION.radiusMeters;
+
+  const testStatus=document.getElementById("testRegionStatus");
+  testStatus.textContent=inTestRegion
+    ? `🧭 Im Testgebiet · ${Math.round(distanceFromCenter/1000)} km von Fürstenberg`
+    : `⚠ Außerhalb des Testgebiets · ${Math.round(distanceFromCenter/1000)} km von Fürstenberg`;
+  testStatus.className=`boundary-status test-region-status ${inTestRegion ? "ok" : "outside"}`;
+
+  if(!inTestRegion){
+    document.getElementById("boundaryStatus").textContent=
+      "Orte werden in V2.4 innerhalb des 100-km-Testgebiets gespeichert.";
+    document.getElementById("boundaryStatus").className="boundary-status outside";
+    return;
+  }
+
+  const boundaryStatus=document.getElementById("boundaryStatus");
+  boundaryStatus.textContent="Ortsname und Ortsgrenze werden geladen …";
+  boundaryStatus.className="boundary-status loading";
+
   try{
 
     const url=
-      "https://api.bigdatacloud.net/data/reverse-geocode-client" +
-      "?latitude=" + encodeURIComponent(lat) +
-      "&longitude=" + encodeURIComponent(lon) +
-      "&localityLanguage=de";
+      "https://nominatim.openstreetmap.org/reverse" +
+      "?format=jsonv2" +
+      "&lat=" + encodeURIComponent(lat) +
+      "&lon=" + encodeURIComponent(lon) +
+      "&zoom=18" +
+      "&addressdetails=1" +
+      "&polygon_geojson=1" +
+      "&polygon_threshold=0.001" +
+      "&accept-language=de";
 
     const response=await fetch(url);
 
@@ -43,17 +75,67 @@ async function maybeReverseGeocode(lat,lon,force=false){
 
     const data=await response.json();
 
+    const address=data.address || {};
+
     const name=
-      data.locality ||
-      data.city ||
-      data.principalSubdivision ||
+      address.village ||
+      address.town ||
+      address.city ||
+      address.municipality ||
+      address.suburb ||
+      address.hamlet ||
       "Unbekannter Ort";
 
     const region=
-      data.principalSubdivision || "";
+      address.state || address.county || "";
 
     const country=
-      data.countryName || "";
+      address.country || "";
+
+    const placeKey=normalizePlaceName(
+      [name,address.postcode,region,country].filter(Boolean).join("|")
+    );
+
+    let geometry=placeBoundaryCache.get(placeKey) || data.geojson;
+
+    if(!geometry || !["Polygon","MultiPolygon"].includes(geometry.type)){
+      /* Die genaue Rückwärtssuche liefert häufig ein Gebäude oder eine
+         Straße. Eine zweite, gedrosselte Ortssuche holt dann die echte
+         Fläche des erkannten Dorfs oder Stadtteils. */
+      await new Promise(resolve=>setTimeout(resolve,1100));
+
+      const query=[name,address.postcode,region,country]
+        .filter(Boolean)
+        .join(", ");
+
+      const searchUrl=
+        "https://nominatim.openstreetmap.org/search" +
+        "?format=jsonv2" +
+        "&q=" + encodeURIComponent(query) +
+        "&limit=1" +
+        "&addressdetails=1" +
+        "&polygon_geojson=1" +
+        "&polygon_threshold=0.001" +
+        "&countrycodes=de" +
+        "&accept-language=de";
+
+      const searchResponse=await fetch(searchUrl);
+
+      if(searchResponse.ok){
+        const matches=await searchResponse.json();
+        geometry=matches[0]?.geojson || geometry;
+      }
+    }
+    const boundaryShown=showCurrentPlaceBoundary(geometry);
+
+    if(boundaryShown){
+      placeBoundaryCache.set(placeKey,geometry);
+      boundaryStatus.textContent="✓ Ortsgrenze von OpenStreetMap geladen";
+      boundaryStatus.className="boundary-status ok";
+    }else{
+      boundaryStatus.textContent="⚠ Für diesen Ort ist noch keine Flächengrenze verfügbar.";
+      boundaryStatus.className="boundary-status outside";
+    }
 
     document.getElementById("locationName").textContent =
       name;
@@ -73,6 +155,11 @@ async function maybeReverseGeocode(lat,lon,force=false){
         name,
         region,
         country,
+        osmType:data.osm_type || "",
+        osmId:data.osm_id || null,
+        boundaryAvailable:boundaryShown,
+        lat,
+        lon,
         discoveredAt:Date.now()
       });
 
@@ -90,16 +177,14 @@ async function maybeReverseGeocode(lat,lon,force=false){
       renderTravelBook();
       updateMissionUI();
 
-      if (isFuerstenbergDiscovered() && fuerstenbergBoundary) {
-        document.getElementById("boundaryStatus").textContent =
-          "✓ Amtliche Gemarkungsgrenze geladen";
-        document.getElementById("boundaryStatus").classList.add("ok");
-      }
     }
 
     updateUI();
 
-  }catch(error){}
+  }catch(error){
+    boundaryStatus.textContent="⚠ Ort oder Ortsgrenze konnte nicht geladen werden.";
+    boundaryStatus.className="boundary-status outside";
+  }
 }
 
 
@@ -206,8 +291,8 @@ function openPlaceDetail(place){
       </div>
 
       <div class="message">
-        Für diesen Ort sind in V1.8 noch keine
-        Erkundungspunkte hinterlegt.
+        Die Ortsgrenze ist erfasst. Eigene Erkundungspunkte
+        folgen in einer späteren Version.
       </div>
 
       <button
