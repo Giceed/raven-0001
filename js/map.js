@@ -252,8 +252,8 @@ async function toggleGodModeView(){
         allPoints.push(...line);
         L.polyline(line,{
           pane:"ravenForegroundPane",
-          color:"#facc15",
-          weight:feature.level===8 ? 5 : 3,
+          color:feature.level===8 ? "#facc15" : "#c084fc",
+          weight:feature.level===8 ? 5 : 4,
           opacity:.98,
           dashArray:feature.level===8 ? null : "8 6",
           interactive:true
@@ -269,7 +269,7 @@ async function toggleGodModeView(){
       map.fitBounds(allPoints,{padding:[25,25],maxZoom:12});
       setTimeout(()=>internalMapMove=false,600);
     }
-    setTemporaryMessage("👁 GOD MODE VIEW aktiv – Grenzen sind gelb.",5000);
+    setTemporaryMessage("👁 GOD MODE VIEW aktiv – Stadtgrenze gelb, Ortsteile lila.",5000);
   }catch(error){
     setTemporaryMessage("⚠ GOD MODE VIEW konnte nicht geladen werden.");
   }
