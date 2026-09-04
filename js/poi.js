@@ -41,8 +41,8 @@ function updateAllPointStates(lat,lon){
 function renderPointMarker(point,discovered,inRange,distance){
 
   const district=point.district||(point.id.startsWith("concept-")?"":"Fürstenberg");
-  const districtKnown=discoveredPlaces.some(place=>normalizePlaceName(place.name)===normalizePlaceName(district));
-  if(!godMode&&!districtKnown){
+  const districtActive=currentRavenDistrict&&normalizePlaceName(currentRavenDistrict)===normalizePlaceName(district);
+  if(!godMode&&!districtActive){
     if(pointMarkers[point.id]){
       map.removeLayer(pointMarkers[point.id]);
       delete pointMarkers[point.id];
