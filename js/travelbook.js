@@ -250,7 +250,7 @@ function renderTravelBook(){
     const found=points.filter(isDiscovered).length;
     const element=document.createElement("div");
     element.className="place";
-    element.innerHTML=`<div class="place-row"><div><div class="place-name district-indent">${saved?"📍":"❔"} ${escapeHTML(name)}</div><div class="place-meta">${saved?"ORT ENTDECKT":"ORT UNBEKANNT"} · ${found}/${points.length} Punkte entdeckt · ${points.length-found} unbekannt</div></div><div class="place-arrow">›</div></div>`;
+    element.innerHTML=`<div class="place-row"><div><div class="place-name district-indent">${saved?"📍 "+escapeHTML(name):"❔ Unbekannter Ortsteil"}</div><div class="place-meta">${saved?"ORT ENTDECKT":"NOCH NICHT BETRETEN"} · ${found}/${points.length} Punkte entdeckt · ${points.length-found} unbekannt</div></div><div class="place-arrow">›</div></div>`;
     element.onclick=()=>openPlaceDetail(place);
     group.appendChild(element);
   });
@@ -288,7 +288,7 @@ function openPlaceDetail(place){
     <div class="detail-header">
 
       <div class="detail-place-name">
-        ${place.unknown?"❔":"📍"} ${escapeHTML(place.name)}
+        ${place.unknown?"❔ Unbekannter Ortsteil":"📍 "+escapeHTML(place.name)}
       </div>
 
       <div class="detail-meta">
