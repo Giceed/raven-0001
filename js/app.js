@@ -205,10 +205,6 @@ renderTravelBook();
 
 createFogLayer();
 
-drawTestRegion();
-
-loadVisibleAdministrativeBoundaries();
-
 loadFuerstenbergBoundary();
 
 /* Marker sofort erzeugen */
