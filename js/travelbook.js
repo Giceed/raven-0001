@@ -214,6 +214,7 @@ async function maybeReverseGeocode(lat,lon,force=false){
 
       renderTravelBook();
       updateMissionUI();
+      updateAllPointStates(lat,lon);
 
     }
 
@@ -234,6 +235,18 @@ function renderTravelBook(){
   const list=document.getElementById("travelList");
   list.innerHTML="";
   const districtNames=["Bad Wünnenberg","Bleiwäsche","Elisenhof","Fürstenberg","Haaren","Helmern","Leiberg"];
+  const knownPlaces=districtNames
+    .map(name=>discoveredPlaces.find(place=>normalizePlaceName(place.name)===normalizePlaceName(name)))
+    .filter(Boolean);
+
+  document.getElementById("travelSummary").textContent=
+    `${knownPlaces.length} Orte entdeckt`;
+
+  if(!knownPlaces.length){
+    list.innerHTML='<div class="message">Noch keine Reise entdeckt. Starte GPS, um dein erstes Gebiet freizuschalten.</div>';
+    return;
+  }
+
   const group=document.createElement("div");
   group.className="municipality-group";
   const title=document.createElement("div");
@@ -241,21 +254,17 @@ function renderTravelBook(){
   title.textContent="🏙️ Stadt Bad Wünnenberg";
   group.appendChild(title);
 
-  let knownCount=0;
-  districtNames.forEach(name=>{
-    const saved=discoveredPlaces.find(place=>normalizePlaceName(place.name)===normalizePlaceName(name));
-    const place=saved||{name,district:name,municipality:"Bad Wünnenberg",region:"Nordrhein-Westfalen",country:"Deutschland",unknown:true};
-    if(saved)knownCount++;
+  knownPlaces.forEach(place=>{
+    const name=place.name;
     const points=pointsForTravelPlace(name);
     const found=points.filter(isDiscovered).length;
     const element=document.createElement("div");
     element.className="place";
-    element.innerHTML=`<div class="place-row"><div><div class="place-name district-indent">${saved?"📍 "+escapeHTML(name):"❔ Unbekannter Ortsteil"}</div><div class="place-meta">${saved?"ORT ENTDECKT":"NOCH NICHT BETRETEN"} · ${found}/${points.length} Punkte entdeckt · ${points.length-found} unbekannt</div></div><div class="place-arrow">›</div></div>`;
+    element.innerHTML=`<div class="place-row"><div><div class="place-name district-indent">📍 ${escapeHTML(name)}</div><div class="place-meta">ORT ENTDECKT · ${found}/${points.length} Punkte entdeckt · ${points.length-found} unbekannt</div></div><div class="place-arrow">›</div></div>`;
     element.onclick=()=>openPlaceDetail(place);
     group.appendChild(element);
   });
   list.appendChild(group);
-  document.getElementById("travelSummary").textContent=`${knownCount}/7 Orte entdeckt · ${ALL_POINTS.length} Punkte im Testgebiet`;
 }
 
 function pointsForTravelPlace(name){
