@@ -9,7 +9,7 @@ const BAD_WUENNENBERG_BOUNDS = L.latLngBounds(
 
 const map = L.map("map",{
   zoomControl:false,
-  minZoom:13,
+  minZoom:11,
   maxBounds:BAD_WUENNENBERG_BOUNDS,
   maxBoundsViscosity:1
 }).setView([51.5157,8.741],15);
@@ -27,6 +27,11 @@ map.createPane("ravenUserPane");
 map.getPane("ravenUserPane").style.zIndex="850";
 map.getPane("ravenUserPane").style.pointerEvents="none";
 
+/* Außerhalb der echten Stadtgrenze wird die Karte vollständig ausgeschnitten. */
+map.createPane("ravenTerritoryMaskPane");
+map.getPane("ravenTerritoryMaskPane").style.zIndex="800";
+map.getPane("ravenTerritoryMaskPane").style.pointerEvents="none";
+
 L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   {
@@ -34,6 +39,40 @@ L.tileLayer(
     attribution:"© OpenStreetMap"
   }
 ).addTo(map);
+
+function joinBoundaryLines(lines){
+  const remaining=lines.map(line=>line.map(point=>[point[0],point[1]]));
+  const ring=remaining.shift()||[];
+  const key=point=>point[0].toFixed(6)+","+point[1].toFixed(6);
+  while(remaining.length){
+    const end=key(ring[ring.length-1]);
+    const index=remaining.findIndex(line=>key(line[0])===end||key(line[line.length-1])===end);
+    if(index<0) break;
+    let next=remaining.splice(index,1)[0];
+    if(key(next[next.length-1])===end) next.reverse();
+    ring.push(...next.slice(1));
+  }
+  if(ring.length&&key(ring[0])!==key(ring[ring.length-1])) ring.push(ring[0]);
+  return ring;
+}
+
+async function cutMapToBadWuennenberg(){
+  try{
+    const response=await fetch("data/bad-wuennenberg-boundaries.json?v=2");
+    const data=await response.json();
+    const city=data.features.find(feature=>feature.level===8);
+    const cityRing=joinBoundaryLines(city.lines);
+    const outside=[[-85,-180],[-85,180],[85,180],[85,-180],[-85,-180]];
+    L.polygon([outside,cityRing],{
+      pane:"ravenTerritoryMaskPane",stroke:false,fillColor:"#05070b",fillOpacity:1,
+      fillRule:"evenodd",interactive:false
+    }).addTo(map);
+  }catch(error){
+    console.warn("Stadtgrenzen-Ausschnitt konnte nicht geladen werden.",error);
+  }
+}
+
+cutMapToBadWuennenberg();
 
 L.control.zoom({position:"topright"}).addTo(map);
 
