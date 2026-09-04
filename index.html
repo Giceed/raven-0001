@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
@@ -15,6 +16,7 @@
   />
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -23,10 +25,10 @@
     body {
       margin: 0;
       padding: 0;
+      min-height: 100%;
       background: #080a0d;
       color: #e6edf3;
       font-family: Arial, Helvetica, sans-serif;
-      min-height: 100%;
     }
 
     body {
@@ -41,8 +43,8 @@
 
     .topbar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       margin-bottom: 14px;
     }
 
@@ -65,7 +67,7 @@
       border-radius: 18px;
       padding: 16px;
       margin-bottom: 14px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 8px 30px rgba(0,0,0,.25);
     }
 
     .raven {
@@ -97,18 +99,18 @@
     }
 
     .xpbar {
-      width: 100%;
       height: 9px;
+      width: 100%;
       background: #21262d;
       border-radius: 20px;
       overflow: hidden;
     }
 
     .xpfill {
-      width: 0%;
       height: 100%;
-      background: linear-gradient(90deg, #6d28d9, #a855f7);
-      transition: width 0.25s ease;
+      width: 0%;
+      background: linear-gradient(90deg,#6d28d9,#a855f7);
+      transition: width .25s ease;
     }
 
     .xptext {
@@ -144,6 +146,32 @@
       font-weight: bold;
     }
 
+    button {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 11px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: linear-gradient(90deg,#6d28d9,#9333ea);
+      color: white;
+    }
+
+    .danger {
+      background: #4c1d1d;
+      color: #fca5a5;
+    }
+
+    .secondary {
+      background: transparent;
+      color: #c9d1d9;
+      border: 1px solid #30363d;
+    }
+
     .map-card {
       padding: 0;
       overflow: hidden;
@@ -151,24 +179,23 @@
 
     .map-header {
       padding: 14px 14px 10px;
-      background: #0d1117;
     }
 
     .map-title-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       gap: 10px;
     }
 
     .map-title {
-      font-weight: bold;
       font-size: 15px;
+      font-weight: bold;
     }
 
     .gps-small {
-      color: #8b949e;
       font-size: 10px;
+      color: #8b949e;
       text-align: right;
     }
 
@@ -184,88 +211,16 @@
     }
 
     .mode-btn {
-      border: none;
-      border-radius: 8px;
-      padding: 9px 4px;
-      font-size: 11px;
-      font-weight: bold;
       background: transparent;
       color: #6e7681;
+      padding: 9px 4px;
+      border-radius: 8px;
+      font-size: 11px;
     }
 
     .mode-btn.active {
       background: #21262d;
-      color: #ffffff;
-    }
-
-    #map {
-      width: 100%;
-      height: 420px;
-      background: #090c10;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .map-controls {
-      position: absolute;
-      z-index: 1000;
-      right: 10px;
-      bottom: 20px;
-    }
-
-    .recenter {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: 1px solid #30363d;
-      background: rgba(13, 17, 23, 0.94);
       color: white;
-      font-size: 19px;
-      padding: 0;
-      margin: 0;
-    }
-
-    .follow-state {
-      position: absolute;
-      z-index: 1000;
-      left: 10px;
-      bottom: 19px;
-      background: rgba(13, 17, 23, 0.92);
-      border: 1px solid #30363d;
-      color: #c9d1d9;
-      border-radius: 20px;
-      padding: 7px 10px;
-      font-size: 9px;
-      pointer-events: none;
-    }
-
-    button {
-      width: 100%;
-      padding: 13px;
-      border: none;
-      border-radius: 11px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .primary {
-      background: linear-gradient(90deg, #6d28d9, #9333ea);
-      color: white;
-    }
-
-    .danger {
-      background: #4c1d1d;
-      color: #fca5a5;
-    }
-
-    .message {
-      text-align: center;
-      min-height: 20px;
-      margin-top: 12px;
-      font-size: 12px;
-      color: #8b949e;
-      line-height: 1.4;
     }
 
     .location-box {
@@ -289,9 +244,146 @@
     }
 
     .location-region {
-      margin-top: 3px;
-      color: #8b949e;
       font-size: 11px;
+      color: #8b949e;
+      margin-top: 3px;
+    }
+
+    #map {
+      width: 100%;
+      height: 420px;
+      background: #090c10;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .follow-state {
+      position: absolute;
+      z-index: 1000;
+      left: 10px;
+      bottom: 19px;
+      background: rgba(13,17,23,.94);
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      border-radius: 20px;
+      padding: 7px 10px;
+      font-size: 9px;
+      pointer-events: none;
+    }
+
+    .map-controls {
+      position: absolute;
+      z-index: 1000;
+      right: 10px;
+      bottom: 20px;
+    }
+
+    .recenter {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      padding: 0;
+      background: rgba(13,17,23,.94);
+      border: 1px solid #30363d;
+      color: white;
+      font-size: 19px;
+    }
+
+    /* GOD MODE */
+
+    .god-box {
+      position: absolute;
+      z-index: 1100;
+      left: 10px;
+      top: 10px;
+      background: rgba(13,17,23,.95);
+      border: 1px solid #30363d;
+      border-radius: 9px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,.3);
+    }
+
+    .god-button {
+      width: auto;
+      padding: 8px 10px;
+      border-radius: 0;
+      background: transparent;
+      color: #8b949e;
+      font-size: 9px;
+      letter-spacing: 1px;
+    }
+
+    .god-box.active {
+      border-color: #f59e0b;
+    }
+
+    .god-box.active .god-button {
+      background: rgba(245,158,11,.14);
+      color: #fbbf24;
+    }
+
+    .god-hint {
+      display: none;
+      padding: 6px 9px;
+      font-size: 8px;
+      color: #fbbf24;
+      border-top: 1px solid #30363d;
+      white-space: nowrap;
+    }
+
+    .god-box.active .god-hint {
+      display: block;
+    }
+
+    .raven-fog-svg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 450;
+    }
+
+    .raven-user-marker {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #a855f7;
+      border: 4px solid white;
+      box-shadow: 0 0 0 8px rgba(168,85,247,.22);
+    }
+
+    .raven-user-marker.god {
+      background: #f59e0b;
+      box-shadow: 0 0 0 8px rgba(245,158,11,.22);
+    }
+
+    .poi-marker {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #3f3f46;
+      border: 2px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: 0 2px 10px rgba(0,0,0,.45);
+    }
+
+    .poi-marker.range {
+      background: #ca8a04;
+    }
+
+    .poi-marker.done {
+      background: #15803d;
+    }
+
+    .message {
+      text-align: center;
+      min-height: 20px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #8b949e;
+      line-height: 1.4;
     }
 
     .mission-title {
@@ -336,8 +428,8 @@
     }
 
     .poi-row.done {
-      border-color: rgba(34, 197, 94, 0.45);
-      background: rgba(22, 101, 52, 0.10);
+      border-color: rgba(34,197,94,.45);
+      background: rgba(22,101,52,.10);
     }
 
     .poi-row.done .poi-state {
@@ -353,6 +445,8 @@
     .boundary-status.ok {
       color: #4ade80;
     }
+
+    /* REISEBUCH */
 
     .travel-title {
       font-size: 16px;
@@ -373,10 +467,24 @@
     }
 
     .place {
-      padding: 11px;
+      padding: 12px;
       background: #090c10;
       border: 1px solid #21262d;
       border-radius: 11px;
+      cursor: pointer;
+      transition: .15s ease;
+    }
+
+    .place:active {
+      transform: scale(.985);
+      background: #11161d;
+    }
+
+    .place-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
     }
 
     .place-name {
@@ -384,10 +492,64 @@
       font-weight: bold;
     }
 
+    .place-arrow {
+      color: #6e7681;
+      font-size: 18px;
+    }
+
     .place-meta {
       color: #8b949e;
       font-size: 10px;
       margin-top: 4px;
+    }
+
+    .travel-detail {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .travel-detail.active {
+      display: block;
+    }
+
+    .travel-overview.hidden {
+      display: none;
+    }
+
+    .detail-header {
+      background: #090c10;
+      border: 1px solid #21262d;
+      border-radius: 12px;
+      padding: 13px;
+    }
+
+    .detail-place-name {
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .detail-meta {
+      margin-top: 5px;
+      color: #8b949e;
+      font-size: 10px;
+    }
+
+    .detail-status {
+      margin-top: 10px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #a78bfa;
+    }
+
+    .detail-poi-title {
+      margin: 15px 0 8px;
+      color: #8b949e;
+      font-size: 9px;
+      letter-spacing: 1px;
+    }
+
+    .back-button {
+      margin-top: 12px;
     }
 
     .empty {
@@ -405,48 +567,7 @@
       padding: 8px 0 25px;
     }
 
-    .leaflet-control-attribution {
-      font-size: 8px !important;
-    }
-
-    .raven-user-marker {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: #a855f7;
-      border: 4px solid #ffffff;
-      box-shadow: 0 0 0 8px rgba(168, 85, 247, 0.22);
-    }
-
-    .poi-marker {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      border: 2px solid #ffffff;
-      background: #3f3f46;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, .45);
-    }
-
-    .poi-marker.range {
-      background: #ca8a04;
-    }
-
-    .poi-marker.done {
-      background: #15803d;
-    }
-
-    .raven-fog-svg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 450;
-    }
+    /* SCRATCH */
 
     .scratch-overlay {
       position: fixed;
@@ -460,7 +581,7 @@
     }
 
     .scratch-card {
-      width: min(390px, 100%);
+      width: min(390px,100%);
       background: #0d1117;
       border: 1px solid #30363d;
       border-radius: 18px;
@@ -483,11 +604,11 @@
     .scratch-area {
       position: relative;
       width: 100%;
-      aspect-ratio: 1.8 / 1;
+      aspect-ratio: 1.8/1;
       border-radius: 14px;
       overflow: hidden;
       background:
-        radial-gradient(circle at 50% 45%, rgba(147,51,234,.2), transparent 55%),
+        radial-gradient(circle at 50% 45%,rgba(147,51,234,.2),transparent 55%),
         #090c10;
       border: 1px solid #21262d;
     }
@@ -496,10 +617,9 @@
       position: absolute;
       inset: 0;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
-      padding: 20px;
     }
 
     .scratch-result-icon {
@@ -507,9 +627,9 @@
     }
 
     .scratch-result-name {
-      font-weight: 900;
       margin-top: 7px;
       font-size: 17px;
+      font-weight: 900;
     }
 
     #scratchCanvas {
@@ -527,7 +647,8 @@
       color: #c9d1d9;
     }
 
-    @media (max-width: 420px) {
+    @media(max-width:420px) {
+
       #map {
         height: 385px;
       }
@@ -539,7 +660,9 @@
       .card {
         border-radius: 15px;
       }
+
     }
+
   </style>
 </head>
 
@@ -551,6 +674,7 @@
     <div class="brand">RAVEN</div>
     <div class="online">● ONLINE</div>
   </div>
+
 
   <div class="card">
 
@@ -573,7 +697,10 @@
     </div>
 
     <div class="xpbar">
-      <div class="xpfill" id="xpfill"></div>
+      <div
+        class="xpfill"
+        id="xpfill">
+      </div>
     </div>
 
     <div class="xptext">
@@ -584,6 +711,7 @@
 
       <div class="stat">
         <div class="label">STRECKE</div>
+
         <div class="value">
           <span id="distance">0.00</span> km
         </div>
@@ -591,11 +719,17 @@
 
       <div class="stat">
         <div class="label">ENTDECKTE ORTE</div>
-        <div class="value" id="areas">0</div>
+
+        <div
+          class="value"
+          id="areas">
+          0
+        </div>
       </div>
 
       <div class="stat">
         <div class="label">SESSION</div>
+
         <div class="value">
           <span id="sessionDistance">0</span> m
         </div>
@@ -603,7 +737,10 @@
 
       <div class="stat">
         <div class="label">STATUS</div>
-        <div class="value" id="statusText">
+
+        <div
+          class="value"
+          id="statusText">
           Bereit
         </div>
       </div>
@@ -623,7 +760,9 @@
           🗺️ Ravens Karte
         </div>
 
-        <div class="gps-small" id="gpsInfo">
+        <div
+          class="gps-small"
+          id="gpsInfo">
           GPS inaktiv
         </div>
 
@@ -653,11 +792,15 @@
           AKTUELLER ORT
         </div>
 
-        <div class="location-name" id="currentPlace">
+        <div
+          class="location-name"
+          id="currentPlace">
           Noch nicht bestimmt
         </div>
 
-        <div class="location-region" id="currentRegion">
+        <div
+          class="location-region"
+          id="currentRegion">
           Starte GPS, damit Raven weiß, wo ihr seid.
         </div>
 
@@ -665,20 +808,44 @@
 
     </div>
 
-    <div style="position: relative">
+
+    <div style="position:relative">
 
       <div id="map"></div>
 
-      <div class="follow-state" id="followState">
+
+      <div
+        class="god-box"
+        id="godBox">
+
+        <button
+          class="god-button"
+          onclick="toggleGodMode()">
+          🛠 GOD MODE
+        </button>
+
+        <div class="god-hint">
+          Karte antippen = teleportieren
+        </div>
+
+      </div>
+
+
+      <div
+        class="follow-state"
+        id="followState">
         📍 RAVEN FOLGT DIR
       </div>
 
+
       <div class="map-controls">
+
         <button
           class="recenter"
           onclick="recenterMap()">
           📍
         </button>
+
       </div>
 
     </div>
@@ -695,7 +862,9 @@
       Erkundung starten
     </button>
 
-    <div class="message" id="message">
+    <div
+      class="message"
+      id="message">
       Dein Raven wartet auf sein nächstes Abenteuer.
     </div>
 
@@ -708,32 +877,15 @@
       🐦‍⬛ Fürstenberg
     </div>
 
-    <div class="mission-subtitle" id="missionText">
+    <div
+      class="mission-subtitle"
+      id="missionText">
       Ravens erste echte Gebietserkundung.
     </div>
 
-    <div class="poi-list">
-
-      <div class="poi-row" id="row-st_marien">
-        <div class="poi-name">
-          ⛪ St. Marien / Sintfeld-Dom
-        </div>
-
-        <div class="poi-state" id="state-st_marien">
-          Nicht entdeckt
-        </div>
-      </div>
-
-      <div class="poi-row" id="row-rathaus">
-        <div class="poi-name">
-          🏛️ Rathaus
-        </div>
-
-        <div class="poi-state" id="state-rathaus">
-          Nicht entdeckt
-        </div>
-      </div>
-
+    <div
+      class="poi-list"
+      id="mainPOIList">
     </div>
 
     <div
@@ -751,20 +903,75 @@
       📖 Ravens Reisen
     </div>
 
-    <div class="travel-summary" id="travelSummary">
-      Noch keine Orte entdeckt.
+
+    <div
+      class="travel-overview"
+      id="travelOverview">
+
+      <div
+        class="travel-summary"
+        id="travelSummary">
+        Noch keine Orte entdeckt.
+      </div>
+
+      <div
+        class="travel-list"
+        id="travelList">
+      </div>
+
     </div>
 
-    <div class="travel-list" id="travelList"></div>
+
+    <div
+      class="travel-detail"
+      id="travelDetail">
+
+      <div class="detail-header">
+
+        <div
+          class="detail-place-name"
+          id="detailPlaceName">
+          Ort
+        </div>
+
+        <div
+          class="detail-meta"
+          id="detailPlaceMeta">
+        </div>
+
+        <div
+          class="detail-status"
+          id="detailStatus">
+        </div>
+
+      </div>
+
+      <div class="detail-poi-title">
+        ERKUNDUNGSPUNKTE
+      </div>
+
+      <div
+        class="poi-list"
+        id="detailPOIList">
+      </div>
+
+      <button
+        class="secondary back-button"
+        onclick="closePlaceDetail()">
+        ← Zurück zu Ravens Reisen
+      </button>
+
+    </div>
 
   </div>
 
 
   <div class="version">
-    RAVEN PROTOTYPE V1.6
+    RAVEN PROTOTYPE V1.7 · DEV
   </div>
 
 </div>
+
 
 
 <div
@@ -774,11 +981,11 @@
   <div class="scratch-card">
 
     <div class="scratch-title">
-      🐦‍⬛ Ort entdeckt
+      🐦‍⬛ Erkundungspunkt
     </div>
 
     <div class="scratch-text">
-      Rubble die Fläche frei, um den Erkundungspunkt zu enthüllen.
+      Rubble die Fläche frei, um herauszufinden, was Raven entdeckt hat.
     </div>
 
     <div class="scratch-area">
@@ -794,7 +1001,7 @@
         <div
           class="scratch-result-name"
           id="scratchName">
-          Unbekannter Ort
+          Unbekannt
         </div>
 
       </div>
@@ -815,42 +1022,73 @@
 </div>
 
 
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 
 <script>
 
-  /* =========================================================
-     RAVEN V1.6
-     ========================================================= */
+  /* ======================================================
+     RAVEN V1.7
+     ====================================================== */
 
+
+  /* ======================================================
+     STORAGE
+     ====================================================== */
 
   let xp =
-    Number(localStorage.getItem("ravenXP")) || 0;
+    Number(
+      localStorage.getItem("ravenXP")
+    ) || 0;
+
 
   let level =
-    Number(localStorage.getItem("ravenLevel")) || 1;
+    Number(
+      localStorage.getItem("ravenLevel")
+    ) || 1;
+
 
   let totalDistance =
-    Number(localStorage.getItem("ravenDistance")) || 0;
+    Number(
+      localStorage.getItem("ravenDistance")
+    ) || 0;
+
 
   let exploredPoints =
     JSON.parse(
-      localStorage.getItem("ravenExploredPoints")
+      localStorage.getItem(
+        "ravenExploredPoints"
+      )
     ) || [];
+
 
   let travelHistory =
     JSON.parse(
-      localStorage.getItem("ravenTravelHistory")
+      localStorage.getItem(
+        "ravenTravelHistory"
+      )
     ) || [];
+
 
   let discoveredPlaces =
     JSON.parse(
-      localStorage.getItem("ravenDiscoveredPlaces")
+      localStorage.getItem(
+        "ravenDiscoveredPlaces"
+      )
     ) || [];
 
-  let mapMode =
-    localStorage.getItem("ravenMapMode") || "explore";
 
+  let mapMode =
+    localStorage.getItem(
+      "ravenMapMode"
+    ) || "explore";
+
+
+
+  /* ======================================================
+     FÜRSTENBERG
+     ====================================================== */
 
   const FUERSTENBERG = {
 
@@ -893,59 +1131,98 @@
         "ravenFuerstenbergMission"
       )
     ) || {
+
       visitedPOIs: [],
       completed: false
+
     };
 
 
   fuerstenbergMission.visitedPOIs =
-    (fuerstenbergMission.visitedPOIs || [])
-      .filter(
-        id =>
-          id === "st_marien" ||
-          id === "rathaus"
-      );
+    (
+      fuerstenbergMission.visitedPOIs ||
+      []
+    ).filter(
+
+      id =>
+        id === "st_marien" ||
+        id === "rathaus"
+
+    );
 
 
   if (
+
     FUERSTENBERG.pois.every(
+
       poi =>
-        fuerstenbergMission.visitedPOIs
+        fuerstenbergMission
+          .visitedPOIs
           .includes(poi.id)
+
     )
+
   ) {
-    fuerstenbergMission.completed = true;
+
+    fuerstenbergMission.completed =
+      true;
+
   }
 
 
   saveMission();
 
 
+
+  /* ======================================================
+     MAP
+     ====================================================== */
+
   const map =
     L.map(
+
       "map",
+
       {
         zoomControl: false
       }
+
     ).setView(
-      [51.1657, 10.4515],
+
+      [51.1657,10.4515],
+
       6
+
     );
 
 
   L.tileLayer(
+
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
     {
+
       maxZoom: 19,
-      attribution: "© OpenStreetMap"
+
+      attribution:
+        "© OpenStreetMap"
+
     }
+
   ).addTo(map);
 
 
   L.control.zoom({
+
     position: "topright"
+
   }).addTo(map);
 
+
+
+  /* ======================================================
+     POSITION
+     ====================================================== */
 
   let tracking = false;
 
@@ -964,9 +1241,151 @@
   let firstValidFix = false;
 
 
-  /* =========================================================
-     FOLLOW MODE
-     ========================================================= */
+
+  /* ======================================================
+     GOD MODE
+     ====================================================== */
+
+  let godMode = false;
+
+
+  function toggleGodMode() {
+
+    godMode =
+      !godMode;
+
+
+    const box =
+      document.getElementById(
+        "godBox"
+      );
+
+
+    box.classList.toggle(
+      "active",
+      godMode
+    );
+
+
+    if (godMode) {
+
+      followUser = false;
+
+      updateFollowUI();
+
+
+      document.getElementById(
+        "statusText"
+      ).textContent =
+        "GOD";
+
+
+      document.getElementById(
+        "gpsInfo"
+      ).textContent =
+        "GOD MODE";
+
+
+      setTemporaryMessage(
+        "🛠 GOD MODE aktiv – tippe auf die Karte, um Raven zu teleportieren.",
+        5000
+      );
+
+
+      updateUserMarker();
+
+    } else {
+
+      document.getElementById(
+        "statusText"
+      ).textContent =
+        tracking
+          ? "Aktiv"
+          : "Bereit";
+
+
+      document.getElementById(
+        "gpsInfo"
+      ).textContent =
+        tracking
+          ? "GPS aktiv"
+          : "GPS pausiert";
+
+
+      setTemporaryMessage(
+        "🛠 GOD MODE beendet.",
+        2500
+      );
+
+
+      updateUserMarker();
+
+    }
+
+  }
+
+
+
+  map.on(
+
+    "click",
+
+    function(event) {
+
+      if (!godMode) {
+        return;
+      }
+
+
+      currentLat =
+        event.latlng.lat;
+
+
+      currentLon =
+        event.latlng.lng;
+
+
+      currentAccuracy =
+        0;
+
+
+      updateUserMarker();
+
+
+      map.panTo(
+        [
+          currentLat,
+          currentLon
+        ]
+      );
+
+
+      updatePOIStates(
+        currentLat,
+        currentLon
+      );
+
+
+      forceReverseGeocode(
+        currentLat,
+        currentLon
+      );
+
+
+      setTemporaryMessage(
+        "⚡ Raven wurde teleportiert.",
+        1800
+      );
+
+    }
+
+  );
+
+
+
+  /* ======================================================
+     FOLLOW
+     ====================================================== */
 
   let followUser = true;
 
@@ -975,11 +1394,17 @@
 
   function leaveFollowMode() {
 
-    if (internalMapMove) {
+    if (
+      internalMapMove ||
+      godMode
+    ) {
       return;
     }
 
-    followUser = false;
+
+    followUser =
+      false;
+
 
     updateFollowUI();
 
@@ -992,63 +1417,88 @@
   );
 
 
-  /*
-    V1.6:
-    Auch manuelles Zoomen beendet
-    den Follow-Modus.
-  */
-
   map.on(
+
     "zoomstart",
-    function () {
 
-      if (!internalMapMove) {
+    function() {
 
-        followUser = false;
+      if (
+
+        !internalMapMove &&
+        !godMode
+
+      ) {
+
+        followUser =
+          false;
+
 
         updateFollowUI();
 
       }
 
     }
+
   );
 
 
   function recenterMap() {
 
-    followUser = true;
-
-    updateFollowUI();
-
-
     if (
-      currentLat !== null &&
-      currentLon !== null
+      currentLat === null ||
+      currentLon === null
     ) {
-
-      internalMapMove = true;
-
-
-      map.setView(
-        [currentLat, currentLon],
-        Math.max(
-          map.getZoom(),
-          16
-        ),
-        {
-          animate: true
-        }
-      );
+      return;
+    }
 
 
-      setTimeout(
-        () => {
-          internalMapMove = false;
-        },
-        600
-      );
+    if (!godMode) {
+
+      followUser =
+        true;
+
+
+      updateFollowUI();
 
     }
+
+
+    internalMapMove =
+      true;
+
+
+    map.setView(
+
+      [
+        currentLat,
+        currentLon
+      ],
+
+      Math.max(
+        map.getZoom(),
+        16
+      ),
+
+      {
+        animate: true
+      }
+
+    );
+
+
+    setTimeout(
+
+      () => {
+
+        internalMapMove =
+          false;
+
+      },
+
+      600
+
+    );
 
   }
 
@@ -1061,7 +1511,12 @@
       );
 
 
-    if (followUser) {
+    if (godMode) {
+
+      el.textContent =
+        "🛠 GOD MODE";
+
+    } else if (followUser) {
 
       el.textContent =
         "📍 RAVEN FOLGT DIR";
@@ -1076,18 +1531,93 @@
   }
 
 
-  const userIcon =
-    L.divIcon({
-      className: "",
-      html:
-        '<div class="raven-user-marker"></div>',
-      iconSize: [22, 22],
-      iconAnchor: [11, 11]
-    });
 
+  /* ======================================================
+     USER MARKER
+     ====================================================== */
 
   let userMarker = null;
 
+
+  function getUserIcon() {
+
+    const className =
+      godMode
+        ? "raven-user-marker god"
+        : "raven-user-marker";
+
+
+    return L.divIcon({
+
+      className: "",
+
+      html:
+        `<div class="${className}"></div>`,
+
+      iconSize: [22,22],
+
+      iconAnchor: [11,11]
+
+    });
+
+  }
+
+
+  function updateUserMarker() {
+
+    if (
+      currentLat === null ||
+      currentLon === null
+    ) {
+      return;
+    }
+
+
+    if (!userMarker) {
+
+      userMarker =
+        L.marker(
+
+          [
+            currentLat,
+            currentLon
+          ],
+
+          {
+
+            icon:
+              getUserIcon(),
+
+            zIndexOffset:
+              1000
+
+          }
+
+        ).addTo(map);
+
+    } else {
+
+      userMarker.setLatLng(
+        [
+          currentLat,
+          currentLon
+        ]
+      );
+
+
+      userMarker.setIcon(
+        getUserIcon()
+      );
+
+    }
+
+  }
+
+
+
+  /* ======================================================
+     POI MARKERS
+     ====================================================== */
 
   function createPOIIcon(
     poi,
@@ -1098,17 +1628,33 @@
       "poi-marker";
 
 
-    if (state === "range") {
-      className += " range";
+    if (
+      state === "range"
+    ) {
+
+      className +=
+        " range";
+
     }
 
 
-    if (state === "done") {
-      className += " done";
+    if (
+      state === "done"
+    ) {
+
+      className +=
+        " done";
+
     }
 
 
-    const visibleIcon =
+    /*
+      WICHTIG:
+      Solange nicht entdeckt:
+      IMMER ?
+    */
+
+    const icon =
       state === "done"
         ? poi.icon
         : "?";
@@ -1120,12 +1666,12 @@
 
       html:
         `<div class="${className}">
-          ${visibleIcon}
+          ${icon}
         </div>`,
 
-      iconSize: [26, 26],
+      iconSize: [26,26],
 
-      iconAnchor: [13, 13]
+      iconAnchor: [13,13]
 
     });
 
@@ -1136,45 +1682,65 @@
 
 
   FUERSTENBERG.pois.forEach(
+
     poi => {
 
       const marker =
         L.marker(
-          [poi.lat, poi.lon],
+
+          [
+            poi.lat,
+            poi.lon
+          ],
+
           {
+
             icon:
               createPOIIcon(
                 poi,
                 "unknown"
               )
+
           }
+
         ).addTo(map);
 
 
       marker.on(
-        "click",
-        function () {
 
-          tryOpenPOI(poi);
+        "click",
+
+        function() {
+
+          tryOpenPOI(
+            poi
+          );
 
         }
+
       );
 
 
-      poiMarkers[poi.id] =
-        marker;
+      poiMarkers[
+        poi.id
+      ] = marker;
 
     }
+
   );
 
 
-  /* =========================================================
-     FÜRSTENBERG GRENZE
-     ========================================================= */
 
-  let fuerstenbergBoundary = null;
+  /* ======================================================
+     GRENZE
+     ====================================================== */
 
-  let fuerstenbergOutline = null;
+  let fuerstenbergBoundary =
+    null;
+
+
+  let fuerstenbergOutline =
+    null;
 
 
   async function loadFuerstenbergBoundary() {
@@ -1203,7 +1769,9 @@
 
 
       const response =
-        await fetch(url);
+        await fetch(
+          url
+        );
 
 
       if (!response.ok) {
@@ -1215,12 +1783,8 @@
       }
 
 
-      const data =
-        await response.json();
-
-
       fuerstenbergBoundary =
-        data;
+        await response.json();
 
 
       status.textContent =
@@ -1237,10 +1801,9 @@
       redrawFog();
 
 
-    } catch (error) {
+    } catch(error) {
 
       console.error(
-        "Grenze konnte nicht geladen werden:",
         error
       );
 
@@ -1255,11 +1818,14 @@
 
   function updateBoundaryOutline() {
 
-    if (fuerstenbergOutline) {
+    if (
+      fuerstenbergOutline
+    ) {
 
       map.removeLayer(
         fuerstenbergOutline
       );
+
 
       fuerstenbergOutline =
         null;
@@ -1268,51 +1834,68 @@
 
 
     if (
+
       !fuerstenbergMission.completed ||
       !fuerstenbergBoundary
+
     ) {
+
       return;
+
     }
 
 
     fuerstenbergOutline =
       L.geoJSON(
+
         fuerstenbergBoundary,
+
         {
+
           style: {
-            color: "#22c55e",
-            weight: 2,
-            opacity: 0.9,
-            fillOpacity: 0
+
+            color:
+              "#22c55e",
+
+            weight:
+              2,
+
+            opacity:
+              .9,
+
+            fillOpacity:
+              0
+
           }
+
         }
+
       ).addTo(map);
 
   }
 
 
-  /* =========================================================
-     FOG OF WAR
-     ========================================================= */
 
-  const REVEAL_RADIUS_METERS = 40;
+  /* ======================================================
+     FOG
+     ====================================================== */
 
-  let fogSvg = null;
+  const REVEAL_RADIUS_METERS =
+    40;
 
 
-  /*
-    V1.6:
-    Fog liegt direkt über dem
-    Kartencontainer.
+  let fogSvg =
+    null;
 
-    Dadurch stimmen SVG-Positionen
-    wieder exakt mit Leaflet überein.
-  */
 
   function createFogLayer() {
 
-    if (fogSvg) {
+    if (
+      fogSvg
+    ) {
+
       fogSvg.remove();
+
     }
 
 
@@ -1322,8 +1905,11 @@
 
     fogSvg =
       document.createElementNS(
+
         "http://www.w3.org/2000/svg",
+
         "svg"
+
       );
 
 
@@ -1344,12 +1930,16 @@
 
   function redrawFog() {
 
-    if (!fogSvg) {
+    if (
+      !fogSvg
+    ) {
       return;
     }
 
 
-    if (mapMode !== "explore") {
+    if (
+      mapMode !== "explore"
+    ) {
 
       fogSvg.style.display =
         "none";
@@ -1385,7 +1975,8 @@
     );
 
 
-    fogSvg.innerHTML = "";
+    fogSvg.innerHTML =
+      "";
 
 
     const defs =
@@ -1415,29 +2006,19 @@
       );
 
 
-    base.setAttribute(
-      "x",
-      "0"
-    );
+    base.setAttribute("x","0");
 
-
-    base.setAttribute(
-      "y",
-      "0"
-    );
-
+    base.setAttribute("y","0");
 
     base.setAttribute(
       "width",
       size.x
     );
 
-
     base.setAttribute(
       "height",
       size.y
     );
-
 
     base.setAttribute(
       "fill",
@@ -1451,42 +2032,57 @@
 
 
     exploredPoints.forEach(
+
       point => {
 
         const center =
           map.latLngToContainerPoint(
+
             [
               point.lat,
               point.lon
             ]
+
           );
 
 
         const edge =
           map.latLngToContainerPoint(
+
             destinationPoint(
+
               point.lat,
               point.lon,
+
               REVEAL_RADIUS_METERS,
+
               90
+
             )
+
           );
 
 
         const radius =
           Math.max(
+
             1,
+
             Math.abs(
               edge.x -
               center.x
             )
+
           );
 
 
         const circle =
           document.createElementNS(
+
             "http://www.w3.org/2000/svg",
+
             "circle"
+
           );
 
 
@@ -1519,17 +2115,23 @@
         );
 
       }
+
     );
 
 
     if (
+
       fuerstenbergMission.completed &&
       fuerstenbergBoundary
+
     ) {
 
       appendGeoJSONGeometryToMask(
+
         mask,
+
         fuerstenbergBoundary
+
       );
 
     }
@@ -1547,8 +2149,11 @@
 
     const fog =
       document.createElementNS(
+
         "http://www.w3.org/2000/svg",
+
         "rect"
+
       );
 
 
@@ -1605,35 +2210,47 @@
     }
 
 
-    let geometry = null;
+    let geometry =
+      null;
 
 
     if (
-      geojson.type === "Feature"
+      geojson.type ===
+      "Feature"
     ) {
 
       geometry =
         geojson.geometry;
 
-    } else if (
+    }
+
+    else if (
       geojson.type ===
       "FeatureCollection"
     ) {
 
       geojson.features.forEach(
+
         feature => {
 
           appendGeoJSONGeometryToMask(
+
             mask,
+
             feature
+
           );
 
         }
+
       );
+
 
       return;
 
-    } else {
+    }
+
+    else {
 
       geometry =
         geojson;
@@ -1647,12 +2264,16 @@
 
 
     if (
-      geometry.type === "Polygon"
+      geometry.type ===
+      "Polygon"
     ) {
 
       appendPolygonToMask(
+
         mask,
+
         geometry.coordinates
+
       );
 
     }
@@ -1664,14 +2285,19 @@
     ) {
 
       geometry.coordinates.forEach(
+
         polygon => {
 
           appendPolygonToMask(
+
             mask,
+
             polygon
+
           );
 
         }
+
       );
 
     }
@@ -1688,7 +2314,9 @@
       !polygonCoordinates ||
       !polygonCoordinates.length
     ) {
+
       return;
+
     }
 
 
@@ -1696,31 +2324,28 @@
       polygonCoordinates[0];
 
 
-    if (!outerRing.length) {
-      return;
-    }
-
-
-    let pathData = "";
+    let pathData =
+      "";
 
 
     outerRing.forEach(
-      (coord, index) => {
 
-        const lon =
-          coord[0];
-
-        const lat =
-          coord[1];
-
+      (coord,index) => {
 
         const point =
           map.latLngToContainerPoint(
-            [lat, lon]
+
+            [
+              coord[1],
+              coord[0]
+            ]
+
           );
 
 
-        if (index === 0) {
+        if (
+          index === 0
+        ) {
 
           pathData +=
             `M ${point.x} ${point.y}`;
@@ -1733,6 +2358,7 @@
         }
 
       }
+
     );
 
 
@@ -1742,8 +2368,11 @@
 
     const path =
       document.createElementNS(
+
         "http://www.w3.org/2000/svg",
+
         "path"
+
       );
 
 
@@ -1772,11 +2401,14 @@
   );
 
 
-  /* =========================================================
-     REISE / ERKUNDUNG
-     ========================================================= */
 
-  function setMapMode(mode) {
+  /* ======================================================
+     MAP MODE
+     ====================================================== */
+
+  function setMapMode(
+    mode
+  ) {
 
     mapMode =
       mode;
@@ -1797,39 +2429,46 @@
 
   function updateMapModeUI() {
 
-    const travel =
-      document.getElementById(
+    document
+      .getElementById(
         "travelModeButton"
+      )
+      .classList.toggle(
+
+        "active",
+
+        mapMode ===
+        "travel"
+
       );
 
 
-    const explore =
-      document.getElementById(
+    document
+      .getElementById(
         "exploreModeButton"
+      )
+      .classList.toggle(
+
+        "active",
+
+        mapMode ===
+        "explore"
+
       );
-
-
-    travel.classList.toggle(
-      "active",
-      mapMode === "travel"
-    );
-
-
-    explore.classList.toggle(
-      "active",
-      mapMode === "explore"
-    );
 
   }
 
 
-  /* =========================================================
+
+  /* ======================================================
      GPS
-     ========================================================= */
+     ====================================================== */
 
   function toggleExploration() {
 
-    if (tracking) {
+    if (
+      tracking
+    ) {
 
       stopExploration();
 
@@ -1844,7 +2483,9 @@
 
   function startExploration() {
 
-    if (!navigator.geolocation) {
+    if (
+      !navigator.geolocation
+    ) {
 
       setMessage(
         "GPS wird von diesem Browser nicht unterstützt."
@@ -1872,34 +2513,36 @@
 
 
     document.getElementById(
-      "statusText"
+      "exploreButton"
     ).textContent =
-      "GPS …";
+      "Erkundung beenden";
 
 
     document.getElementById(
-      "gpsInfo"
-    ).textContent =
-      "GPS wird gestartet …";
+      "exploreButton"
+    ).className =
+      "danger";
+
+
+    if (!godMode) {
+
+      document.getElementById(
+        "statusText"
+      ).textContent =
+        "GPS …";
+
+
+      document.getElementById(
+        "gpsInfo"
+      ).textContent =
+        "GPS wird gestartet …";
+
+    }
 
 
     setMessage(
       "📡 Raven sucht deine Position …"
     );
-
-
-    const button =
-      document.getElementById(
-        "exploreButton"
-      );
-
-
-    button.textContent =
-      "Erkundung beenden";
-
-
-    button.className =
-      "danger";
 
 
     watchId =
@@ -1911,9 +2554,16 @@
           handleGPSError,
 
           {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 20000
+
+            enableHighAccuracy:
+              true,
+
+            maximumAge:
+              0,
+
+            timeout:
+              20000
+
           }
 
         );
@@ -1965,36 +2615,42 @@
     }
 
 
-    document.getElementById(
-      "statusText"
-    ).textContent =
-      "Bereit";
+    if (!godMode) {
+
+      document.getElementById(
+        "statusText"
+      ).textContent =
+        "Bereit";
 
 
-    document.getElementById(
-      "gpsInfo"
-    ).textContent =
-      "GPS pausiert";
+      document.getElementById(
+        "gpsInfo"
+      ).textContent =
+        "GPS pausiert";
+
+    }
 
 
     setMessage(
+
       sessionDistance > 0
+
         ? `🐦‍⬛ Erkundung beendet – ${(sessionDistance / 1000).toFixed(2)} km zurückgelegt.`
+
         : "Erkundung beendet."
+
     );
 
 
-    const button =
-      document.getElementById(
-        "exploreButton"
-      );
-
-
-    button.textContent =
+    document.getElementById(
+      "exploreButton"
+    ).textContent =
       "Erkundung starten";
 
 
-    button.className =
+    document.getElementById(
+      "exploreButton"
+    ).className =
       "primary";
 
 
@@ -2011,7 +2667,22 @@
     position
   ) {
 
-    if (!tracking) {
+    if (
+      !tracking
+    ) {
+      return;
+    }
+
+
+    /*
+      Im GOD MODE ignorieren wir
+      echte GPS-Positionsupdates,
+      damit Raven nicht zurückspringt.
+    */
+
+    if (
+      godMode
+    ) {
       return;
     }
 
@@ -2033,14 +2704,17 @@
 
 
     if (
+
       accuracy &&
       accuracy > 35
+
     ) {
 
       document.getElementById(
         "gpsInfo"
       ).textContent =
         `GPS ungenau ±${Math.round(accuracy)} m`;
+
 
       return;
 
@@ -2059,7 +2733,9 @@
       accuracy;
 
 
-    if (!firstValidFix) {
+    if (
+      !firstValidFix
+    ) {
 
       firstValidFix =
         true;
@@ -2081,76 +2757,81 @@
     document.getElementById(
       "gpsInfo"
     ).textContent =
+
       accuracy
+
         ? `GPS aktiv · ±${Math.round(accuracy)} m`
+
         : "GPS aktiv";
 
 
-    if (!userMarker) {
-
-      userMarker =
-        L.marker(
-          [lat, lon],
-          {
-            icon: userIcon,
-            zIndexOffset: 1000
-          }
-        ).addTo(map);
-
-    } else {
-
-      userMarker.setLatLng(
-        [lat, lon]
-      );
-
-    }
+    updateUserMarker();
 
 
-    if (followUser) {
+    if (
+      followUser
+    ) {
 
       internalMapMove =
         true;
 
 
       map.setView(
-        [lat, lon],
+
+        [
+          lat,
+          lon
+        ],
+
         Math.max(
           map.getZoom(),
           16
         ),
+
         {
           animate: true
         }
+
       );
 
 
       setTimeout(
+
         () => {
 
           internalMapMove =
             false;
 
         },
+
         500
+
       );
 
     }
 
 
-    if (lastPosition) {
+    if (
+      lastPosition
+    ) {
 
       const moved =
         haversineDistance(
+
           lastPosition.lat,
           lastPosition.lon,
+
           lat,
           lon
+
         );
 
 
       if (
+
         moved >= 3 &&
         moved < 150
+
       ) {
 
         totalDistance +=
@@ -2162,15 +2843,21 @@
 
 
         localStorage.setItem(
+
           "ravenDistance",
+
           totalDistance
+
         );
 
 
         travelHistory.push({
+
           lat,
           lon,
-          time: Date.now()
+          time:
+            Date.now()
+
         });
 
 
@@ -2188,10 +2875,13 @@
 
 
         localStorage.setItem(
+
           "ravenTravelHistory",
+
           JSON.stringify(
             travelHistory
           )
+
         );
 
       }
@@ -2200,8 +2890,10 @@
 
 
     lastPosition = {
+
       lat,
       lon
+
     };
 
 
@@ -2234,8 +2926,14 @@
     error
   ) {
 
+    if (
+      godMode
+    ) {
+      return;
+    }
+
+
     console.error(
-      "GPS Fehler:",
       error
     );
 
@@ -2244,7 +2942,9 @@
       "GPS konnte nicht gestartet werden.";
 
 
-    if (error.code === 1) {
+    if (
+      error.code === 1
+    ) {
 
       text =
         "Standortzugriff wurde nicht erlaubt.";
@@ -2252,7 +2952,9 @@
     }
 
 
-    if (error.code === 2) {
+    if (
+      error.code === 2
+    ) {
 
       text =
         "GPS-Position momentan nicht verfügbar.";
@@ -2260,10 +2962,12 @@
     }
 
 
-    if (error.code === 3) {
+    if (
+      error.code === 3
+    ) {
 
       text =
-        "GPS braucht länger als erwartet. Versuch es erneut.";
+        "GPS braucht länger als erwartet.";
 
     }
 
@@ -2287,9 +2991,10 @@
   }
 
 
-  /* =========================================================
-     ERKUNDETE PUNKTE
-     ========================================================= */
+
+  /* ======================================================
+     EXPLORED
+     ====================================================== */
 
   function saveExploredPoint(
     lat,
@@ -2301,8 +3006,10 @@
     ) {
 
       exploredPoints.push({
+
         lat,
         lon
+
       });
 
 
@@ -2321,10 +3028,13 @@
 
     const distance =
       haversineDistance(
+
         last.lat,
         last.lon,
+
         lat,
         lon
+
       );
 
 
@@ -2333,8 +3043,10 @@
     ) {
 
       exploredPoints.push({
+
         lat,
         lon
+
       });
 
 
@@ -2361,18 +3073,22 @@
   function saveExploredPoints() {
 
     localStorage.setItem(
+
       "ravenExploredPoints",
+
       JSON.stringify(
         exploredPoints
       )
+
     );
 
   }
 
 
-  /* =========================================================
-     ORTSERKENNUNG
-     ========================================================= */
+
+  /* ======================================================
+     ORT
+     ====================================================== */
 
   let lastGeocodeTime =
     0;
@@ -2386,9 +3102,34 @@
     false;
 
 
-  async function maybeReverseGeocode(
+  async function forceReverseGeocode(
     lat,
     lon
+  ) {
+
+    lastGeocodeTime =
+      0;
+
+
+    lastGeocodePosition =
+      null;
+
+
+    await maybeReverseGeocode(
+
+      lat,
+      lon,
+      true
+
+    );
+
+  }
+
+
+  async function maybeReverseGeocode(
+    lat,
+    lon,
+    force = false
   ) {
 
     const now =
@@ -2396,34 +3137,49 @@
 
 
     if (
+      !force &&
       now - lastGeocodeTime <
       60000
     ) {
+
       return;
+
     }
 
 
-    if (lastGeocodePosition) {
+    if (
+
+      !force &&
+      lastGeocodePosition
+
+    ) {
 
       const moved =
         haversineDistance(
+
           lastGeocodePosition.lat,
           lastGeocodePosition.lon,
+
           lat,
           lon
+
         );
 
 
       if (
         moved < 100
       ) {
+
         return;
+
       }
 
     }
 
 
-    if (geocodeRunning) {
+    if (
+      geocodeRunning
+    ) {
       return;
     }
 
@@ -2437,27 +3193,37 @@
 
 
     lastGeocodePosition = {
+
       lat,
       lon
+
     };
 
 
     try {
 
       const url =
+
         "https://api.bigdatacloud.net/data/reverse-geocode-client" +
+
         "?latitude=" +
         encodeURIComponent(lat) +
+
         "&longitude=" +
         encodeURIComponent(lon) +
+
         "&localityLanguage=de";
 
 
       const response =
-        await fetch(url);
+        await fetch(
+          url
+        );
 
 
-      if (!response.ok) {
+      if (
+        !response.ok
+      ) {
 
         throw new Error(
           "Reverse Geocoding fehlgeschlagen"
@@ -2471,16 +3237,17 @@
 
 
       handlePlaceData(
+
         data,
         lat,
         lon
+
       );
 
 
-    } catch (error) {
+    } catch(error) {
 
       console.warn(
-        "Ort konnte nicht bestimmt werden:",
         error
       );
 
@@ -2502,13 +3269,16 @@
   ) {
 
     const place =
+
       data.locality ||
+
       data.city ||
-      data.principalSubdivisionCode ||
+
       data.localityInfo
         ?.administrative
         ?.[0]
         ?.name ||
+
       "Unbekannter Ort";
 
 
@@ -2531,17 +3301,25 @@
     document.getElementById(
       "currentRegion"
     ).textContent =
-      [region, country]
-        .filter(Boolean)
-        .join(" · ");
+
+      [
+        region,
+        country
+      ]
+
+      .filter(Boolean)
+
+      .join(" · ");
 
 
     discoverPlace(
+
       place,
       region,
       country,
       lat,
       lon
+
     );
 
   }
@@ -2556,8 +3334,11 @@
   ) {
 
     if (
+
       !place ||
-      place === "Unbekannter Ort"
+      place ===
+      "Unbekannter Ort"
+
     ) {
       return;
     }
@@ -2565,24 +3346,37 @@
 
     const normalize =
       value =>
-        String(value || "")
-          .trim()
-          .toLowerCase();
+        String(
+          value || ""
+        )
+        .trim()
+        .toLowerCase();
 
 
     const exists =
       discoveredPlaces.some(
+
         item =>
+
           normalize(item.name) ===
-            normalize(place) &&
+          normalize(place)
+
+          &&
+
           normalize(item.region) ===
-            normalize(region) &&
+          normalize(region)
+
+          &&
+
           normalize(item.country) ===
-            normalize(country)
+          normalize(country)
+
       );
 
 
-    if (exists) {
+    if (
+      exists
+    ) {
 
       renderTravelBook();
 
@@ -2591,9 +3385,10 @@
     }
 
 
-    const newPlace = {
+    discoveredPlaces.push({
 
-      name: place,
+      name:
+        place,
 
       region,
 
@@ -2607,19 +3402,17 @@
         new Date()
           .toISOString()
 
-    };
-
-
-    discoveredPlaces.push(
-      newPlace
-    );
+    });
 
 
     localStorage.setItem(
+
       "ravenDiscoveredPlaces",
+
       JSON.stringify(
         discoveredPlaces
       )
+
     );
 
 
@@ -2629,7 +3422,11 @@
 
 
     setTemporaryMessage(
-      `✨ Neuer Ort entdeckt: ${place} · +25 XP`
+
+      `✨ Neuer Ort entdeckt: ${place} · +25 XP`,
+
+      4000
+
     );
 
 
@@ -2638,9 +3435,10 @@
   }
 
 
-  /* =========================================================
+
+  /* ======================================================
      REISEBUCH
-     ========================================================= */
+     ====================================================== */
 
   function renderTravelBook() {
 
@@ -2685,101 +3483,464 @@
 
     const countries =
       new Set(
+
         discoveredPlaces
-          .map(p => p.country)
+          .map(
+            p => p.country
+          )
           .filter(Boolean)
+
       );
 
 
     const regions =
       new Set(
+
         discoveredPlaces
-          .map(p => p.region)
+          .map(
+            p => p.region
+          )
           .filter(Boolean)
+
       );
 
 
     summary.textContent =
+
       `${discoveredPlaces.length} Orte · ${regions.size} Regionen · ${countries.size} Länder`;
 
 
-    const newestFirst =
-      [...discoveredPlaces]
-        .reverse();
+    [...discoveredPlaces]
+      .reverse()
+      .forEach(
 
+        place => {
 
-    newestFirst.forEach(
-      place => {
-
-        const el =
-          document.createElement(
-            "div"
-          );
-
-
-        el.className =
-          "place";
-
-
-        let dateText =
-          "Früher entdeckt";
-
-
-        if (
-          place.discoveredAt
-        ) {
-
-          const date =
-            new Date(
-              place.discoveredAt
+          const el =
+            document.createElement(
+              "div"
             );
 
 
-          if (!isNaN(date)) {
+          el.className =
+            "place";
 
-            dateText =
-              date.toLocaleDateString(
-                "de-DE",
-                {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric"
-                }
+
+          el.addEventListener(
+
+            "click",
+
+            () => {
+
+              openPlaceDetail(
+                place
               );
+
+            }
+
+          );
+
+
+          let dateText =
+            "Früher entdeckt";
+
+
+          if (
+            place.discoveredAt
+          ) {
+
+            const date =
+              new Date(
+                place.discoveredAt
+              );
+
+
+            if (
+              !isNaN(date)
+            ) {
+
+              dateText =
+                date.toLocaleDateString(
+
+                  "de-DE",
+
+                  {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric"
+                  }
+
+                );
+
+            }
 
           }
 
+
+          el.innerHTML =
+
+            `<div class="place-row">
+
+              <div>
+
+                <div class="place-name">
+                  📍 ${escapeHTML(place.name || "Unbekannt")}
+                </div>
+
+                <div class="place-meta">
+
+                  ${escapeHTML(place.region || "")}
+
+                  ${
+                    place.region &&
+                    place.country
+                      ? " · "
+                      : ""
+                  }
+
+                  ${escapeHTML(place.country || "")}
+
+                  <br>
+
+                  Entdeckt: ${dateText}
+
+                </div>
+
+              </div>
+
+              <div class="place-arrow">
+                ›
+              </div>
+
+            </div>`;
+
+
+          list.appendChild(
+            el
+          );
+
         }
 
+      );
 
-        el.innerHTML =
-
-          `<div class="place-name">
-            📍 ${escapeHTML(place.name || "Unbekannt")}
-          </div>
-
-          <div class="place-meta">
-            ${escapeHTML(place.region || "")}
-            ${place.region && place.country ? " · " : ""}
-            ${escapeHTML(place.country || "")}
-            <br>
-            Entdeckt: ${dateText}
-          </div>`;
+  }
 
 
-        list.appendChild(
-          el
-        );
+  function openPlaceDetail(
+    place
+  ) {
 
-      }
+    document.getElementById(
+      "travelOverview"
+    ).classList.add(
+      "hidden"
+    );
+
+
+    document.getElementById(
+      "travelDetail"
+    ).classList.add(
+      "active"
+    );
+
+
+    document.getElementById(
+      "detailPlaceName"
+    ).textContent =
+
+      `🐦‍⬛ ${place.name || "Unbekannt"}`;
+
+
+    document.getElementById(
+      "detailPlaceMeta"
+    ).textContent =
+
+      [
+        place.region,
+        place.country
+      ]
+
+      .filter(Boolean)
+
+      .join(" · ");
+
+
+    const poiContainer =
+      document.getElementById(
+        "detailPOIList"
+      );
+
+
+    poiContainer.innerHTML =
+      "";
+
+
+    /*
+      Aktuell existiert nur für
+      Fürstenberg eine Mission.
+
+      Später wird das automatisch
+      für jeden Ort erzeugt.
+    */
+
+    if (
+      normalizePlaceName(
+        place.name
+      ) ===
+      normalizePlaceName(
+        "Fürstenberg"
+      )
+    ) {
+
+      const visited =
+        fuerstenbergMission
+          .visitedPOIs
+          .length;
+
+
+      document.getElementById(
+        "detailStatus"
+      ).textContent =
+
+        fuerstenbergMission.completed
+
+          ? "✓ ERKUNDET · 2 / 2"
+
+          : `ENTDECKT · ${visited} / ${FUERSTENBERG.pois.length}`;
+
+
+      FUERSTENBERG.pois.forEach(
+
+        poi => {
+
+          const done =
+            fuerstenbergMission
+              .visitedPOIs
+              .includes(
+                poi.id
+              );
+
+
+          const row =
+            document.createElement(
+              "div"
+            );
+
+
+          row.className =
+            done
+              ? "poi-row done"
+              : "poi-row";
+
+
+          const name =
+            done
+
+              ? `${poi.icon} ${poi.name}`
+
+              : "? Unbekannter Erkundungspunkt";
+
+
+          const state =
+            done
+              ? "✓ Entdeckt"
+              : "Nicht entdeckt";
+
+
+          row.innerHTML =
+
+            `<div class="poi-name">
+              ${escapeHTML(name)}
+            </div>
+
+            <div class="poi-state">
+              ${state}
+            </div>`;
+
+
+          /*
+            POI im Reisebuch auswählen.
+          */
+
+          row.addEventListener(
+
+            "click",
+
+            () => {
+
+              tryOpenPOI(
+                poi
+              );
+
+            }
+
+          );
+
+
+          poiContainer.appendChild(
+            row
+          );
+
+        }
+
+      );
+
+    } else {
+
+      document.getElementById(
+        "detailStatus"
+      ).textContent =
+        "ENTDECKT";
+
+
+      poiContainer.innerHTML =
+
+        `<div class="empty">
+          Für diesen Ort sind in der aktuellen Testversion noch keine Erkundungspunkte hinterlegt.
+        </div>`;
+
+    }
+
+  }
+
+
+  function closePlaceDetail() {
+
+    document.getElementById(
+      "travelDetail"
+    ).classList.remove(
+      "active"
+    );
+
+
+    document.getElementById(
+      "travelOverview"
+    ).classList.remove(
+      "hidden"
     );
 
   }
 
 
-  /* =========================================================
-     POI SYSTEM
-     ========================================================= */
+  function normalizePlaceName(
+    value
+  ) {
+
+    return String(
+      value || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  }
+
+
+
+  /* ======================================================
+     MAIN POI LIST
+     ====================================================== */
+
+  function renderMainPOIList() {
+
+    const container =
+      document.getElementById(
+        "mainPOIList"
+      );
+
+
+    container.innerHTML =
+      "";
+
+
+    FUERSTENBERG.pois.forEach(
+
+      poi => {
+
+        const done =
+          fuerstenbergMission
+            .visitedPOIs
+            .includes(
+              poi.id
+            );
+
+
+        const row =
+          document.createElement(
+            "div"
+          );
+
+
+        row.className =
+          done
+            ? "poi-row done"
+            : "poi-row";
+
+
+        row.id =
+          `row-${poi.id}`;
+
+
+        const name =
+          done
+
+            ? `${poi.icon} ${poi.name}`
+
+            : "? Unbekannter Erkundungspunkt";
+
+
+        row.innerHTML =
+
+          `<div
+            class="poi-name"
+            id="name-${poi.id}">
+
+            ${escapeHTML(name)}
+
+          </div>
+
+          <div
+            class="poi-state"
+            id="state-${poi.id}">
+
+            ${
+              done
+                ? "✓ Entdeckt"
+                : "Nicht entdeckt"
+            }
+
+          </div>`;
+
+
+        row.addEventListener(
+
+          "click",
+
+          () => {
+
+            tryOpenPOI(
+              poi
+            );
+
+          }
+
+        );
+
+
+        container.appendChild(
+          row
+        );
+
+      }
+
+    );
+
+  }
+
+
+
+  /* ======================================================
+     POI STATE
+     ====================================================== */
 
   function updatePOIStates(
     lat,
@@ -2787,20 +3948,26 @@
   ) {
 
     FUERSTENBERG.pois.forEach(
+
       poi => {
 
         const done =
           fuerstenbergMission
             .visitedPOIs
-            .includes(poi.id);
+            .includes(
+              poi.id
+            );
 
 
         const distance =
           haversineDistance(
+
             lat,
             lon,
+
             poi.lat,
             poi.lon
+
           );
 
 
@@ -2808,14 +3975,20 @@
           "unknown";
 
 
-        if (done) {
+        if (
+          done
+        ) {
 
           state =
             "done";
 
-        } else if (
+        }
+
+        else if (
+
           distance <=
           FUERSTENBERG.visitRadius
+
         ) {
 
           state =
@@ -2827,17 +4000,13 @@
         poiMarkers[
           poi.id
         ].setIcon(
+
           createPOIIcon(
             poi,
             state
           )
+
         );
-
-
-        const row =
-          document.getElementById(
-            `row-${poi.id}`
-          );
 
 
         const stateEl =
@@ -2846,32 +4015,39 @@
           );
 
 
-        row.classList.toggle(
-          "done",
-          done
-        );
-
-
-        if (done) {
-
-          stateEl.textContent =
-            "✓ Entdeckt";
-
-        } else if (
-          state === "range"
+        if (
+          stateEl
         ) {
 
-          stateEl.textContent =
-            "In Reichweite";
+          if (
+            done
+          ) {
 
-        } else {
+            stateEl.textContent =
+              "✓ Entdeckt";
 
-          stateEl.textContent =
-            `${Math.round(distance)} m`;
+          }
+
+          else if (
+            state === "range"
+          ) {
+
+            stateEl.textContent =
+              "In Reichweite";
+
+          }
+
+          else {
+
+            stateEl.textContent =
+              `${Math.round(distance)} m`;
+
+          }
 
         }
 
       }
+
     );
 
 
@@ -2885,12 +4061,14 @@
   ) {
 
     if (
+
       currentLat === null ||
       currentLon === null
+
     ) {
 
       setTemporaryMessage(
-        "Starte zuerst GPS."
+        "Raven hat noch keine Position."
       );
 
       return;
@@ -2899,14 +4077,23 @@
 
 
     if (
+
       fuerstenbergMission
         .visitedPOIs
-        .includes(poi.id)
+        .includes(
+          poi.id
+        )
+
     ) {
 
       setTemporaryMessage(
-        `✓ ${poi.name} wurde bereits entdeckt.`
+
+        `✓ ${poi.name} wurde bereits entdeckt.`,
+
+        2500
+
       );
+
 
       return;
 
@@ -2915,21 +4102,35 @@
 
     const distance =
       haversineDistance(
+
         currentLat,
         currentLon,
+
         poi.lat,
         poi.lon
+
       );
 
 
     if (
+
       distance >
       FUERSTENBERG.visitRadius
+
     ) {
 
+      /*
+        Name bleibt geheim!
+      */
+
       setTemporaryMessage(
-        `Noch ${Math.round(distance)} m bis ${poi.name}.`
+
+        `? Erkundungspunkt ist noch ${Math.round(distance)} m entfernt.`,
+
+        3000
+
       );
+
 
       return;
 
@@ -2943,9 +4144,10 @@
   }
 
 
-  /* =========================================================
-     RUBBELN
-     ========================================================= */
+
+  /* ======================================================
+     SCRATCH
+     ====================================================== */
 
   let scratchPOI =
     null;
@@ -2996,6 +4198,12 @@
     scratchCheckCounter =
       0;
 
+
+    /*
+      Ergebnis liegt darunter,
+      aber wird durch Rubbeldeckel
+      verborgen.
+    */
 
     document.getElementById(
       "scratchIcon"
@@ -3053,26 +4261,32 @@
 
 
     scratchContext.setTransform(
+
       dpr,
       0,
       0,
       dpr,
       0,
       0
+
     );
 
 
-    scratchContext.globalCompositeOperation =
+    scratchContext
+      .globalCompositeOperation =
       "source-over";
 
 
     const gradient =
       scratchContext
         .createLinearGradient(
+
           0,
           0,
+
           rect.width,
           rect.height
+
         );
 
 
@@ -3083,7 +4297,7 @@
 
 
     gradient.addColorStop(
-      0.5,
+      .5,
       "#71717a"
     );
 
@@ -3099,10 +4313,13 @@
 
 
     scratchContext.fillRect(
+
       0,
       0,
+
       rect.width,
       rect.height
+
     );
 
 
@@ -3123,9 +4340,13 @@
 
 
     scratchContext.fillText(
+
       "RUBBEL MICH FREI",
+
       rect.width / 2,
+
       rect.height / 2
+
     );
 
   }
@@ -3167,11 +4388,13 @@
 
 
     scratchContext.arc(
+
       x,
       y,
       22,
       0,
       Math.PI * 2
+
     );
 
 
@@ -3182,8 +4405,10 @@
 
 
     if (
+
       scratchCheckCounter %
       12 === 0
+
     ) {
 
       checkScratchProgress();
@@ -3202,21 +4427,17 @@
     }
 
 
-    const width =
-      scratchCanvas.width;
-
-
-    const height =
-      scratchCanvas.height;
-
-
     const image =
       scratchContext
         .getImageData(
+
           0,
           0,
-          width,
-          height
+
+          scratchCanvas.width,
+
+          scratchCanvas.height
+
         );
 
 
@@ -3229,17 +4450,23 @@
 
 
     for (
+
       let i = 3;
+
       i < image.data.length;
+
       i += 4 * 20
+
     ) {
 
       checked++;
 
 
       if (
+
         image.data[i] <
         40
+
       ) {
 
         transparent++;
@@ -3255,7 +4482,7 @@
 
 
     if (
-      ratio >= 0.45
+      ratio >= .45
     ) {
 
       completeScratch();
@@ -3268,8 +4495,10 @@
   function completeScratch() {
 
     if (
+
       scratchCompleted ||
       !scratchPOI
+
     ) {
       return;
     }
@@ -3280,10 +4509,14 @@
 
 
     scratchContext.clearRect(
+
       0,
       0,
+
       scratchCanvas.width,
+
       scratchCanvas.height
+
     );
 
 
@@ -3317,7 +4550,9 @@
 
 
   scratchCanvas.addEventListener(
+
     "pointerdown",
+
     event => {
 
       scratching =
@@ -3325,51 +4560,75 @@
 
 
       scratchAt(
+
         event.clientX,
+
         event.clientY
+
       );
 
     }
+
   );
 
 
   scratchCanvas.addEventListener(
+
     "pointermove",
+
     event => {
 
-      if (!scratching) {
+      if (
+        !scratching
+      ) {
         return;
       }
 
 
       scratchAt(
+
         event.clientX,
+
         event.clientY
+
       );
 
     }
+
   );
 
 
   window.addEventListener(
+
     "pointerup",
+
     () => {
 
       scratching =
         false;
 
     }
+
   );
 
+
+
+  /* ======================================================
+     DISCOVER POI
+     ====================================================== */
 
   function discoverPOI(
     poi
   ) {
 
     if (
+
       fuerstenbergMission
         .visitedPOIs
-        .includes(poi.id)
+        .includes(
+          poi.id
+        )
+
     ) {
       return;
     }
@@ -3377,7 +4636,9 @@
 
     fuerstenbergMission
       .visitedPOIs
-      .push(poi.id);
+      .push(
+        poi.id
+      );
 
 
     addXP(
@@ -3386,18 +4647,23 @@
 
 
     const allDone =
-      FUERSTENBERG.pois
-        .every(
-          item =>
-            fuerstenbergMission
-              .visitedPOIs
-              .includes(item.id)
-        );
+      FUERSTENBERG.pois.every(
+
+        item =>
+          fuerstenbergMission
+            .visitedPOIs
+            .includes(
+              item.id
+            )
+
+      );
 
 
     if (
+
       allDone &&
       !fuerstenbergMission.completed
+
     ) {
 
       fuerstenbergMission.completed =
@@ -3410,15 +4676,21 @@
 
 
       setTemporaryMessage(
+
         `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP`,
+
         5000
+
       );
 
     } else {
 
       setTemporaryMessage(
+
         `✨ ${poi.name} entdeckt! +${FUERSTENBERG.poiXP} XP`,
+
         5000
+
       );
 
     }
@@ -3426,17 +4698,27 @@
 
     saveMission();
 
+
+    renderMainPOIList();
+
     updateMissionUI();
+
+    renderTravelBook();
 
 
     if (
+
       currentLat !== null &&
       currentLon !== null
+
     ) {
 
       updatePOIStates(
+
         currentLat,
+
         currentLon
+
       );
 
     }
@@ -3449,13 +4731,21 @@
   }
 
 
+
+  /* ======================================================
+     MISSION
+     ====================================================== */
+
   function saveMission() {
 
     localStorage.setItem(
+
       "ravenFuerstenbergMission",
+
       JSON.stringify(
         fuerstenbergMission
       )
+
     );
 
   }
@@ -3475,70 +4765,23 @@
         .length;
 
 
-    const el =
-      document.getElementById(
-        "missionText"
-      );
+    document.getElementById(
+      "missionText"
+    ).textContent =
 
-
-    if (
       fuerstenbergMission.completed
-    ) {
 
-      el.textContent =
-        "Fürstenberg ist vollständig erkundet und als echtes Gebiet freigelegt.";
+        ? "Fürstenberg ist vollständig erkundet und als echtes Gebiet freigelegt."
 
-    } else {
-
-      el.textContent =
-        `${visited} / ${total} Erkundungspunkte entdeckt.`;
-
-    }
-
-
-    FUERSTENBERG.pois.forEach(
-      poi => {
-
-        const done =
-          fuerstenbergMission
-            .visitedPOIs
-            .includes(poi.id);
-
-
-        const row =
-          document.getElementById(
-            `row-${poi.id}`
-          );
-
-
-        const state =
-          document.getElementById(
-            `state-${poi.id}`
-          );
-
-
-        row.classList.toggle(
-          "done",
-          done
-        );
-
-
-        if (done) {
-
-          state.textContent =
-            "✓ Entdeckt";
-
-        }
-
-      }
-    );
+        : `${visited} / ${total} Erkundungspunkte entdeckt.`;
 
   }
 
 
-  /* =========================================================
+
+  /* ======================================================
      XP
-     ========================================================= */
+     ====================================================== */
 
   function addXP(
     amount
@@ -3578,9 +4821,10 @@
   }
 
 
-  /* =========================================================
-     MELDUNGEN
-     ========================================================= */
+
+  /* ======================================================
+     MESSAGE
+     ====================================================== */
 
   let messageTimer =
     null;
@@ -3590,7 +4834,9 @@
     text
   ) {
 
-    if (messageTimer) {
+    if (
+      messageTimer
+    ) {
 
       clearTimeout(
         messageTimer
@@ -3611,18 +4857,14 @@
   }
 
 
-  /*
-    V1.6:
-    Kurzmeldungen bleiben nicht mehr
-    dauerhaft auf dem Bildschirm.
-  */
-
   function setTemporaryMessage(
     text,
     duration = 3500
   ) {
 
-    if (messageTimer) {
+    if (
+      messageTimer
+    ) {
 
       clearTimeout(
         messageTimer
@@ -3639,11 +4881,25 @@
 
     messageTimer =
       setTimeout(
+
         () => {
 
           if (
+            godMode
+          ) {
+
+            document.getElementById(
+              "message"
+            ).textContent =
+              "🛠 GOD MODE aktiv – tippe auf die Karte.";
+
+          }
+
+          else if (
+
             tracking &&
             firstValidFix
+
           ) {
 
             document.getElementById(
@@ -3651,14 +4907,20 @@
             ).textContent =
               "📍 GPS aktiv – Raven folgt dir.";
 
-          } else if (tracking) {
+          }
+
+          else if (
+            tracking
+          ) {
 
             document.getElementById(
               "message"
             ).textContent =
               "📡 Raven sucht deine Position …";
 
-          } else {
+          }
+
+          else {
 
             document.getElementById(
               "message"
@@ -3672,15 +4934,18 @@
             null;
 
         },
+
         duration
+
       );
 
   }
 
 
-  /* =========================================================
+
+  /* ======================================================
      UI
-     ========================================================= */
+     ====================================================== */
 
   function updateUI() {
 
@@ -3730,9 +4995,10 @@
   }
 
 
-  /* =========================================================
-     DISTANZ
-     ========================================================= */
+
+  /* ======================================================
+     DISTANCE
+     ====================================================== */
 
   function haversineDistance(
     lat1,
@@ -3754,37 +5020,53 @@
 
     const dLat =
       toRad(
-        lat2 - lat1
+        lat2 -
+        lat1
       );
 
 
     const dLon =
       toRad(
-        lon2 - lon1
+        lon2 -
+        lon1
       );
 
 
     const a =
-      Math.sin(dLat / 2) *
-      Math.sin(dLat / 2) +
+
+      Math.sin(
+        dLat / 2
+      ) ** 2
+
+      +
 
       Math.cos(
         toRad(lat1)
-      ) *
+      )
+
+      *
 
       Math.cos(
         toRad(lat2)
-      ) *
+      )
 
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+      *
+
+      Math.sin(
+        dLon / 2
+      ) ** 2;
 
 
     const c =
       2 *
       Math.atan2(
+
         Math.sqrt(a),
-        Math.sqrt(1 - a)
+
+        Math.sqrt(
+          1 - a
+        )
+
       );
 
 
@@ -3833,7 +5115,9 @@
         Math.sin(lat1) *
         Math.cos(
           angularDistance
-        ) +
+        )
+
+        +
 
         Math.cos(lat1) *
         Math.sin(
@@ -3847,6 +5131,7 @@
 
 
     const lon2 =
+
       lon1 +
 
       Math.atan2(
@@ -3861,7 +5146,9 @@
 
         Math.cos(
           angularDistance
-        ) -
+        )
+
+        -
 
         Math.sin(lat1) *
         Math.sin(lat2)
@@ -3884,23 +5171,51 @@
   }
 
 
+
+  /* ======================================================
+     SECURITY
+     ====================================================== */
+
   function escapeHTML(
     value
   ) {
 
-    return String(value)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
+    return String(
+      value
+    )
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 
   }
 
 
-  /* =========================================================
+
+  /* ======================================================
      START
-     ========================================================= */
+     ====================================================== */
 
   updateUI();
 
@@ -3910,6 +5225,8 @@
 
   updateMissionUI();
 
+  renderMainPOIList();
+
   renderTravelBook();
 
   createFogLayer();
@@ -3918,6 +5235,7 @@
 
 
   setTimeout(
+
     () => {
 
       map.invalidateSize();
@@ -3925,7 +5243,9 @@
       redrawFog();
 
     },
+
     400
+
   );
 
 </script>
