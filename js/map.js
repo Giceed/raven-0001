@@ -3,8 +3,8 @@
    ========================================================== */
 
 const BAD_WUENNENBERG_BOUNDS = L.latLngBounds(
-  [51.447216,8.625182],
-  [51.615433,8.846116]
+  [51.447216,8.709994],
+  [51.555537,8.837855]
 );
 
 const map = L.map("map",{
@@ -61,10 +61,12 @@ function joinBoundaryLines(lines){
 
 async function cutMapToBadWuennenberg(){
   try{
-    const response=await fetch("data/bad-wuennenberg-boundaries.json?v=2");
+    const response=await fetch("data/fuerstenberg-boundary.json?v=1");
     const data=await response.json();
-    const city=data.features.find(feature=>feature.level===8);
-    const cityRing=joinBoundaryLines(city.lines);
+    const coordinates=data.geojson.type==="Polygon"
+      ? data.geojson.coordinates[0]
+      : data.geojson.coordinates[0][0];
+    const cityRing=coordinates.map(point=>[point[1],point[0]]);
     const outside=[[-85,-180],[-85,180],[85,180],[85,-180],[-85,-180]];
     L.polygon([outside,cityRing],{
       pane:"ravenTerritoryMaskPane",stroke:false,fillColor:"#05070b",fillOpacity:1,
@@ -236,29 +238,16 @@ async function toggleGodModeView(){
   if(godViewEnabled){disableGodModeView();return;}
 
   try{
-    setTemporaryMessage("👁 Grenzen von Bad Wünnenberg werden geladen …",5000);
-    const response=await fetch("data/bad-wuennenberg-boundaries.json?v=1");
+    setTemporaryMessage("👁 Grenze von Fürstenberg wird geladen …",5000);
+    const response=await fetch("data/fuerstenberg-boundary.json?v=1");
     if(!response.ok) throw new Error();
     const data=await response.json();
     godViewLayer=L.layerGroup().addTo(map);
     const allPoints=[];
 
-    data.features.forEach(feature=>{
-      feature.lines.forEach(line=>{
-        const visibleLine=line.filter(point=>BAD_WUENNENBERG_BOUNDS.contains(point));
-        if(visibleLine.length<2) return;
-        allPoints.push(...visibleLine);
-        L.polyline(visibleLine,{
-          pane:"ravenForegroundPane",
-          color:feature.level===8 ? "#facc15" : "#c084fc",
-          weight:feature.level===8 ? 5 : 4,
-          opacity:.98,
-          dashArray:feature.level===8 ? null : "8 6",
-          interactive:true
-        }).bindTooltip(feature.name,{sticky:true,direction:"top"})
-          .addTo(godViewLayer);
-      });
-    });
+    const layer=L.geoJSON(data.geojson,{pane:"ravenForegroundPane",style:{color:"#facc15",weight:5,opacity:.98,fill:false},interactive:true})
+      .bindTooltip("Fürstenberg",{sticky:true,direction:"top"}).addTo(godViewLayer);
+    layer.eachLayer(item=>{const latlngs=item.getLatLngs?.().flat(3)||[];allPoints.push(...latlngs);});
 
     godViewEnabled=true;
     document.getElementById("godViewButton").classList.add("active");
@@ -267,7 +256,7 @@ async function toggleGodModeView(){
       map.fitBounds(allPoints,{padding:[25,25],maxZoom:12});
       setTimeout(()=>internalMapMove=false,600);
     }
-    setTemporaryMessage("👁 GOD MODE VIEW aktiv – Stadtgrenze gelb, Ortsteile lila.",5000);
+    setTemporaryMessage("👁 GOD MODE VIEW aktiv – Fürstenberg-Grenze gelb.",5000);
   }catch(error){
     setTemporaryMessage("⚠ GOD MODE VIEW konnte nicht geladen werden.");
   }
