@@ -41,13 +41,13 @@ async function maybeReverseGeocode(lat,lon,force=false){
 
   const testStatus=document.getElementById("testRegionStatus");
   testStatus.textContent=inTestRegion
-    ? `🧭 Im Testgebiet · ${Math.round(distanceFromCenter/1000)} km von Fürstenberg`
-    : `⚠ Außerhalb des Testgebiets · ${Math.round(distanceFromCenter/1000)} km von Fürstenberg`;
+    ? `🧭 Testgebiet Stadt Bad Wünnenberg`
+    : `⚠ Außerhalb des Testgebiets Bad Wünnenberg`;
   testStatus.className=`boundary-status test-region-status ${inTestRegion ? "ok" : "outside"}`;
 
   if(!inTestRegion){
     document.getElementById("boundaryStatus").textContent=
-      "Orte werden in V2.4 innerhalb des 100-km-Testgebiets gespeichert.";
+      "Orte werden derzeit nur im Testgebiet Bad Wünnenberg gespeichert.";
     document.getElementById("boundaryStatus").className="boundary-status outside";
     return;
   }
@@ -91,6 +91,23 @@ async function maybeReverseGeocode(lat,lon,force=false){
       address.municipality ||
       address.county ||
       "Unbekannter Ort";
+
+    const allowedOrtschaften=new Set([
+      "Bad Wünnenberg","Bleiwäsche","Elisenhof","Fürstenberg",
+      "Haaren","Helmern","Leiberg"
+    ]);
+    const inBadWuennenberg=
+      municipality.includes("Bad Wünnenberg") ||
+      allowedOrtschaften.has(district);
+
+    if(!inBadWuennenberg){
+      testStatus.textContent="⚠ Außerhalb des Testgebiets Bad Wünnenberg";
+      testStatus.className="boundary-status test-region-status outside";
+      boundaryStatus.textContent=
+        "Dieser Ort wird im aktuellen Teststand nicht gespeichert.";
+      boundaryStatus.className="boundary-status outside";
+      return;
+    }
 
     const name=district || municipality;
 
