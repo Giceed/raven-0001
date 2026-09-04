@@ -127,16 +127,19 @@ function tryOpenPoint(point){
    ========================================================== */
 
 function renderMainLists(){
+  if(!currentRavenDistrict){
+    document.getElementById("explorationList").innerHTML="";
+    document.getElementById("activityList").innerHTML="";
+    updateMissionUI();
+    return;
+  }
 
-  renderPointList(
-    "explorationList",
-    FUERSTENBERG.explorationPOIs
+  const placePoints=ALL_POINTS.filter(point=>
+    normalizePlaceName(point.district||(point.id.startsWith("concept-")?"":"Fürstenberg"))===normalizePlaceName(currentRavenDistrict)
   );
 
-  renderPointList(
-    "activityList",
-    FUERSTENBERG.activityPOIs
-  );
+  renderPointList("explorationList",placePoints.filter(point=>point.type==="exploration"));
+  renderPointList("activityList",placePoints.filter(point=>point.type==="activity"));
 
   updateMissionUI();
 }
@@ -489,34 +492,20 @@ function isFuerstenbergDiscovered(){
 }
 
 function updateMissionUI(){
-
-  const placeKnown=isFuerstenbergDiscovered();
-
-  document.getElementById("missionTitle").textContent =
-    placeKnown ? "📍 Standort: Fürstenberg" : "📍 Standort";
-
-  const visited=
-    fuerstenbergMission.visitedPOIs.length;
-
-  const total=
-    FUERSTENBERG.explorationPOIs.length;
-
-  const activities=
-    fuerstenbergMission.visitedActivities.length;
-
-  const activityTotal=
-    FUERSTENBERG.activityPOIs.length;
-
-  document.getElementById("missionText").textContent =
-    !placeKnown
-
-      ? `${visited} / ${total} Erkundungspunkte vorbereitet · Aktivitäten ${activities}/${activityTotal} · Starte GPS, um den Ort zu entdecken.`
-
-      : fuerstenbergMission.completed
-
-        ? `Fürstenberg ist vollständig erkundet · ${visited}/${total} · Aktivitäten ${activities}/${activityTotal}.`
-
-        : `${visited} / ${total} Erkundungspunkte entdeckt · Aktivitäten ${activities}/${activityTotal}.`;
+  const title=document.getElementById("missionTitle");
+  const text=document.getElementById("missionText");
+  if(!currentRavenDistrict){
+    title.textContent="📍 Standort: unbekannt";
+    text.textContent="Starte die Erkundung, damit Raven deinen Ort erkennt und die zugehörigen Punkte lädt.";
+    return;
+  }
+  const points=ALL_POINTS.filter(point=>normalizePlaceName(point.district||(point.id.startsWith("concept-")?"":"Fürstenberg"))===normalizePlaceName(currentRavenDistrict));
+  const exploration=points.filter(point=>point.type==="exploration");
+  const activities=points.filter(point=>point.type==="activity");
+  const foundExploration=exploration.filter(isDiscovered).length;
+  const foundActivities=activities.filter(isDiscovered).length;
+  title.textContent=`📍 Standort: ${currentRavenDistrict}`;
+  text.textContent=`${foundExploration}/${exploration.length} Erkundungspunkte entdeckt · Aktivitäten ${foundActivities}/${activities.length}.`;
 }
 
 
@@ -546,3 +535,4 @@ function addXP(amount){
 
   updateUI();
 }
+
