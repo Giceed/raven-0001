@@ -51,6 +51,22 @@ const state=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")||{center:{lat:
 let markers=new Map(),selectedId=null,radiusCircle=null,moveId=null;
 const endpoints=["https://overpass.kumi.systems/api/interpreter","https://overpass-api.de/api/interpreter"];
 
+const ravenBasePoints=[
+  {id:"raven-schloss",name:"Schloss Fürstenberg",lat:51.5155802,lon:8.7367807,rawType:"castle",category:"exploration",radius:160,score:100,access:"Außenradius / öffentliche Wege",status:"approved",source:"Raven-Karte"},
+  {id:"raven-st-marien",name:"St. Marien / Sintfeld-Dom",lat:51.5157079,lon:8.7397917,rawType:"place_of_worship",category:"exploration",radius:50,score:100,access:"öffentliches Umfeld",status:"approved",source:"Raven-Karte"},
+  {id:"raven-rathaus",name:"Rathaus",lat:51.5164455,lon:8.7449286,rawType:"townhall",category:"exploration",radius:50,score:100,access:"öffentlicher Straßenraum",status:"approved",source:"Raven-Karte"},
+  {id:"raven-beerenstelle",name:"Beerenstelle",lat:51.51325,lon:8.74215,rawType:"foraging",category:"activity",radius:35,score:100,access:"draußen",status:"approved",source:"Raven-Karte"},
+  {id:"raven-spielplatz",name:"Spielplatz",lat:51.51845,lon:8.74730,rawType:"playground",category:"activity",radius:35,score:100,access:"draußen",status:"approved",source:"Raven-Karte"}
+];
+
+function mergeRavenBasePoints(){
+  const existing=new Set(state.candidates.map(candidate=>candidate.id));
+  ravenBasePoints.forEach(point=>{
+    if(!existing.has(point.id)) state.candidates.unshift({...point});
+  });
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+}
+
 function esc(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));}
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderStats();renderList();}
 function setMessage(text){document.getElementById("status").textContent=text;}
@@ -69,7 +85,12 @@ async function loadCandidates(){
   for(const endpoint of endpoints){try{const response=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:"data="+encodeURIComponent(q)});if(response.ok){data=await response.json();break;}}catch(e){}}
   if(!data){setMessage("OSM-Server nicht erreichbar. Bitte später erneut versuchen.");return;}
   const previous=new Map(state.candidates.map(c=>[c.id,c]));
-  state.candidates=data.elements.map(makeCandidate).filter(Boolean).map(c=>previous.has(c.id)?{...c,...previous.get(c.id)}:c).sort((a,b)=>b.score-a.score).slice(0,120);
+  const ravenPoints=state.candidates.filter(c=>c.source==="Raven-Karte");
+  const osmPoints=data.elements.map(makeCandidate).filter(Boolean)
+    .map(c=>previous.has(c.id)?{...c,...previous.get(c.id)}:c)
+    .filter(c=>!ravenPoints.some(r=>Math.hypot(r.lat-c.lat,r.lon-c.lon)<0.00035))
+    .sort((a,b)=>b.score-a.score).slice(0,120);
+  state.candidates=[...ravenPoints,...osmPoints];
   save();renderMarkers();fitAll();setMessage(state.candidates.length+" geeignete Vorschläge geladen.");
 }
 
@@ -81,12 +102,12 @@ function makeCandidate(e){
   if(!activities.includes(raw)&&!explorations.includes(raw))return null;
   const category=activities.includes(raw)?"activity":"exploration";let score=40;if(t.wikidata||t.wikipedia)score+=25;if(t.historic||t.tourism)score+=15;if(t.access==="yes"||t.foot==="yes")score+=10;
   const radius=["castle","manor","archaeological_site"].includes(raw)?140:["fire_station","police"].includes(raw)?90:["place_of_worship","townhall","museum"].includes(raw)?60:35;
-  return{id:`osm-${e.type}-${e.id}`,name:t.name,lat,lon,rawType:raw,category,radius,score,access:t.access||t.foot||"unbekannt",status:"pending",osmType:e.type,osmId:e.id};
+  return{id:`osm-${e.type}-${e.id}`,name:t.name,lat,lon,rawType:raw,category,radius,score,access:t.access||t.foot||"unbekannt",status:"pending",osmType:e.type,osmId:e.id,source:"OpenStreetMap"};
 }
 
 function renderMarkers(){markers.forEach(m=>map.removeLayer(m));markers.clear();state.candidates.forEach((c,i)=>{const icon=L.divIcon({className:"",html:`<div class="marker ${c.category} ${c.status}">${i+1}</div>`,iconSize:[34,34],iconAnchor:[17,17]});const marker=L.marker([c.lat,c.lon],{icon}).addTo(map).on("click",()=>selectCandidate(c.id));markers.set(c.id,marker);});}
 function renderList(){const list=document.getElementById("candidateList");if(!state.candidates.length){list.innerHTML='<div class="empty">Noch keine Kandidaten geladen.</div>';return;}list.innerHTML=state.candidates.map((c,i)=>`<button class="candidate ${c.status} ${c.id===selectedId?'selected':''}" onclick="selectCandidate('${c.id}')"><div class="candidate-name">${i+1}. ${esc(c.name)}</div><div class="candidate-sub">${c.category==='activity'?'Aktivität':'Erkundung'} · ${esc(c.rawType)} · ${c.radius} m · ${c.status}</div></button>`).join("");}
-function selectCandidate(id){const c=state.candidates.find(x=>x.id===id);if(!c)return;selectedId=id;editor.hidden=false;editName.textContent=c.name;editMeta.textContent=`OSM ${c.osmType} ${c.osmId} · ${c.rawType} · Bewertung ${c.score}/100 · Zugang ${c.access}`;editCategory.value=c.category;editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);renderList();map.panTo([c.lat,c.lon]);}
+function selectCandidate(id){const c=state.candidates.find(x=>x.id===id);if(!c)return;selectedId=id;editor.hidden=false;editName.textContent=c.name;editMeta.textContent=`${c.source||"OpenStreetMap"}${c.osmType?` · OSM ${c.osmType} ${c.osmId}`:""} · ${c.rawType} · Bewertung ${c.score}/100 · Zugang ${c.access}`;editCategory.value=c.category;editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);renderList();map.panTo([c.lat,c.lon]);}
 function showRadius(c){if(radiusCircle)map.removeLayer(radiusCircle);radiusCircle=L.circle([c.lat,c.lon],{radius:c.radius,color:c.category==="activity"?"#f97316":"#8b5cf6",weight:3,fillOpacity:.18,dashArray:"8 5"}).addTo(map);radiusCircle.bringToBack();}
 function syncRadius(value){const c=current();if(!c)return;c.radius=Math.max(15,Math.min(250,+value||15));editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);save();}
 function updateSelected(){const c=current();if(!c)return;c.category=editCategory.value;showRadius(c);save();renderMarkers();}
@@ -99,7 +120,7 @@ function fitAll(){const visible=state.candidates.filter(c=>c.status!=="rejected"
 function exportProject(){const payload={format:"raven-poi-review",version:1,exportedAt:new Date().toISOString(),center:state.center,candidates:state.candidates};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="raven-pois-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(url);setMessage("Raven-Projekt exportiert.");}
 async function importProject(event){try{const data=JSON.parse(await event.target.files[0].text());if(!Array.isArray(data.candidates))throw Error();state.center=data.center||state.center;state.candidates=data.candidates;save();renderMarkers();fitAll();setMessage("Projekt importiert.");}catch(e){setMessage("Diese Datei ist kein gültiges Raven-Projekt.");}event.target.value="";}
 
-placeSearch.value=state.center.name;renderStats();renderList();renderMarkers();if(state.candidates.length)fitAll();
+mergeRavenBasePoints();placeSearch.value=state.center.name;renderStats();renderList();renderMarkers();if(state.candidates.length)fitAll();
 </script>
 </body>
 </html>
