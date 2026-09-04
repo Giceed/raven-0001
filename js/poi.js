@@ -9,6 +9,10 @@ function isDiscovered(point){
     : fuerstenbergMission.visitedPOIs.includes(point.id);
 }
 
+function getDiscoveryRadius(point){
+  return point.discoveryRadius || FUERSTENBERG.visitRadius;
+}
+
 function updateAllPointStates(lat,lon){
 
   ALL_POINTS.forEach(point=>{
@@ -21,7 +25,7 @@ function updateAllPointStates(lat,lon){
     );
 
     const discovered=isDiscovered(point);
-    const inRange=distance<=FUERSTENBERG.visitRadius;
+    const inRange=distance<=getDiscoveryRadius(point);
 
     renderPointMarker(
       point,
@@ -103,10 +107,12 @@ function tryOpenPoint(point){
     point.lon
   );
 
-  if(distance>FUERSTENBERG.visitRadius){
+  const discoveryRadius=getDiscoveryRadius(point);
+
+  if(distance>discoveryRadius){
 
     setTemporaryMessage(
-      `? Dieser Punkt ist noch ${Math.round(distance)} m entfernt.`
+      `? Dieser Punkt ist noch ${Math.round(distance)} m entfernt (Radius ${discoveryRadius} m).`
     );
 
     return;
