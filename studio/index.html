@@ -10,6 +10,7 @@
 *{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif}button,input,select{font:inherit}
 .app{height:100%;display:grid;grid-template-rows:auto 1fr}.top{padding:12px 16px;border-bottom:1px solid var(--line);background:#090c12;display:flex;align-items:center;gap:14px;flex-wrap:wrap}.brand{font-weight:1000;letter-spacing:1.4px}.brand span{color:#c4b5fd}.toolbar{display:flex;gap:8px;flex:1;flex-wrap:wrap}.search{min-width:220px;flex:1}.top input,.top button,.top select,.editor input,.editor select,.editor button{border:1px solid var(--line);border-radius:9px;background:#111722;color:var(--text);padding:9px 11px}.top button,.editor button{cursor:pointer;font-weight:800}.primary{background:#6d28d9!important;border-color:#a78bfa!important}.good{background:#14532d!important;border-color:#22c55e!important}.bad{background:#451a1a!important;border-color:#ef4444!important}.layout{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 370px}.map-wrap{position:relative;min-height:400px}#map{height:100%;width:100%;background:#0a0d12}.legend{position:absolute;z-index:800;left:12px;bottom:12px;background:#0d1117e8;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:11px;line-height:1.7}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}.side{min-height:0;border-left:1px solid var(--line);background:var(--panel);display:grid;grid-template-rows:auto auto 1fr}.status{padding:12px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}.stats{display:flex;gap:12px;margin-top:7px;color:var(--text);font-weight:800}.editor{padding:14px;border-bottom:1px solid var(--line);display:grid;gap:9px}.editor[hidden]{display:none}.editor h2{font-size:18px;margin:0}.meta{font-size:11px;color:var(--muted);line-height:1.5}.field{display:grid;grid-template-columns:95px 1fr;align-items:center;gap:8px;font-size:12px}.range-row{display:grid;grid-template-columns:1fr 78px;gap:7px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.list{overflow:auto;padding:8px}.candidate{width:100%;text-align:left;margin-bottom:7px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#0a0e14;color:var(--text);cursor:pointer}.candidate:hover,.candidate.selected{border-color:#a78bfa}.candidate.approved{border-color:#166534;background:#052e161f}.candidate.rejected{opacity:.45}.candidate-name{font-weight:850;font-size:12px}.candidate-sub{font-size:10px;color:var(--muted);margin-top:4px}.marker{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:3px solid white;background:var(--cyan);box-shadow:0 0 0 6px #22d3ee4d,0 0 20px #22d3ee;color:white;font-weight:950}.marker.activity{background:var(--orange);box-shadow:0 0 0 6px #fb923c4d,0 0 20px #fb923c}.marker.approved{background:#15803d;box-shadow:none}.marker.rejected{background:#4b5563;box-shadow:none;opacity:.45}.empty{padding:24px;text-align:center;color:var(--muted);font-size:12px}@media(max-width:850px){.layout{grid-template-columns:1fr;grid-template-rows:58vh auto}.side{border-left:0;border-top:1px solid var(--line);min-height:500px}}
 .app{grid-template-rows:auto auto 1fr}.filters{display:flex;gap:7px;padding:9px 12px;overflow-x:auto;border-bottom:1px solid var(--line);background:#0b0f16}.filters button,.filters input,.filters select{white-space:nowrap;border:1px solid var(--line);border-radius:999px;background:#111722;color:var(--muted);padding:7px 11px;font-size:11px;font-weight:800}.filters button{cursor:pointer}.filters button.active{background:#6d28d9;color:white;border-color:#a78bfa}.filters input{min-width:190px;border-radius:9px;color:var(--text)}
+.place-search-wrap{position:relative;min-width:240px;flex:1}.place-search-wrap .search{width:100%}.place-suggestions{display:none;position:absolute;top:calc(100% + 5px);left:0;right:0;z-index:5000;background:#111722;border:1px solid #374151;border-radius:10px;overflow:hidden;box-shadow:0 14px 35px #000b}.place-suggestions.open{display:block}.place-suggestions button{display:block;width:100%;text-align:left;border:0!important;border-bottom:1px solid #273142!important;border-radius:0!important;background:#111722!important;color:#f8fafc!important;padding:10px 12px!important}.place-suggestions button:hover{background:#312e81!important}
 </style>
 </head>
 <body>
@@ -17,8 +18,7 @@
   <header class="top">
     <div class="brand">🐦‍⬛ <span>RAVEN STUDIO</span> V1</div>
     <div class="toolbar">
-      <input class="search" id="placeSearch" list="placeSuggestions" value="Fürstenberg" placeholder="Ortsteil suchen">
-      <datalist id="placeSuggestions"><option value="Bad Wünnenberg"></option><option value="Bleiwäsche"></option><option value="Elisenhof"></option><option value="Fürstenberg"></option><option value="Haaren"></option><option value="Helmern"></option><option value="Leiberg"></option></datalist>
+      <div class="place-search-wrap"><input class="search" id="placeSearch" value="Fürstenberg" placeholder="Ortsteil suchen" oninput="renderLocalPlaceSuggestions(this.value)" autocomplete="off"><div class="place-suggestions" id="placeSuggestions"></div></div>
       <button onclick="searchPlace()">🔎 Ort suchen</button>
       <select id="searchRadius" title="Suchradius"><option value="1500">1,5 km</option><option value="3000" selected>3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select>
       <button class="primary" onclick="loadCandidates()">OSM-Punkte laden</button>
@@ -59,6 +59,22 @@ const TEST_CENTER={lat:51.5157,lon:8.741,radius:100000};
 let placeSuggestTimer=null,placeSuggestionRows=[];
 let selectedGeojson=null,selectedAreaLayer=null;
 const BAD_WUENNENBERG_PLACES=["Bad Wünnenberg","Bleiwäsche","Elisenhof","Fürstenberg","Haaren","Helmern","Leiberg"];
+
+function renderLocalPlaceSuggestions(value){
+  const query=value.trim().toLocaleLowerCase("de");
+  const matches=BAD_WUENNENBERG_PLACES.filter(name=>
+    !query || name.toLocaleLowerCase("de").startsWith(query)
+  );
+  const box=document.getElementById("placeSuggestions");
+  box.innerHTML=matches.map(name=>`<button type="button" onclick="chooseLocalPlace('${name}')">📍 ${name}</button>`).join("");
+  box.classList.toggle("open",matches.length>0&&document.activeElement===document.getElementById("placeSearch"));
+}
+
+function chooseLocalPlace(name){
+  document.getElementById("placeSearch").value=name;
+  document.getElementById("placeSuggestions").classList.remove("open");
+  searchPlace();
+}
 const endpoints=["https://overpass.kumi.systems/api/interpreter","https://overpass-api.de/api/interpreter"];
 
 const ravenBasePoints=[
