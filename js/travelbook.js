@@ -77,14 +77,22 @@ async function maybeReverseGeocode(lat,lon,force=false){
 
     const address=data.address || {};
 
-    const name=
+    const district=
       address.village ||
-      address.town ||
-      address.city ||
-      address.municipality ||
       address.suburb ||
       address.hamlet ||
+      address.quarter ||
+      address.neighbourhood ||
+      "";
+
+    const municipality=
+      address.city ||
+      address.town ||
+      address.municipality ||
+      address.county ||
       "Unbekannter Ort";
+
+    const name=district || municipality;
 
     const region=
       address.state || address.county || "";
@@ -141,7 +149,9 @@ async function maybeReverseGeocode(lat,lon,force=false){
       name;
 
     document.getElementById("locationRegion").textContent =
-      [region,country].filter(Boolean).join(" · ");
+      [district && municipality!==district ? municipality : "",region,country]
+        .filter(Boolean)
+        .join(" · ");
 
     const exists=discoveredPlaces.some(
       place =>
@@ -153,6 +163,8 @@ async function maybeReverseGeocode(lat,lon,force=false){
 
       discoveredPlaces.push({
         name,
+        district:district || name,
+        municipality,
         region,
         country,
         osmType:data.osm_type || "",
@@ -215,9 +227,31 @@ function renderTravelBook(){
   document.getElementById("travelSummary").textContent =
     `${discoveredPlaces.length} Orte · ${regions} Regionen · ${countries} Länder`;
 
-  [...discoveredPlaces]
+  const groups=new Map();
+
+  discoveredPlaces.forEach(place=>{
+    const municipality=place.municipality ||
+      (normalizePlaceName(place.name).includes("fürstenberg")
+        ? "Bad Wünnenberg"
+        : place.name);
+
+    if(!groups.has(municipality)) groups.set(municipality,[]);
+    groups.get(municipality).push(place);
+  });
+
+  [...groups.entries()]
     .reverse()
-    .forEach(place=>{
+    .forEach(([municipality,places])=>{
+
+      const group=document.createElement("div");
+      group.className="municipality-group";
+
+      const title=document.createElement("div");
+      title.className="municipality-title";
+      title.textContent=`🏙️ ${municipality}`;
+      group.appendChild(title);
+
+      [...places].reverse().forEach(place=>{
 
       const element=document.createElement("div");
 
@@ -227,7 +261,7 @@ function renderTravelBook(){
         <div class="place-row">
 
           <div>
-            <div class="place-name">
+            <div class="place-name district-indent">
               📍 ${escapeHTML(place.name)}
             </div>
 
@@ -247,7 +281,10 @@ function renderTravelBook(){
 
       element.onclick=()=>openPlaceDetail(place);
 
-      list.appendChild(element);
+      group.appendChild(element);
+      });
+
+      list.appendChild(group);
     });
 }
 
@@ -422,3 +459,4 @@ function normalizePlaceName(value){
     .trim()
     .toLowerCase();
 }
+
