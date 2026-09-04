@@ -197,6 +197,7 @@ function toggleGodMode(){
   if(godMode){
 
     map.setMinZoom(11);
+    setMapMode("travel");
 
     followUser = false;
 
@@ -212,6 +213,7 @@ function toggleGodMode(){
 
     map.setMinZoom(12);
     if(map.getZoom()<12) map.setZoom(12);
+    setMapMode("explore");
 
     disableGodModeView();
 
