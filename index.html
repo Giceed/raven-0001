@@ -2,8 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
 
   <title>RAVEN #0001</title>
 
@@ -201,11 +203,12 @@
       height: 420px;
       background: #090c10;
       position: relative;
+      overflow: hidden;
     }
 
     .map-controls {
       position: absolute;
-      z-index: 800;
+      z-index: 1000;
       right: 10px;
       bottom: 20px;
     }
@@ -224,7 +227,7 @@
 
     .follow-state {
       position: absolute;
-      z-index: 800;
+      z-index: 1000;
       left: 10px;
       bottom: 19px;
       background: rgba(13, 17, 23, 0.92);
@@ -254,13 +257,6 @@
     .danger {
       background: #4c1d1d;
       color: #fca5a5;
-    }
-
-    .secondary {
-      background: transparent;
-      border: 1px solid #30363d;
-      color: #c9d1d9;
-      margin-top: 10px;
     }
 
     .message {
@@ -432,7 +428,7 @@
       font-size: 13px;
       border: 2px solid #ffffff;
       background: #3f3f46;
-      box-shadow: 0 2px 10px rgba(0,0,0,.45);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .45);
     }
 
     .poi-marker.range {
@@ -441,6 +437,15 @@
 
     .poi-marker.done {
       background: #15803d;
+    }
+
+    .raven-fog-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 450;
     }
 
     .scratch-overlay {
@@ -547,8 +552,6 @@
     <div class="online">● ONLINE</div>
   </div>
 
-
-  <!-- RAVEN -->
   <div class="card">
 
     <div class="raven">🐦‍⬛</div>
@@ -558,7 +561,6 @@
     <div class="generation">
       Generation 1
     </div>
-
 
     <div class="level-line">
       <span>
@@ -570,7 +572,6 @@
       </span>
     </div>
 
-
     <div class="xpbar">
       <div class="xpfill" id="xpfill"></div>
     </div>
@@ -578,7 +579,6 @@
     <div class="xptext">
       <span id="xp">0</span> / 100 XP
     </div>
-
 
     <div class="stats">
 
@@ -613,7 +613,6 @@
   </div>
 
 
-  <!-- KARTE -->
   <div class="card map-card">
 
     <div class="map-header">
@@ -629,7 +628,6 @@
         </div>
 
       </div>
-
 
       <div class="mode-switch">
 
@@ -649,7 +647,6 @@
 
       </div>
 
-
       <div class="location-box">
 
         <div class="location-label">
@@ -667,7 +664,6 @@
       </div>
 
     </div>
-
 
     <div style="position: relative">
 
@@ -690,7 +686,6 @@
   </div>
 
 
-  <!-- TRACKING -->
   <div class="card">
 
     <button
@@ -707,7 +702,6 @@
   </div>
 
 
-  <!-- FÜRSTENBERG MISSION -->
   <div class="card">
 
     <div class="mission-title">
@@ -718,13 +712,13 @@
       Ravens erste echte Gebietserkundung.
     </div>
 
-
     <div class="poi-list">
 
       <div class="poi-row" id="row-st_marien">
         <div class="poi-name">
           ⛪ St. Marien / Sintfeld-Dom
         </div>
+
         <div class="poi-state" id="state-st_marien">
           Nicht entdeckt
         </div>
@@ -734,13 +728,13 @@
         <div class="poi-name">
           🏛️ Rathaus
         </div>
+
         <div class="poi-state" id="state-rathaus">
           Nicht entdeckt
         </div>
       </div>
 
     </div>
-
 
     <div
       class="boundary-status"
@@ -751,7 +745,6 @@
   </div>
 
 
-  <!-- REISEBUCH -->
   <div class="card">
 
     <div class="travel-title">
@@ -768,14 +761,12 @@
 
 
   <div class="version">
-    RAVEN PROTOTYPE V1.5
+    RAVEN PROTOTYPE V1.6
   </div>
 
 </div>
 
 
-
-<!-- RUBBELFENSTER -->
 <div
   class="scratch-overlay"
   id="scratchOverlay">
@@ -789,7 +780,6 @@
     <div class="scratch-text">
       Rubble die Fläche frei, um den Erkundungspunkt zu enthüllen.
     </div>
-
 
     <div class="scratch-area">
 
@@ -813,7 +803,6 @@
 
     </div>
 
-
     <button
       class="scratch-close"
       id="scratchClose"
@@ -826,19 +815,14 @@
 </div>
 
 
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
   /* =========================================================
-     RAVEN V1.5
+     RAVEN V1.6
      ========================================================= */
 
-
-  /* =========================================================
-     SPEICHER
-     ========================================================= */
 
   let xp =
     Number(localStorage.getItem("ravenXP")) || 0;
@@ -867,11 +851,6 @@
   let mapMode =
     localStorage.getItem("ravenMapMode") || "explore";
 
-
-
-  /* =========================================================
-     FÜRSTENBERG
-     ========================================================= */
 
   const FUERSTENBERG = {
 
@@ -919,13 +898,12 @@
     };
 
 
-  /* Alte Testpunkte entfernen */
-
   fuerstenbergMission.visitedPOIs =
     (fuerstenbergMission.visitedPOIs || [])
-      .filter(id =>
-        id === "st_marien" ||
-        id === "rathaus"
+      .filter(
+        id =>
+          id === "st_marien" ||
+          id === "rathaus"
       );
 
 
@@ -942,11 +920,6 @@
 
   saveMission();
 
-
-
-  /* =========================================================
-     MAP
-     ========================================================= */
 
   const map =
     L.map(
@@ -974,11 +947,6 @@
   }).addTo(map);
 
 
-
-  /* =========================================================
-     GPS VARIABLEN
-     ========================================================= */
-
   let tracking = false;
 
   let watchId = null;
@@ -996,9 +964,8 @@
   let firstValidFix = false;
 
 
-
   /* =========================================================
-     FOLLOW-ME
+     FOLLOW MODE
      ========================================================= */
 
   let followUser = true;
@@ -1006,8 +973,33 @@
   let internalMapMove = false;
 
 
+  function leaveFollowMode() {
+
+    if (internalMapMove) {
+      return;
+    }
+
+    followUser = false;
+
+    updateFollowUI();
+
+  }
+
+
   map.on(
     "dragstart",
+    leaveFollowMode
+  );
+
+
+  /*
+    V1.6:
+    Auch manuelles Zoomen beendet
+    den Follow-Modus.
+  */
+
+  map.on(
+    "zoomstart",
     function () {
 
       if (!internalMapMove) {
@@ -1028,6 +1020,7 @@
 
     updateFollowUI();
 
+
     if (
       currentLat !== null &&
       currentLon !== null
@@ -1035,19 +1028,24 @@
 
       internalMapMove = true;
 
+
       map.setView(
         [currentLat, currentLon],
-        Math.max(map.getZoom(), 16),
+        Math.max(
+          map.getZoom(),
+          16
+        ),
         {
           animate: true
         }
       );
 
+
       setTimeout(
         () => {
           internalMapMove = false;
         },
-        500
+        600
       );
 
     }
@@ -1061,6 +1059,7 @@
       document.getElementById(
         "followState"
       );
+
 
     if (followUser) {
 
@@ -1076,11 +1075,6 @@
 
   }
 
-
-
-  /* =========================================================
-     MARKER
-     ========================================================= */
 
   const userIcon =
     L.divIcon({
@@ -1103,13 +1097,16 @@
     let className =
       "poi-marker";
 
+
     if (state === "range") {
       className += " range";
     }
 
+
     if (state === "done") {
       className += " done";
     }
+
 
     const visibleIcon =
       state === "done"
@@ -1118,13 +1115,18 @@
 
 
     return L.divIcon({
+
       className: "",
+
       html:
         `<div class="${className}">
           ${visibleIcon}
         </div>`,
+
       iconSize: [26, 26],
+
       iconAnchor: [13, 13]
+
     });
 
   }
@@ -1166,9 +1168,8 @@
   );
 
 
-
   /* =========================================================
-     GRENZE FÜRSTENBERG
+     FÜRSTENBERG GRENZE
      ========================================================= */
 
   let fuerstenbergBoundary = null;
@@ -1206,9 +1207,11 @@
 
 
       if (!response.ok) {
+
         throw new Error(
           "Grenze nicht verfügbar"
         );
+
       }
 
 
@@ -1223,7 +1226,10 @@
       status.textContent =
         "✓ Amtliche Gemarkungsgrenze geladen";
 
-      status.classList.add("ok");
+
+      status.classList.add(
+        "ok"
+      );
 
 
       updateBoundaryOutline();
@@ -1247,7 +1253,6 @@
   }
 
 
-
   function updateBoundaryOutline() {
 
     if (fuerstenbergOutline) {
@@ -1256,7 +1261,8 @@
         fuerstenbergOutline
       );
 
-      fuerstenbergOutline = null;
+      fuerstenbergOutline =
+        null;
 
     }
 
@@ -1285,7 +1291,6 @@
   }
 
 
-
   /* =========================================================
      FOG OF WAR
      ========================================================= */
@@ -1295,47 +1300,46 @@
   let fogSvg = null;
 
 
+  /*
+    V1.6:
+    Fog liegt direkt über dem
+    Kartencontainer.
+
+    Dadurch stimmen SVG-Positionen
+    wieder exakt mit Leaflet überein.
+  */
+
   function createFogLayer() {
 
     if (fogSvg) {
-
       fogSvg.remove();
-
     }
 
 
-    const pane =
-      map.getPanes().overlayPane;
+    const mapContainer =
+      map.getContainer();
 
 
     fogSvg =
-      L.DomUtil.create(
-        "svg",
-        "raven-fog-svg",
-        pane
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg"
       );
 
 
-    fogSvg.style.position =
-      "absolute";
+    fogSvg.classList.add(
+      "raven-fog-svg"
+    );
 
-    fogSvg.style.left =
-      "0";
 
-    fogSvg.style.top =
-      "0";
-
-    fogSvg.style.pointerEvents =
-      "none";
-
-    fogSvg.style.zIndex =
-      "450";
+    mapContainer.appendChild(
+      fogSvg
+    );
 
 
     redrawFog();
 
   }
-
 
 
   function redrawFog() {
@@ -1367,6 +1371,7 @@
       "width",
       size.x
     );
+
 
     fogSvg.setAttribute(
       "height",
@@ -1415,20 +1420,24 @@
       "0"
     );
 
+
     base.setAttribute(
       "y",
       "0"
     );
+
 
     base.setAttribute(
       "width",
       size.x
     );
 
+
     base.setAttribute(
       "height",
       size.y
     );
+
 
     base.setAttribute(
       "fill",
@@ -1436,11 +1445,10 @@
     );
 
 
-    mask.appendChild(base);
+    mask.appendChild(
+      base
+    );
 
-
-
-    /* Physisch gelaufene Bereiche */
 
     exploredPoints.forEach(
       point => {
@@ -1487,15 +1495,18 @@
           center.x
         );
 
+
         circle.setAttribute(
           "cy",
           center.y
         );
 
+
         circle.setAttribute(
           "r",
           radius
         );
+
 
         circle.setAttribute(
           "fill",
@@ -1511,9 +1522,6 @@
     );
 
 
-
-    /* Fürstenberg vollständig freilegen */
-
     if (
       fuerstenbergMission.completed &&
       fuerstenbergBoundary
@@ -1527,9 +1535,14 @@
     }
 
 
-    defs.appendChild(mask);
+    defs.appendChild(
+      mask
+    );
 
-    fogSvg.appendChild(defs);
+
+    fogSvg.appendChild(
+      defs
+    );
 
 
     const fog =
@@ -1544,25 +1557,30 @@
       "0"
     );
 
+
     fog.setAttribute(
       "y",
       "0"
     );
+
 
     fog.setAttribute(
       "width",
       size.x
     );
 
+
     fog.setAttribute(
       "height",
       size.y
     );
 
+
     fog.setAttribute(
       "fill",
       "rgba(0,0,0,0.94)"
     );
+
 
     fog.setAttribute(
       "mask",
@@ -1570,10 +1588,11 @@
     );
 
 
-    fogSvg.appendChild(fog);
+    fogSvg.appendChild(
+      fog
+    );
 
   }
-
 
 
   function appendGeoJSONGeometryToMask(
@@ -1660,7 +1679,6 @@
   }
 
 
-
   function appendPolygonToMask(
     mask,
     polygonCoordinates
@@ -1689,8 +1707,11 @@
     outerRing.forEach(
       (coord, index) => {
 
-        const lon = coord[0];
-        const lat = coord[1];
+        const lon =
+          coord[0];
+
+        const lat =
+          coord[1];
 
 
         const point =
@@ -1715,7 +1736,8 @@
     );
 
 
-    pathData += " Z";
+    pathData +=
+      " Z";
 
 
     const path =
@@ -1730,16 +1752,18 @@
       pathData
     );
 
+
     path.setAttribute(
       "fill",
       "black"
     );
 
 
-    mask.appendChild(path);
+    mask.appendChild(
+      path
+    );
 
   }
-
 
 
   map.on(
@@ -1748,19 +1772,21 @@
   );
 
 
-
   /* =========================================================
-     MAP MODE
+     REISE / ERKUNDUNG
      ========================================================= */
 
   function setMapMode(mode) {
 
-    mapMode = mode;
+    mapMode =
+      mode;
+
 
     localStorage.setItem(
       "ravenMapMode",
       mapMode
     );
+
 
     updateMapModeUI();
 
@@ -1769,13 +1795,13 @@
   }
 
 
-
   function updateMapModeUI() {
 
     const travel =
       document.getElementById(
         "travelModeButton"
       );
+
 
     const explore =
       document.getElementById(
@@ -1797,7 +1823,6 @@
   }
 
 
-
   /* =========================================================
      GPS
      ========================================================= */
@@ -1817,12 +1842,9 @@
   }
 
 
-
   function startExploration() {
 
-    if (
-      !navigator.geolocation
-    ) {
+    if (!navigator.geolocation) {
 
       setMessage(
         "GPS wird von diesem Browser nicht unterstützt."
@@ -1833,13 +1855,20 @@
     }
 
 
-    tracking = true;
+    tracking =
+      true;
 
-    firstValidFix = false;
 
-    lastPosition = null;
+    firstValidFix =
+      false;
 
-    sessionDistance = 0;
+
+    lastPosition =
+      null;
+
+
+    sessionDistance =
+      0;
 
 
     document.getElementById(
@@ -1854,10 +1883,9 @@
       "GPS wird gestartet …";
 
 
-    document.getElementById(
-      "message"
-    ).textContent =
-      "📡 Raven sucht deine Position …";
+    setMessage(
+      "📡 Raven sucht deine Position …"
+    );
 
 
     const button =
@@ -1868,6 +1896,7 @@
 
     button.textContent =
       "Erkundung beenden";
+
 
     button.className =
       "danger";
@@ -1892,7 +1921,6 @@
   }
 
 
-
   function stopExploration() {
 
     if (
@@ -1907,22 +1935,32 @@
     }
 
 
-    tracking = false;
+    tracking =
+      false;
 
-    watchId = null;
 
-    lastPosition = null;
+    watchId =
+      null;
+
+
+    lastPosition =
+      null;
 
 
     const earnedXP =
       Math.floor(
-        sessionDistance / 10
+        sessionDistance /
+        10
       );
 
 
-    if (earnedXP > 0) {
+    if (
+      earnedXP > 0
+    ) {
 
-      addXP(earnedXP);
+      addXP(
+        earnedXP
+      );
 
     }
 
@@ -1939,12 +1977,11 @@
       "GPS pausiert";
 
 
-    document.getElementById(
-      "message"
-    ).textContent =
+    setMessage(
       sessionDistance > 0
         ? `🐦‍⬛ Erkundung beendet – ${(sessionDistance / 1000).toFixed(2)} km zurückgelegt.`
-        : "Erkundung beendet.";
+        : "Erkundung beendet."
+    );
 
 
     const button =
@@ -1956,19 +1993,21 @@
     button.textContent =
       "Erkundung starten";
 
+
     button.className =
       "primary";
 
 
-    sessionDistance = 0;
+    sessionDistance =
+      0;
+
 
     updateUI();
 
   }
 
 
-
-  async function handlePosition(
+  function handlePosition(
     position
   ) {
 
@@ -1984,16 +2023,14 @@
     const lat =
       coords.latitude;
 
+
     const lon =
       coords.longitude;
+
 
     const accuracy =
       coords.accuracy;
 
-
-    /*
-      Ungenaue GPS-Sprünge ignorieren.
-    */
 
     if (
       accuracy &&
@@ -2010,24 +2047,22 @@
     }
 
 
+    currentLat =
+      lat;
 
-    currentLat = lat;
 
-    currentLon = lon;
+    currentLon =
+      lon;
+
 
     currentAccuracy =
       accuracy;
 
 
-    /*
-      WICHTIG V1.5:
-      Nach erstem echten GPS-Fix
-      wird der Starttext ersetzt.
-    */
-
     if (!firstValidFix) {
 
-      firstValidFix = true;
+      firstValidFix =
+        true;
 
 
       document.getElementById(
@@ -2036,13 +2071,11 @@
         "Aktiv";
 
 
-      document.getElementById(
-        "message"
-      ).textContent =
-        "📍 GPS aktiv – Raven folgt dir.";
+      setMessage(
+        "📍 GPS aktiv – Raven folgt dir."
+      );
 
     }
-
 
 
     document.getElementById(
@@ -2052,9 +2085,6 @@
         ? `GPS aktiv · ±${Math.round(accuracy)} m`
         : "GPS aktiv";
 
-
-
-    /* User Marker */
 
     if (!userMarker) {
 
@@ -2076,12 +2106,10 @@
     }
 
 
-
-    /* Follow */
-
     if (followUser) {
 
-      internalMapMove = true;
+      internalMapMove =
+        true;
 
 
       map.setView(
@@ -2099,17 +2127,15 @@
       setTimeout(
         () => {
 
-          internalMapMove = false;
+          internalMapMove =
+            false;
 
         },
-        350
+        500
       );
 
     }
 
-
-
-    /* Strecke */
 
     if (lastPosition) {
 
@@ -2122,11 +2148,6 @@
         );
 
 
-      /*
-        Kleine GPS-Schwankungen ignorieren.
-        Extrem große Sprünge ebenfalls.
-      */
-
       if (
         moved >= 3 &&
         moved < 150
@@ -2134,6 +2155,7 @@
 
         totalDistance +=
           moved;
+
 
         sessionDistance +=
           moved;
@@ -2146,17 +2168,11 @@
 
 
         travelHistory.push({
-          lat: lat,
-          lon: lon,
+          lat,
+          lon,
           time: Date.now()
         });
 
-
-        /*
-          Verlauf begrenzen,
-          damit LocalStorage nicht
-          unendlich wächst.
-        */
 
         if (
           travelHistory.length >
@@ -2183,15 +2199,11 @@
     }
 
 
-
     lastPosition = {
-      lat: lat,
-      lon: lon
+      lat,
+      lon
     };
 
-
-
-    /* Fog-Punkt speichern */
 
     saveExploredPoint(
       lat,
@@ -2199,17 +2211,11 @@
     );
 
 
-
-    /* POIs prüfen */
-
     updatePOIStates(
       lat,
       lon
     );
 
-
-
-    /* Ort bestimmen */
 
     maybeReverseGeocode(
       lat,
@@ -2222,7 +2228,6 @@
     redrawFog();
 
   }
-
 
 
   function handleGPSError(
@@ -2275,14 +2280,15 @@
       "GPS Fehler";
 
 
-    setMessage(text);
+    setMessage(
+      text
+    );
 
   }
 
 
-
   /* =========================================================
-     EXPLORED POINTS
+     ERKUNDETE PUNKTE
      ========================================================= */
 
   function saveExploredPoint(
@@ -2322,17 +2328,15 @@
       );
 
 
-    if (distance >= 20) {
+    if (
+      distance >= 20
+    ) {
 
       exploredPoints.push({
         lat,
         lon
       });
 
-
-      /*
-        Sicherheitsgrenze.
-      */
 
       if (
         exploredPoints.length >
@@ -2354,7 +2358,6 @@
   }
 
 
-
   function saveExploredPoints() {
 
     localStorage.setItem(
@@ -2367,16 +2370,20 @@
   }
 
 
-
   /* =========================================================
-     ORTSERKENNUNG V1.5
+     ORTSERKENNUNG
      ========================================================= */
 
-  let lastGeocodeTime = 0;
+  let lastGeocodeTime =
+    0;
 
-  let lastGeocodePosition = null;
 
-  let geocodeRunning = false;
+  let lastGeocodePosition =
+    null;
+
+
+  let geocodeRunning =
+    false;
 
 
   async function maybeReverseGeocode(
@@ -2388,28 +2395,15 @@
       Date.now();
 
 
-    /*
-      Maximal etwa einmal pro Minute.
-    */
-
     if (
       now - lastGeocodeTime <
       60000
     ) {
-
       return;
-
     }
 
 
-    /*
-      Zusätzlich nur wenn Raven sich
-      mindestens ca. 100 m bewegt hat.
-    */
-
-    if (
-      lastGeocodePosition
-    ) {
+    if (lastGeocodePosition) {
 
       const moved =
         haversineDistance(
@@ -2420,7 +2414,9 @@
         );
 
 
-      if (moved < 100) {
+      if (
+        moved < 100
+      ) {
         return;
       }
 
@@ -2432,10 +2428,13 @@
     }
 
 
-    geocodeRunning = true;
+    geocodeRunning =
+      true;
+
 
     lastGeocodeTime =
       now;
+
 
     lastGeocodePosition = {
       lat,
@@ -2488,12 +2487,12 @@
 
     } finally {
 
-      geocodeRunning = false;
+      geocodeRunning =
+        false;
 
     }
 
   }
-
 
 
   function handlePlaceData(
@@ -2502,19 +2501,14 @@
     lon
   ) {
 
-    /*
-      BigDataCloud liefert je nach
-      Position unterschiedliche Felder.
-
-      locality ist meistens der
-      genaueste brauchbare Ortsname.
-    */
-
     const place =
       data.locality ||
       data.city ||
       data.principalSubdivisionCode ||
-      data.localityInfo?.administrative?.[0]?.name ||
+      data.localityInfo
+        ?.administrative
+        ?.[0]
+        ?.name ||
       "Unbekannter Ort";
 
 
@@ -2551,7 +2545,6 @@
     );
 
   }
-
 
 
   function discoverPlace(
@@ -2602,16 +2595,17 @@
 
       name: place,
 
-      region: region,
+      region,
 
-      country: country,
+      country,
 
-      lat: lat,
+      lat,
 
-      lon: lon,
+      lon,
 
       discoveredAt:
-        new Date().toISOString()
+        new Date()
+          .toISOString()
 
     };
 
@@ -2629,14 +2623,12 @@
     );
 
 
-    /*
-      Ein Ort gibt einmalig XP.
-    */
-
-    addXP(25);
+    addXP(
+      25
+    );
 
 
-    setMessage(
+    setTemporaryMessage(
       `✨ Neuer Ort entdeckt: ${place} · +25 XP`
     );
 
@@ -2644,7 +2636,6 @@
     renderTravelBook();
 
   }
-
 
 
   /* =========================================================
@@ -2671,7 +2662,8 @@
       discoveredPlaces.length;
 
 
-    list.innerHTML = "";
+    list.innerHTML =
+      "";
 
 
     if (
@@ -2743,9 +2735,7 @@
             );
 
 
-          if (
-            !isNaN(date)
-          ) {
+          if (!isNaN(date)) {
 
             dateText =
               date.toLocaleDateString(
@@ -2777,13 +2767,14 @@
           </div>`;
 
 
-        list.appendChild(el);
+        list.appendChild(
+          el
+        );
 
       }
     );
 
   }
-
 
 
   /* =========================================================
@@ -2889,15 +2880,16 @@
   }
 
 
-
-  function tryOpenPOI(poi) {
+  function tryOpenPOI(
+    poi
+  ) {
 
     if (
       currentLat === null ||
       currentLon === null
     ) {
 
-      setMessage(
+      setTemporaryMessage(
         "Starte zuerst GPS."
       );
 
@@ -2912,8 +2904,8 @@
         .includes(poi.id)
     ) {
 
-      setMessage(
-        `${poi.name} wurde bereits entdeckt.`
+      setTemporaryMessage(
+        `✓ ${poi.name} wurde bereits entdeckt.`
       );
 
       return;
@@ -2935,7 +2927,7 @@
       FUERSTENBERG.visitRadius
     ) {
 
-      setMessage(
+      setTemporaryMessage(
         `Noch ${Math.round(distance)} m bis ${poi.name}.`
       );
 
@@ -2944,23 +2936,31 @@
     }
 
 
-    openScratch(poi);
+    openScratch(
+      poi
+    );
 
   }
-
 
 
   /* =========================================================
      RUBBELN
      ========================================================= */
 
-  let scratchPOI = null;
+  let scratchPOI =
+    null;
 
-  let scratching = false;
 
-  let scratchCompleted = false;
+  let scratching =
+    false;
 
-  let scratchCheckCounter = 0;
+
+  let scratchCompleted =
+    false;
+
+
+  let scratchCheckCounter =
+    0;
 
 
   const scratchOverlay =
@@ -2981,14 +2981,17 @@
     );
 
 
-
-  function openScratch(poi) {
+  function openScratch(
+    poi
+  ) {
 
     scratchPOI =
       poi;
 
+
     scratchCompleted =
       false;
+
 
     scratchCheckCounter =
       0;
@@ -3021,7 +3024,6 @@
     );
 
   }
-
 
 
   function setupScratchCanvas() {
@@ -3079,10 +3081,12 @@
       "#3f3f46"
     );
 
+
     gradient.addColorStop(
       0.5,
       "#71717a"
     );
+
 
     gradient.addColorStop(
       1,
@@ -3127,7 +3131,6 @@
   }
 
 
-
   function scratchAt(
     clientX,
     clientY
@@ -3162,6 +3165,7 @@
 
     scratchContext.beginPath();
 
+
     scratchContext.arc(
       x,
       y,
@@ -3169,6 +3173,7 @@
       0,
       Math.PI * 2
     );
+
 
     scratchContext.fill();
 
@@ -3188,7 +3193,6 @@
   }
 
 
-
   function checkScratchProgress() {
 
     if (
@@ -3200,6 +3204,7 @@
 
     const width =
       scratchCanvas.width;
+
 
     const height =
       scratchCanvas.height;
@@ -3215,16 +3220,13 @@
         );
 
 
-    let transparent = 0;
+    let transparent =
+      0;
 
-    let checked = 0;
 
+    let checked =
+      0;
 
-    /*
-      Nur jeden 20. Pixel testen.
-      Das ist auf dem Handy deutlich
-      leichter.
-    */
 
     for (
       let i = 3;
@@ -3263,7 +3265,6 @@
   }
 
 
-
   function completeScratch() {
 
     if (
@@ -3299,25 +3300,29 @@
   }
 
 
-
   function closeScratch() {
 
     scratchOverlay.style.display =
       "none";
 
-    scratchPOI = null;
 
-    scratching = false;
+    scratchPOI =
+      null;
+
+
+    scratching =
+      false;
 
   }
-
 
 
   scratchCanvas.addEventListener(
     "pointerdown",
     event => {
 
-      scratching = true;
+      scratching =
+        true;
+
 
       scratchAt(
         event.clientX,
@@ -3350,14 +3355,16 @@
     "pointerup",
     () => {
 
-      scratching = false;
+      scratching =
+        false;
 
     }
   );
 
 
-
-  function discoverPOI(poi) {
+  function discoverPOI(
+    poi
+  ) {
 
     if (
       fuerstenbergMission
@@ -3402,14 +3409,16 @@
       );
 
 
-      setMessage(
-        `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP`
+      setTemporaryMessage(
+        `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP`,
+        5000
       );
 
     } else {
 
-      setMessage(
-        `✨ ${poi.name} entdeckt! +${FUERSTENBERG.poiXP} XP`
+      setTemporaryMessage(
+        `✨ ${poi.name} entdeckt! +${FUERSTENBERG.poiXP} XP`,
+        5000
       );
 
     }
@@ -3419,17 +3428,25 @@
 
     updateMissionUI();
 
-    updatePOIStates(
-      currentLat,
-      currentLon
-    );
+
+    if (
+      currentLat !== null &&
+      currentLon !== null
+    ) {
+
+      updatePOIStates(
+        currentLat,
+        currentLon
+      );
+
+    }
+
 
     updateBoundaryOutline();
 
     redrawFog();
 
   }
-
 
 
   function saveMission() {
@@ -3444,16 +3461,18 @@
   }
 
 
-
   function updateMissionUI() {
 
     const visited =
       fuerstenbergMission
-        .visitedPOIs.length;
+        .visitedPOIs
+        .length;
 
 
     const total =
-      FUERSTENBERG.pois.length;
+      FUERSTENBERG
+        .pois
+        .length;
 
 
     const el =
@@ -3517,21 +3536,25 @@
   }
 
 
-
   /* =========================================================
      XP
      ========================================================= */
 
-  function addXP(amount) {
+  function addXP(
+    amount
+  ) {
 
-    xp += amount;
+    xp +=
+      amount;
 
 
     while (
       xp >= 100
     ) {
 
-      xp -= 100;
+      xp -=
+        100;
+
 
       level++;
 
@@ -3554,6 +3577,105 @@
 
   }
 
+
+  /* =========================================================
+     MELDUNGEN
+     ========================================================= */
+
+  let messageTimer =
+    null;
+
+
+  function setMessage(
+    text
+  ) {
+
+    if (messageTimer) {
+
+      clearTimeout(
+        messageTimer
+      );
+
+
+      messageTimer =
+        null;
+
+    }
+
+
+    document.getElementById(
+      "message"
+    ).textContent =
+      text;
+
+  }
+
+
+  /*
+    V1.6:
+    Kurzmeldungen bleiben nicht mehr
+    dauerhaft auf dem Bildschirm.
+  */
+
+  function setTemporaryMessage(
+    text,
+    duration = 3500
+  ) {
+
+    if (messageTimer) {
+
+      clearTimeout(
+        messageTimer
+      );
+
+    }
+
+
+    document.getElementById(
+      "message"
+    ).textContent =
+      text;
+
+
+    messageTimer =
+      setTimeout(
+        () => {
+
+          if (
+            tracking &&
+            firstValidFix
+          ) {
+
+            document.getElementById(
+              "message"
+            ).textContent =
+              "📍 GPS aktiv – Raven folgt dir.";
+
+          } else if (tracking) {
+
+            document.getElementById(
+              "message"
+            ).textContent =
+              "📡 Raven sucht deine Position …";
+
+          } else {
+
+            document.getElementById(
+              "message"
+            ).textContent =
+              "Dein Raven wartet auf sein nächstes Abenteuer.";
+
+          }
+
+
+          messageTimer =
+            null;
+
+        },
+        duration
+      );
+
+  }
 
 
   /* =========================================================
@@ -3606,18 +3728,6 @@
       discoveredPlaces.length;
 
   }
-
-
-
-  function setMessage(text) {
-
-    document.getElementById(
-      "message"
-    ).textContent =
-      text;
-
-  }
-
 
 
   /* =========================================================
@@ -3681,7 +3791,6 @@
     return R * c;
 
   }
-
 
 
   function destinationPoint(
@@ -3775,37 +3884,18 @@
   }
 
 
-
-  /* =========================================================
-     HTML SICHERHEIT
-     ========================================================= */
-
-  function escapeHTML(value) {
+  function escapeHTML(
+    value
+  ) {
 
     return String(value)
-      .replaceAll(
-        "&",
-        "&amp;"
-      )
-      .replaceAll(
-        "<",
-        "&lt;"
-      )
-      .replaceAll(
-        ">",
-        "&gt;"
-      )
-      .replaceAll(
-        '"',
-        "&quot;"
-      )
-      .replaceAll(
-        "'",
-        "&#039;"
-      );
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
 
   }
-
 
 
   /* =========================================================
@@ -3835,7 +3925,7 @@
       redrawFog();
 
     },
-    300
+    400
   );
 
 </script>
