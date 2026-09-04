@@ -112,15 +112,16 @@ function handlePosition(position){
   const lon=coords.longitude;
   const accuracy=coords.accuracy;
 
-  const preciseEnoughForExploration = !accuracy || accuracy<=100;
+  if(accuracy && accuracy>35){
 
-  /* Desktop-Browser liefern den Standort oft nur grob über WLAN/IP.
-     Die Position trotzdem anzeigen, aber damit nichts entdecken. */
-  const locationZoom =
-    accuracy>3000 ? 10 :
-    accuracy>1000 ? 11 :
-    accuracy>300  ? 13 :
-    accuracy>100  ? 14 : 16;
+    document.getElementById("gpsInfo").textContent =
+      `Warte auf genaues GPS · aktuell ±${Math.round(accuracy)} m`;
+
+    setMessage("📡 Grober Standort gefunden – Raven wartet auf deine genaue Position.");
+    return;
+  }
+
+  const locationZoom=16;
 
   currentLat=lat;
   currentLon=lon;
@@ -161,7 +162,7 @@ function handlePosition(position){
     setTimeout(()=>internalMapMove=false,500);
   }
 
-  if(preciseEnoughForExploration && lastPosition){
+  if(lastPosition){
 
     const moved=haversineDistance(
       lastPosition.lat,
