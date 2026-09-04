@@ -189,7 +189,8 @@ const FUERSTENBERG = {
 
 const ALL_POINTS = [
   ...FUERSTENBERG.explorationPOIs,
-  ...FUERSTENBERG.activityPOIs
+  ...FUERSTENBERG.activityPOIs,
+  ...CITY_CONCEPT_POINTS
 ];
 
 let fuerstenbergMission =
@@ -201,12 +202,12 @@ let fuerstenbergMission =
 
 fuerstenbergMission.visitedPOIs =
   (fuerstenbergMission.visitedPOIs || []).filter(id =>
-    FUERSTENBERG.explorationPOIs.some(p => p.id === id)
+    ALL_POINTS.some(p => p.type === "exploration" && p.id === id)
   );
 
 fuerstenbergMission.visitedActivities =
   (fuerstenbergMission.visitedActivities || []).filter(id =>
-    FUERSTENBERG.activityPOIs.some(p => p.id === id)
+    ALL_POINTS.some(p => p.type === "activity" && p.id === id)
   );
 
 if (
