@@ -279,6 +279,9 @@ button{
 
 .boundary-status{margin-top:11px;font-size:10px;color:#8b949e}
 .boundary-status.ok{color:#4ade80}
+.boundary-status.loading{color:#c084fc}
+.boundary-status.outside{color:#fbbf24}
+.test-region-status{color:#a78bfa}
 
 .travel-detail{display:none;margin-top:12px}
 .travel-detail.active{display:block}
