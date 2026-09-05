@@ -47,8 +47,11 @@ function renderPointMarker(point,discovered,inRange,distance){
       map.removeLayer(pointMarkers[point.id]);
       delete pointMarkers[point.id];
     }
+    removePointRadius(point.id);
     return;
   }
+
+  renderPointRadius(point);
 
   let css="poi-marker";
 
@@ -88,6 +91,42 @@ function renderPointMarker(point,discovered,inRange,distance){
 
     pointMarkers[point.id].setIcon(icon);
   }
+}
+
+function removePointRadius(pointId){
+  if(!pointRadiusLayers[pointId]) return;
+  map.removeLayer(pointRadiusLayers[pointId]);
+  delete pointRadiusLayers[pointId];
+}
+
+function renderPointRadius(point){
+  if(!godMode){
+    removePointRadius(point.id);
+    return;
+  }
+
+  const color=point.type==="activity"?"#fb923c":"#a855f7";
+  const radius=getDiscoveryRadius(point);
+
+  if(!pointRadiusLayers[point.id]){
+    pointRadiusLayers[point.id]=L.circle([point.lat,point.lon],{
+      radius,
+      color,
+      weight:2,
+      opacity:.95,
+      dashArray:"7 5",
+      fillColor:color,
+      fillOpacity:.12,
+      interactive:false
+    }).addTo(map);
+  }else{
+    pointRadiusLayers[point.id]
+      .setLatLng([point.lat,point.lon])
+      .setRadius(radius)
+      .setStyle({color,fillColor:color});
+  }
+
+  pointRadiusLayers[point.id].bringToBack();
 }
 
 function tryOpenPoint(point){
