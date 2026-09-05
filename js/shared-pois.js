@@ -33,6 +33,7 @@
           map.removeLayer(pointMarkers[oldPoint.id]);
           delete pointMarkers[oldPoint.id];
         }
+        if(typeof removePointRadius==="function") removePointRadius(oldPoint.id);
         ALL_POINTS.splice(index,1);
       }
     }
