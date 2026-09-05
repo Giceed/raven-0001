@@ -84,6 +84,7 @@ L.control.zoom({position:"topright"}).addTo(map);
 
 let userMarker = null;
 let pointMarkers = {};
+let pointRadiusLayers = {};
 let boundaryLayer = null;
 let fuerstenbergBoundary = null;
 let currentPlaceBoundaryLayer = null;
