@@ -391,4 +391,15 @@ button{
   touch-action:none
 }
 .scratch-close{margin-top:13px}
+.raven-radius-label{
+  background:#090c12ee;
+  border:1px solid #c084fc;
+  border-radius:7px;
+  color:#fff;
+  box-shadow:0 0 12px #7c3aed;
+  font-size:10px;
+  font-weight:900;
+  padding:3px 6px;
+}
+.raven-radius-label::before{display:none}
 
