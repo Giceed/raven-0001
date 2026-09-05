@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Raven Studio</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
@@ -60,7 +63,7 @@ function joinBoundaryLines(lines){const rest=lines.map(line=>line.map(point=>[po
 async function cutMapToBadWuennenberg(){try{const response=await fetch("../data/bad-wuennenberg-boundaries.json?v=2"),data=await response.json(),city=data.features.find(feature=>feature.level===8),ring=joinBoundaryLines(city.lines),outside=[[-85,-180],[-85,180],[85,180],[85,-180],[-85,-180]];L.polygon([outside,ring],{pane:"territoryMaskPane",stroke:false,fillColor:"#05070b",fillOpacity:1,fillRule:"evenodd",interactive:false}).addTo(map);}catch(error){console.warn("Stadtgrenzen-Ausschnitt konnte nicht geladen werden.",error);}}
 cutMapToBadWuennenberg();
 const state=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")||{center:{lat:51.5157,lon:8.741,name:"Fürstenberg, Bad Wünnenberg"},candidates:[]};
-let markers=new Map(),selectedId=null,radiusCircle=null,moveId=null;
+let markers=new Map(),markerLayer=L.layerGroup().addTo(map),selectedId=null,radiusCircle=null,moveId=null;
 let activePoiGroup="all";
 const TEST_CENTER={lat:51.5157,lon:8.741,radius:100000};
 let placeSuggestTimer=null,placeSuggestionRows=[];
@@ -222,7 +225,7 @@ function makeCandidate(e){
 function matchesPoiFilter(c){if(c.status==="rejected")return false;const groups={fountain:["fountain","foraging"],play:["playground"],sport:["sports_centre","pitch","fitness_station","swimming_pool"],services:["fire_station","police"],education:["school","kindergarten"],rail:["station","halt"],airport:["aerodrome","terminal"],culture:["castle","manor","memorial","monument","archaeological_site","attraction","museum","artwork","place_of_worship","townhall","library","community_centre","post_office","information","tower","water_tower"],nature:["park","picnic_site","trailhead","viewpoint"]};const groupOk=activePoiGroup==="all"||(groups[activePoiGroup]||[]).includes(c.rawType);const text=(document.getElementById("pointSearch")?.value||"").trim().toLowerCase();const areaOk=!selectedGeojson||pointInGeojson(c.lat,c.lon,selectedGeojson);return groupOk&&areaOk&&(!text||c.name.toLowerCase().includes(text));}
 function setPoiFilter(group,button){activePoiGroup=group;document.querySelectorAll("#filters button").forEach(b=>b.classList.remove("active"));button.classList.add("active");applyPoiFilters();}
 function applyPoiFilters(){renderMarkers();renderList();}
-function renderMarkers(){markers.forEach(m=>map.removeLayer(m));markers.clear();state.candidates.forEach((c,i)=>{if(!matchesPoiFilter(c))return;const icon=L.divIcon({className:"",html:`<div class="marker ${c.category} ${c.status}">${i+1}</div>`,iconSize:[34,34],iconAnchor:[17,17]});const marker=L.marker([c.lat,c.lon],{icon}).addTo(map).on("click",()=>selectCandidate(c.id));markers.set(c.id,marker);});}
+function renderMarkers(){markerLayer.clearLayers();markers.clear();state.candidates.forEach((c,i)=>{if(!matchesPoiFilter(c))return;const icon=L.divIcon({className:"",html:`<div class="marker ${c.category} ${c.status}">${i+1}</div>`,iconSize:[34,34],iconAnchor:[17,17]});const marker=L.marker([c.lat,c.lon],{icon}).addTo(markerLayer).on("click",()=>selectCandidate(c.id));markers.set(c.id,marker);});}
 function renderList(){const list=document.getElementById("candidateList"),visible=state.candidates.filter(matchesPoiFilter);if(!visible.length){list.innerHTML='<div class="empty">Keine passenden Punkte in diesem Filter.</div>';return;}list.innerHTML=visible.map(c=>{const i=state.candidates.indexOf(c);return `<button class="candidate ${c.status} ${c.id===selectedId?'selected':''}" onclick="selectCandidate('${c.id}')"><div class="candidate-name">${i+1}. ${esc(c.name)}</div><div class="candidate-sub">${esc(c.district||'Fürstenberg')} · ${c.category==='activity'?'Aktivität':'Erkundung'} · ${esc(c.rawType)} · ${c.radius} m · ${c.status}</div></button>`}).join("");}
 function selectCandidate(id){const c=state.candidates.find(x=>x.id===id);if(!c)return;selectedId=id;editor.hidden=false;editName.textContent=c.name;editMeta.textContent=`${c.source||"OpenStreetMap"}${c.osmType?` · OSM ${c.osmType} ${c.osmId}`:""} · ${c.rawType} · Bewertung ${c.score}/100 · Zugang ${c.access}`;editCategory.value=c.category;editRadius.value=c.radius;editRadiusRange.value=c.radius;showRadius(c);renderList();map.panTo([c.lat,c.lon]);}
 function showRadius(c){if(radiusCircle)map.removeLayer(radiusCircle);radiusCircle=L.circle([c.lat,c.lon],{radius:c.radius,color:c.category==="activity"?"#f97316":"#8b5cf6",weight:3,fillOpacity:.18,dashArray:"8 5"}).addTo(map);radiusCircle.bringToBack();}
