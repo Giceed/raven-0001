@@ -108,25 +108,38 @@ function renderPointRadius(point){
   const color=point.type==="activity"?"#fb923c":"#a855f7";
   const radius=getDiscoveryRadius(point);
 
-  if(!pointRadiusLayers[point.id]){
-    pointRadiusLayers[point.id]=L.circle([point.lat,point.lon],{
-      radius,
-      color,
-      weight:2,
-      opacity:.95,
-      dashArray:"7 5",
-      fillColor:color,
-      fillOpacity:.12,
-      interactive:false
-    }).addTo(map);
-  }else{
-    pointRadiusLayers[point.id]
-      .setLatLng([point.lat,point.lon])
-      .setRadius(radius)
-      .setStyle({color,fillColor:color});
-  }
+  removePointRadius(point.id);
 
-  pointRadiusLayers[point.id].bringToBack();
+  const actualRadius=L.circle([point.lat,point.lon],{
+    pane:"ravenForegroundPane",
+    radius,
+    color,
+    weight:4,
+    opacity:1,
+    dashArray:"8 5",
+    fillColor:color,
+    fillOpacity:.2,
+    interactive:false
+  });
+
+  /* Der zusätzliche Halo bleibt auch herausgezoomt erkennbar. */
+  const visibleHalo=L.circleMarker([point.lat,point.lon],{
+    pane:"ravenForegroundPane",
+    radius:14,
+    color,
+    weight:2,
+    opacity:.9,
+    fill:false,
+    interactive:false
+  });
+
+  pointRadiusLayers[point.id]=L.layerGroup([actualRadius,visibleHalo]).addTo(map);
+  actualRadius.bindTooltip(`${radius} m`,{
+    permanent:true,
+    direction:"right",
+    className:"raven-radius-label",
+    offset:[12,0]
+  }).openTooltip();
 }
 
 function tryOpenPoint(point){
