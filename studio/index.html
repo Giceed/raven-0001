@@ -158,6 +158,15 @@ async function mergeCityPoiCatalog(){
       if(saved)Object.assign(saved,{...point,status:saved.status,lat:saved.lat,lon:saved.lon,radius:saved.radius,category:saved.category});
       else state.candidates.push(point);
     });
+    /* Alte Suchergebnisse früherer großer Karten entfernen, Entscheidungen behalten. */
+    const catalogIds=new Set(catalog.points.map(point=>point.id));
+    const baseIds=new Set(ravenBasePoints.map(point=>point.id));
+    state.candidates=state.candidates.filter(point=>
+      catalogIds.has(point.id) ||
+      baseIds.has(point.id) ||
+      point.source==="Eigener Punkt" ||
+      String(point.id).startsWith("custom-")
+    );
     localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
     return catalog.points.length;
   }catch(error){setMessage("Der Bad-Wünnenberg-Punktkatalog konnte nicht geladen werden.");return 0;}
