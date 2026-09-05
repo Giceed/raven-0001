@@ -24,7 +24,7 @@
       <button id="studioGodViewButton" onclick="toggleStudioGodView()">👁 GOD VIEW</button>
       <select id="searchRadius" title="Suchradius"><option value="1500">1,5 km</option><option value="3000" selected>3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select>
       <button class="primary" onclick="loadCandidates()">OSM-Punkte laden</button>
-      <button onclick="exportProject()">⬇ Export</button>
+      <button class="primary" onclick="exportProject()">🔄 Für Spiel exportieren</button>
       <button onclick="document.getElementById('importFile').click()">⬆ Import</button>
       <input id="importFile" type="file" accept="application/json" hidden onchange="importProject(event)">
     </div>
@@ -281,8 +281,8 @@ async function renderBoundaries(){
   catch(e){setMessage("Ortsgrenzen konnten gerade nicht geladen werden.");}
 }
 
-function exportProject(){const payload={format:"raven-poi-review",version:1,exportedAt:new Date().toISOString(),center:state.center,candidates:state.candidates};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="raven-pois-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(url);setMessage("Raven-Projekt exportiert.");}
-async function importProject(event){try{const data=JSON.parse(await event.target.files[0].text());if(!Array.isArray(data.candidates))throw Error();state.center=data.center||state.center;state.candidates=data.candidates;save();renderMarkers();fitAll();setMessage("Projekt importiert.");}catch(e){setMessage("Diese Datei ist kein gültiges Raven-Projekt.");}event.target.value="";}
+function exportProject(){const payload={format:"raven-shared-pois",version:2,exportedAt:new Date().toISOString(),center:state.center,points:state.candidates};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="raven-shared-pois.json";a.click();URL.revokeObjectURL(url);setMessage("Gemeinsame Punktedatei erstellt – schick sie jetzt im Karten-Chat an Codex.");}
+async function importProject(event){try{const data=JSON.parse(await event.target.files[0].text()),points=data.points||data.candidates;if(!Array.isArray(points))throw Error();state.center=data.center||state.center;state.candidates=points;save();renderMarkers();fitAll();setMessage("Gemeinsame Punktedatei importiert.");}catch(e){setMessage("Diese Datei ist keine gültige Raven-Punktedatei.");}event.target.value="";}
 
 async function initializeStudio(){mergeRavenBasePoints();const loaded=await mergeCityPoiCatalog();if(!BAD_WUENNENBERG_PLACES.includes(state.center.name))state.center={lat:51.5157,lon:8.741,name:"Fürstenberg"};placeSearch.value=state.center.name;renderStats();renderList();renderMarkers();showWholeCity();setMessage(`${loaded} OSM-Punkte für Bad Wünnenberg und seine Ortsteile geladen.`);}
 initializeStudio();
