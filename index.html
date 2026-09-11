@@ -11,7 +11,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<link rel="stylesheet" href="css/raven.css?v=41edge-tests1">
+<link rel="stylesheet" href="css/raven.css?v=42game-loop1">
 </head>
 
 <body>
@@ -20,7 +20,7 @@
 
 <div class="topbar">
   <div class="brand">RAVEN</div>
-  <div class="online">● ONLINE</div>
+  <div class="topbar-actions"><button class="view-toggle" id="playerViewToggle" onclick="toggleRavenPlayerView()">🛠 ENTWICKLER</button><div class="online">● ONLINE</div></div>
 </div>
 
 <div class="card">
@@ -62,6 +62,28 @@
   </div>
 </div>
 
+</div>
+
+<div class="game-grid">
+  <div class="card raven-life-card">
+    <div class="panel-head"><div><span class="eyebrow">DEIN BEGLEITER</span><h2>🐦‍⬛ Raven</h2></div><span class="raven-mood" id="ravenMoodLabel">Zufrieden</span></div>
+    <div class="need-row"><span>🍖 Hunger</span><div class="need-bar"><i id="ravenHungerBar"></i></div><b id="ravenHungerValue">80</b></div>
+    <div class="need-row"><span>⚡ Energie</span><div class="need-bar energy"><i id="ravenEnergyBar"></i></div><b id="ravenEnergyValue">80</b></div>
+    <div class="need-row"><span>💜 Stimmung</span><div class="need-bar mood"><i id="ravenMoodBar"></i></div><b id="ravenMoodValue">80</b></div>
+    <div class="raven-actions"><button onclick="feedRaven()">🍖 Füttern</button><button onclick="restRaven()">🌙 Ausruhen</button><button onclick="playWithRaven()">💜 Spielen</button></div>
+    <div class="raven-note" id="ravenLifeMessage">Raven ist bereit für sein erstes Abenteuer.</div>
+  </div>
+  <div class="card inventory-card">
+    <div class="panel-head"><div><span class="eyebrow">RUCKSACK</span><h2>🎒 Inventar</h2></div><strong id="inventoryCapacity">0 / 30</strong></div>
+    <div class="inventory-slots" id="inventorySlots"></div>
+    <div class="inventory-note">Aktivitätspunkte liefern neue Items und sind danach 15 Minuten erschöpft.</div>
+  </div>
+</div>
+<div class="card story-mission-card">
+  <div class="panel-head"><div><span class="eyebrow">ERSTE MISSION</span><h2>Fürstenberg erwacht</h2></div><span id="storyMissionState">0 %</span></div>
+  <p id="storyMissionText">Entdecke alle Erkundungspunkte und vertreibe den Fog aus Fürstenberg.</p>
+  <div class="story-progress"><i id="storyMissionBar"></i></div>
+  <div class="story-reward">Belohnung: 100 XP · 3 Futter · Reisetagebuch-Abschluss</div>
 </div>
 
 <div class="card map-card">
@@ -213,7 +235,7 @@
 </div>
 
 <div class="version">
-      RAVEN PROTOTYPE V2.9 · TEST
+      RAVEN PROTOTYPE V3.0 · FIRST RAVEN
 </div>
 
 </div>
@@ -252,7 +274,8 @@
 <script src="js/map.js?v=29testcenter2"></script>
 <script src="js/fog.js?v=41edge-tests1"></script>
 <script src="js/gps.js?v=41edge-tests1"></script>
-<script src="js/poi.js?v=41edge-tests1"></script>
+<script src="js/raven-life.js?v=42game-loop1"></script>
+<script src="js/poi.js?v=42game-loop1"></script>
 <script src="js/travelbook.js?v=28cache1"></script>
 <script src="js/app.js?v=28cache1"></script>
 <script src="js/shared-pois.js?v=41boundary-fix1"></script>
