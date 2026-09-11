@@ -11,7 +11,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<link rel="stylesheet" href="css/raven.css?v=34fourbots1">
+<link rel="stylesheet" href="css/raven.css?v=39bot-report1">
 </head>
 
 <body>
@@ -200,6 +200,11 @@
     <div class="bot-map-legend"><span>🟣 Erkundung</span><span>🟠 Aktivität</span><span>✓ geschafft</span><span>✕ Fehler</span></div>
     <div class="bot-grid" id="botGrid"></div>
     <div class="bot-summary" id="botSummary">Noch kein Bot-Test gestartet.</div>
+    <details class="bot-report" open>
+      <summary>📋 Automatischer Testbericht</summary>
+      <div class="bot-report-actions"><button onclick="renderRavenBotReport()">Aktualisieren</button><button onclick="downloadRavenBotReport()">TXT herunterladen</button></div>
+      <div id="botReport">Noch keine Testdaten vorhanden.</div>
+    </details>
     <details class="bot-protocol" open><summary>Fehlerprotokoll <b id="botErrorCount">0</b></summary><div id="botProtocol">Noch keine Fehler gefunden.</div></details>
   </div>
   <div class="dev-log" id="devLog"></div>
@@ -250,7 +255,7 @@
 <script src="js/app.js?v=28cache1"></script>
 <script src="js/shared-pois.js?v=34fourbots2"></script>
 <script src="js/test-tools.js?v=31botmap2"></script>
-<script src="js/bot-testers.js?v=38fog-trails1"></script>
+<script src="js/bot-testers.js?v=39bot-report1"></script>
 
 </body>
 </html>
