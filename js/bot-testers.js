@@ -47,13 +47,14 @@ function updateRavenBotSummary(){
   if(!summary)return;
   const finished=ravenBots.filter(bot=>bot.finished).length;
   const failures=ravenBots.flatMap(bot=>bot.results).filter(result=>!result.ok);
+  const failedNames=[...new Set(failures.map(result=>result.name))];
   const roadFallbacks=ravenBots.reduce((sum,bot)=>sum+bot.routeFallbacks,0);
   summary.className="bot-summary "+(finished===3&&!failures.length?"ok":roadFallbacks?"warn":"");
   if(finished<3){
     summary.textContent=`Test läuft: ${finished}/3 Bots fertig · ${roadFallbacks} Routen ohne Wegdienst.`;
   }else{
     summary.textContent=failures.length
-      ? `Test beendet: ${failures.length} Radius-Prüfungen fehlgeschlagen.`
+      ? `Test beendet: ${failures.length} Radius-Prüfungen fehlgeschlagen · prüfen: ${failedNames.join(", ")}.`
       : `✓ Alle 3 Bots fertig. Radien bestanden${roadFallbacks?`; ${roadFallbacks} Strecken nutzten die Luftlinien-Notlösung`:"; alle Strecken folgten berechneten Wegen"}.`;
   }
 }
@@ -109,7 +110,7 @@ function finishRavenBotPoint(bot){
   const distance=haversineDistance(bot.lat,bot.lon,target.lat,target.lon);
   const radius=getDiscoveryRadius(target);
   const ok=distance<=radius;
-  bot.results.push({pointId:target.id,type:target.type,distance,radius,ok});
+  bot.results.push({pointId:target.id,name:target.name,type:target.type,distance,radius,ok});
   bot.state=ok?`✓ ${target.name} bei ${Math.round(distance)} m bestanden`:`✗ ${target.name}: ${Math.round(distance)} m statt ${radius} m`;
   if(bot.routeLayer){ravenBotLayers.removeLayer(bot.routeLayer);bot.routeLayer=null;}
   bot.targetIndex++;
