@@ -149,9 +149,9 @@ function balancedRadius(point){
 }
 
 function applyRadiusBalanceOnce(){
-  if(localStorage.getItem("ravenRadiusBalanceV1Done")) return;
+  if(localStorage.getItem("ravenRadiusBalanceV2Done")) return;
   state.candidates.forEach(point=>point.radius=balancedRadius(point));
-  localStorage.setItem("ravenRadiusBalanceV1Done","1");
+  localStorage.setItem("ravenRadiusBalanceV2Done","1");
 }
 
 /* Kleine, bewusst kuratierte Fürstenberg-Erkundungsrunde.
@@ -285,7 +285,7 @@ function makeCandidate(e){
   const explorations=["castle","manor","memorial","monument","archaeological_site","attraction","viewpoint","museum","artwork","place_of_worship","townhall","library","community_centre","fire_station","police","school","kindergarten","station","halt","aerodrome","terminal","post_office","information","tower","water_tower"];
   if(!activities.includes(raw)&&!explorations.includes(raw))return null;
   const category=activities.includes(raw)?"activity":"exploration";let score=40;if(t.wikidata||t.wikipedia)score+=25;if(t.historic||t.tourism)score+=15;if(t.access==="yes"||t.foot==="yes")score+=10;
-  const radius=raw==="aerodrome"?500:raw==="terminal"?120:["school","kindergarten"].includes(raw)?120:["castle","manor","archaeological_site"].includes(raw)?140:["fire_station","police","tower","water_tower"].includes(raw)?90:["place_of_worship","townhall","museum","station","halt","post_office","information"].includes(raw)?60:["pitch","sports_centre","trailhead"].includes(raw)?45:35;
+  const radius=category==="activity"?80:["castle","manor","school","kindergarten","fire_station","police","tower","water_tower","aerodrome","terminal"].includes(raw)?160:60;
   const fallbackNames={fountain:"Brunnen",playground:"Spielplatz",park:"Park",pitch:"Sportplatz",sports_centre:"Sportanlage",fire_station:"Feuerwehr",school:"Schule",kindergarten:"Kindergarten",station:"Bahnhof",halt:"Haltepunkt",aerodrome:"Flughafen",terminal:"Flughafen-Terminal",post_office:"Poststelle",information:"Information",trailhead:"Wanderstartpunkt",tower:"Aussichtsturm",water_tower:"Wasserturm"};
   const access=["school","kindergarten","fire_station","police","tower","water_tower"].includes(raw)?"Nur Außenradius – Gelände nicht betreten":["station","halt"].includes(raw)?"Nur öffentliche Bahnhofsbereiche – Gleise nicht betreten":["aerodrome","terminal"].includes(raw)?"Nur öffentliche Bereiche – keine Rollfelder oder Betriebsflächen":t.access||t.foot||"unbekannt";
   return{id:`osm-${e.type}-${e.id}`,name:t.name||fallbackNames[raw]||"Unbenannter Punkt",lat,lon,rawType:raw,category,radius,score,access,status:"pending",osmType:e.type,osmId:e.id,source:"OpenStreetMap"};
