@@ -3,9 +3,14 @@
    der Exportdatei lädt die Spielkarte die Änderungen automatisch. */
 (async function loadSharedRavenPoints(){
   try{
-    const response=await fetch("data/bad-wuennenberg-pois.json?v=28sync1",{cache:"no-store"});
-    if(!response.ok) throw new Error("POI-Datei nicht verfügbar");
-    const payload=await response.json();
+    const localPayload=JSON.parse(localStorage.getItem("ravenSharedPoisLive")||"null");
+    const usingStudioData=Array.isArray(localPayload?.points);
+    let payload=localPayload;
+    if(!usingStudioData){
+      const response=await fetch("data/bad-wuennenberg-pois.json?v=28sync1",{cache:"no-store"});
+      if(!response.ok) throw new Error("POI-Datei nicht verfügbar");
+      payload=await response.json();
+    }
     const source=Array.isArray(payload.points)?payload.points:(payload.candidates||[]);
     const curatedExplorations=new Set([
       "osm-node-12779747489",
@@ -19,16 +24,24 @@
       "osm-way-32636625",
       "osm-way-249788369"
     ]);
+    const idMap={
+      "raven-schloss":"schloss",
+      "raven-st-marien":"st_marien",
+      "raven-rathaus":"rathaus",
+      "raven-beerenstelle":"beerenstelle_dev",
+      "raven-spielplatz":"spielplatz_dev"
+    };
     const shared=source
       .filter(point=>
         point.status!=="rejected" &&
-        point.district==="Fürstenberg" &&
-        (point.category==="exploration"
-          ? curatedExplorations.has(point.id)
-          : curatedActivities.has(point.id))
+        (point.district||"Fürstenberg")==="Fürstenberg" &&
+        (usingStudioData ||
+          (point.category==="exploration"
+            ? curatedExplorations.has(point.id)
+            : curatedActivities.has(point.id)))
       )
       .map(point=>({
-        id:"shared-"+point.id,
+        id:idMap[point.id]||"shared-"+point.id,
         type:point.category==="activity"?"activity":"exploration",
         name:point.name||"Unbekannter Punkt",
         icon:point.category==="activity"?"◆":"?",
@@ -45,7 +58,7 @@
 
     if(!shared.length) return;
     for(let index=ALL_POINTS.length-1;index>=0;index--){
-      if(ALL_POINTS[index].conceptOnly){
+      if(usingStudioData||ALL_POINTS[index].conceptOnly){
         const oldPoint=ALL_POINTS[index];
         if(pointMarkers[oldPoint.id]){
           map.removeLayer(pointMarkers[oldPoint.id]);
