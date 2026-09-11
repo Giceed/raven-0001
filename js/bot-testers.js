@@ -12,8 +12,12 @@ let ravenBots=[],ravenBotTimer=null,ravenBotMap=null,ravenBotLayer=null,ravenBot
 
 function getRavenBotPoints(){return ALL_POINTS.filter(point=>normalizePlaceName(point.district||"Fürstenberg")===normalizePlaceName("Fürstenberg")).sort((a,b)=>(a.type==="exploration"?0:1)-(b.type==="exploration"?0:1));}
 function makeRavenBot(definition,index){const start=[51.5157+(index-1.5)*.00012,8.741+(index-1.5)*.00012];return {...definition,lat:start[0],lon:start[1],start,targets:getRavenBotPoints(),targetIndex:0,target:null,segments:[],results:[],trail:[{lat:start[0],lon:start[1]}],blockedChecks:0,routeChecks:0,routeFallbacks:0,running:false,finished:false,state:"Bereit"};}
+function syncRavenBotTargets(){
+  if(ravenBots.some(bot=>bot.running))return;const currentIds=getRavenBotPoints().map(point=>point.id).join("|");const botIds=(ravenBots[0]?.targets||[]).map(point=>point.id).join("|");if(currentIds!==botIds)ravenBots=RAVEN_BOT_DEFS.map(makeRavenBot);
+}
 
 function ensureRavenBotMap(){
+  syncRavenBotTargets();
   if(!ravenBotMap){
     ravenBotMap=L.map("botMap",{zoomControl:true,minZoom:13,maxBounds:BAD_WUENNENBERG_BOUNDS,maxBoundsViscosity:1}).setView([51.5157,8.741],15);
     ravenBotMap.createPane("botFogPane");ravenBotMap.getPane("botFogPane").style.zIndex="450";ravenBotMap.getPane("botFogPane").style.pointerEvents="none";
