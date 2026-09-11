@@ -139,6 +139,16 @@ const ravenBasePoints=[
   {id:"raven-spielplatz",name:"Spielplatz",lat:51.51845,lon:8.74730,rawType:"playground",category:"activity",radius:35,score:100,access:"draußen",status:"approved",source:"Raven-Karte"}
 ];
 
+/* Kleine, bewusst kuratierte Fürstenberg-Erkundungsrunde.
+   Schloss, St. Marien und Rathaus kommen bereits aus ravenBasePoints. */
+const CURATED_FUERSTENBERG_EXPLORATIONS=new Set([
+  "osm-way-251801441",      // Feuerwehr Fürstenberg
+  "osm-node-12779747489",   // Handwerkerhäuser
+  "osm-node-12607148738",   // Kulturscheune 1a
+  "osm-node-8650312796",    // Königswege
+  "osm-node-5079038501"     // Hochwasserrückhaltebecken
+]);
+
 function mergeRavenBasePoints(){
   const existing=new Set(state.candidates.map(candidate=>candidate.id));
   ravenBasePoints.forEach(point=>{
@@ -159,7 +169,12 @@ async function mergeCityPoiCatalog(){
       else state.candidates.push(point);
     });
     /* Alte Suchergebnisse früherer großer Karten entfernen, Entscheidungen behalten. */
-    const catalogIds=new Set(catalog.points.map(point=>point.id));
+    const usableCatalogPoints=catalog.points.filter(point=>
+      point.district!=="Fürstenberg" ||
+      point.category!=="exploration" ||
+      CURATED_FUERSTENBERG_EXPLORATIONS.has(point.id)
+    );
+    const catalogIds=new Set(usableCatalogPoints.map(point=>point.id));
     const baseIds=new Set(ravenBasePoints.map(point=>point.id));
     state.candidates=state.candidates.filter(point=>
       catalogIds.has(point.id) ||
