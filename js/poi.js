@@ -29,6 +29,7 @@ function collectActivityReward(point){
   const rewardText=typeof ravenRewardText==="function"?ravenRewardText(reward):"1 Futter";
   setTemporaryMessage(`🎒 ${point.name}: ${rewardText} · +${FUERSTENBERG.activityXP} XP`,4500);
   if(typeof logRavenEvent==="function")logRavenEvent("Item gesammelt",`${point.name} · ${rewardText}`);
+  if(typeof recordDailyTask==="function")recordDailyTask("collect");
   if(typeof renderRavenGamePanel==="function")renderRavenGamePanel();
   return true;
 }
