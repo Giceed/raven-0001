@@ -85,7 +85,7 @@
     }
 
     if(currentLat!==null&&currentLon!==null) updateAllPointStates(currentLat,currentLon);
-    else shared.forEach(point=>renderPointMarker(point,false,false,Infinity));
+    else shared.forEach(point=>renderPointMarker(point,isDiscovered(point),false,Infinity));
     if(typeof renderMainLists==="function") renderMainLists();
     if(typeof renderTravelBook==="function") renderTravelBook();
     if(typeof redrawFog==="function") redrawFog();
