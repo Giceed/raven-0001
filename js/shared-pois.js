@@ -88,6 +88,7 @@
     else shared.forEach(point=>renderPointMarker(point,isDiscovered(point),false,Infinity));
     if(typeof renderMainLists==="function") renderMainLists();
     if(typeof renderTravelBook==="function") renderTravelBook();
+    if(typeof renderRavenGamePanel==="function") renderRavenGamePanel();
     if(typeof redrawFog==="function") redrawFog();
     if(typeof syncRavenBotTargets==="function"){
       syncRavenBotTargets();
