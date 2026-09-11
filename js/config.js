@@ -92,6 +92,16 @@ if(!localStorage.getItem("ravenV27AllUnknownResetDone")){
   localStorage.setItem("ravenV27AllUnknownResetDone","1");
 }
 
+/* Einmaliger Reset für die direkte Studio-Spiel-Synchronisierung. */
+if(!localStorage.getItem("ravenV28StudioSyncResetDone")){
+  localStorage.setItem("ravenFuerstenbergMission",JSON.stringify({
+    visitedPOIs:[],
+    visitedActivities:[],
+    completed:false
+  }));
+  localStorage.setItem("ravenV28StudioSyncResetDone","1");
+}
+
 /* ==========================================================
    TESTGEBIET
    Ganz Deutschland bleibt auf der Karte erreichbar. Für die
