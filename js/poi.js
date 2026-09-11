@@ -3,7 +3,7 @@
    ========================================================== */
 
 let activeGamePointType="all";
-const ACTIVITY_COOLDOWN_MS=5*60*1000;
+const ACTIVITY_COOLDOWN_MS=15*60*1000;
 
 function getActivityCooldowns(){return JSON.parse(localStorage.getItem("ravenActivityCooldowns")||"{}");}
 function getActivityCooldownRemaining(point){return Math.max(0,(getActivityCooldowns()[point.id]||0)-Date.now());}
@@ -14,13 +14,21 @@ function collectActivityReward(point){
     if(typeof logRavenEvent==="function")logRavenEvent("Aktivität im Cooldown",point.name);
     return false;
   }
+  const reward=typeof createRavenActivityReward==="function"?createRavenActivityReward(point):{futter:1};
+  if(typeof addRavenItems==="function"&&!addRavenItems(reward)){
+    setTemporaryMessage("🎒 Dein Inventar ist voll. Verbrauche zuerst ein Item.",4000);
+    return false;
+  }
   const cooldowns=getActivityCooldowns();cooldowns[point.id]=Date.now()+ACTIVITY_COOLDOWN_MS;
   localStorage.setItem("ravenActivityCooldowns",JSON.stringify(cooldowns));
-  const items=JSON.parse(localStorage.getItem("ravenItems")||'{"futter":0}');items.futter=(items.futter||0)+1;
-  localStorage.setItem("ravenItems",JSON.stringify(items));
+  if(typeof addRavenItems!=="function"){
+    const items=JSON.parse(localStorage.getItem("ravenItems")||'{"futter":0}');items.futter=(items.futter||0)+1;localStorage.setItem("ravenItems",JSON.stringify(items));
+  }
   addXP(FUERSTENBERG.activityXP);
-  setTemporaryMessage(`🎒 ${point.name}: 1 Futter gesammelt · +${FUERSTENBERG.activityXP} XP`,4500);
-  if(typeof logRavenEvent==="function")logRavenEvent("Item gesammelt",`${point.name} · 1 Futter`);
+  const rewardText=typeof ravenRewardText==="function"?ravenRewardText(reward):"1 Futter";
+  setTemporaryMessage(`🎒 ${point.name}: ${rewardText} · +${FUERSTENBERG.activityXP} XP`,4500);
+  if(typeof logRavenEvent==="function")logRavenEvent("Item gesammelt",`${point.name} · ${rewardText}`);
+  if(typeof renderRavenGamePanel==="function")renderRavenGamePanel();
   return true;
 }
 
@@ -615,6 +623,7 @@ function discoverPoint(point){
 
   updateBoundaryOutline();
   redrawFog();
+  if(typeof renderRavenGamePanel==="function")renderRavenGamePanel();
 }
 
 function saveMission(){
