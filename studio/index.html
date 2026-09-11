@@ -17,6 +17,7 @@
 @media(max-width:700px){.type-guide{grid-template-columns:1fr}.type-guide button{padding:8px 10px}}
 .map-add-button{position:absolute;z-index:1000;top:12px;right:12px;width:54px;height:54px;border:2px solid #fff;border-radius:50%;background:#7c3aed;color:#fff;font-size:32px;font-weight:900;line-height:1;cursor:pointer;box-shadow:0 0 20px #7c3aed}.map-add-button.moving{background:#92400e}
 .marker{background:#7c3aed;box-shadow:0 0 0 6px #8b5cf64d,0 0 20px #8b5cf6}.marker.activity{background:#ea580c;box-shadow:0 0 0 6px #fb923c4d,0 0 20px #fb923c}.marker.approved{background:#7c3aed;border-color:#4ade80;box-shadow:0 0 0 4px #22c55e55,0 0 18px #8b5cf6}.marker.activity.approved{background:#ea580c;box-shadow:0 0 0 4px #22c55e55,0 0 18px #fb923c}
+.marker.approved{position:relative;background:#7c3aed!important;border-color:#fff!important;box-shadow:0 0 0 6px #8b5cf64d,0 0 20px #8b5cf6!important}.marker.activity.approved{background:#ea580c!important;box-shadow:0 0 0 6px #fb923c4d,0 0 20px #fb923c!important}.marker.approved::after{content:"✓";position:absolute;right:-7px;top:-8px;width:16px;height:16px;display:grid;place-items:center;border-radius:50%;background:#16a34a;border:2px solid white;color:white;font-size:10px;line-height:1}
 </style>
 </head>
 <body>
@@ -53,7 +54,7 @@
     <section class="map-wrap">
       <div id="map"></div>
       <button class="map-add-button" id="mapAddButton" title="Eigenen Punkt hinzufügen" onclick="event.stopPropagation();startAddPoint()">+</button>
-      <div class="legend"><div><i class="dot" style="background:#06b6d4"></i>Erkundung</div><div><i class="dot" style="background:#f97316"></i>Aktivität</div><div><i class="dot" style="background:#22c55e"></i>Behalten</div></div>
+      <div class="legend"><div><i class="dot" style="background:#7c3aed"></i>Erkundungspunkt</div><div><i class="dot" style="background:#f97316"></i>Aktivitätspunkt</div><div>✓ = Behalten</div></div>
     </section>
     <aside class="side">
       <div class="status"><div id="status">Bereit. Ort suchen oder OSM-Punkte laden.</div><div class="stats"><span id="pending">0 zu prüfen</span><span id="approved">0 behalten</span><span id="rejected">0 gelöscht</span><span id="customCount">0 eigene</span></div></div>
