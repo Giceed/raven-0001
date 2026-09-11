@@ -102,6 +102,12 @@ if(!localStorage.getItem("ravenV28StudioSyncResetDone")){
   localStorage.setItem("ravenV28StudioSyncResetDone","1");
 }
 
+if(!localStorage.getItem("ravenV28StudioSyncReset2Done")){
+  localStorage.setItem("ravenMissionVisited", JSON.stringify([]));
+  localStorage.setItem("ravenActivityVisited", JSON.stringify([]));
+  localStorage.setItem("ravenV28StudioSyncReset2Done", "1");
+}
+
 /* ==========================================================
    TESTGEBIET
    Ganz Deutschland bleibt auf der Karte erreichbar. Für die
