@@ -93,7 +93,7 @@ function renderPointMarker(point,discovered,inRange,distance){
 
   const content =
     discovered
-      ? point.icon
+      ? (point.type==="exploration" ? "✓" : point.icon)
       : "?";
 
   const icon=L.divIcon({
