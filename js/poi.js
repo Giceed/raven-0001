@@ -235,7 +235,7 @@ function tryOpenPoint(point){
     return;
   }
 
-  if(distance>discoveryRadius){
+  if(!isWithinRavenRadius(distance,discoveryRadius)){
 
     setTemporaryMessage(
       `? Dieser Punkt ist noch ${Math.round(distance)} m entfernt (Radius ${discoveryRadius} m).`
@@ -254,6 +254,8 @@ function tryOpenPoint(point){
 
   openScratch(point);
 }
+
+function isWithinRavenRadius(distance,radius){return distance<=radius;}
 
 
 /* ==========================================================
