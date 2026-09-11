@@ -510,8 +510,12 @@ function discoverPoint(point){
 
     addXP(FUERSTENBERG.poiXP);
 
+    const requiredExplorationPoints=ALL_POINTS.filter(candidate=>
+      candidate.type==="exploration"&&
+      normalizePlaceName(candidate.district||"Fürstenberg")===normalizePlaceName(currentRavenDistrict||"Fürstenberg")
+    );
     const allDone=
-      FUERSTENBERG.explorationPOIs
+      requiredExplorationPoints.length>0&&requiredExplorationPoints
         .every(point =>
           fuerstenbergMission
             .visitedPOIs
