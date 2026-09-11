@@ -11,7 +11,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<link rel="stylesheet" href="css/raven.css?v=28markers-above-fog1">
+<link rel="stylesheet" href="css/raven.css?v=29testcenter1">
 </head>
 
 <body>
@@ -128,6 +128,11 @@
 
 </div>
 
+<div class="completion-banner" id="completionBanner">
+  <strong>✓ Fürstenberg vollständig erkundet</strong>
+  <span>Karte freigelegt · Ortsabschluss gespeichert</span>
+</div>
+
 <div class="card">
 
 <div class="mission-title" id="missionTitle">📍 Standort: unbekannt</div>
@@ -171,6 +176,17 @@
 
 </div>
 
+<div class="card dev-card" id="devCard">
+  <div class="dev-title">🧪 RAVEN TESTZENTRALE</div>
+  <div class="dev-grid" id="devGrid"></div>
+  <div class="dev-actions">
+    <button class="secondary" onclick="runRavenSelfTest()">Selbsttest starten</button>
+    <button class="danger" onclick="resetRavenTestProgress()">Testfortschritt zurücksetzen</button>
+  </div>
+  <div class="dev-test-result" id="devTestResult">Noch kein Selbsttest ausgeführt.</div>
+  <div class="dev-log" id="devLog"></div>
+</div>
+
 <div class="version">
       RAVEN PROTOTYPE V2.7 · DEV
 </div>
@@ -208,13 +224,14 @@
 <script src="js/city-concept-points.js?v=28cache1"></script>
 <script src="js/config.js?v=28radiusbalance1"></script>
 <script src="js/storage.js?v=28cache1"></script>
-<script src="js/map.js?v=28point-visibility1"></script>
+<script src="js/map.js?v=29testcenter1"></script>
 <script src="js/fog.js?v=28markers-above-fog1"></script>
-<script src="js/gps.js?v=28cache1"></script>
-<script src="js/poi.js?v=28markers-above-fog1"></script>
+<script src="js/gps.js?v=29testcenter1"></script>
+<script src="js/poi.js?v=29testcenter1"></script>
 <script src="js/travelbook.js?v=28cache1"></script>
 <script src="js/app.js?v=28cache1"></script>
 <script src="js/shared-pois.js?v=28marker-state1"></script>
+<script src="js/test-tools.js?v=29testcenter1"></script>
 
 </body>
 </html>
