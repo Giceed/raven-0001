@@ -8,7 +8,8 @@ const RAVEN_ITEM_DEFS={
 let ravenItems=readRavenJSON("ravenItems",{futter:3,feder:0,glanzstein:0});
 let ravenLife=readRavenJSON("ravenLife",{hunger:78,energy:82,mood:76,updatedAt:Date.now()});
 let ravenPendingItems=readRavenJSON("ravenPendingItems",{futter:0,feder:0,glanzstein:0});
-let ravenPlayerView=localStorage.getItem("ravenPlayerView")!=="developer";
+const ravenPlayerLocked=new URLSearchParams(location.search).get("view")==="player";
+let ravenPlayerView=ravenPlayerLocked||localStorage.getItem("ravenPlayerView")!=="developer";
 
 function readRavenJSON(key,fallback){try{return {...fallback,...JSON.parse(localStorage.getItem(key)||"null")};}catch{return {...fallback};}}
 function clampRavenNeed(value){return Math.max(0,Math.min(100,Math.round(value)));}
@@ -81,10 +82,11 @@ function renderRavenGamePanel(){
 }
 function applyRavenPlayerView(){
   document.body.classList.toggle("player-view",ravenPlayerView);
+  document.body.classList.toggle("player-locked",ravenPlayerLocked);
   localStorage.setItem("ravenPlayerView",ravenPlayerView?"player":"developer");
   const button=document.getElementById("playerViewToggle");if(button)button.textContent=ravenPlayerView?"🛠 ENTWICKLER":"🎮 SPIELERANSICHT";
   if(ravenPlayerView&&typeof godMode!=="undefined"&&godMode&&typeof toggleGodMode==="function")toggleGodMode();
 }
-function toggleRavenPlayerView(){ravenPlayerView=!ravenPlayerView;applyRavenPlayerView();}
+function toggleRavenPlayerView(){if(ravenPlayerLocked)return;ravenPlayerView=!ravenPlayerView;applyRavenPlayerView();}
 window.addEventListener("DOMContentLoaded",()=>{applyRavenTime();applyRavenPlayerView();renderRavenGamePanel();setInterval(()=>{renderRavenGamePanel();if(typeof renderMainLists==="function")renderMainLists();},30000);});
 
