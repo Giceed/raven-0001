@@ -263,6 +263,8 @@ button{
   font-size:12px;
   color:#8b949e
 }
+.completion-banner{display:none;margin:0 0 14px;padding:14px;border:1px solid #22c55e;border-radius:14px;background:#052e16;color:#86efac;text-align:center}
+.completion-banner.active{display:grid;gap:4px}.completion-banner span{font-size:11px;color:#bbf7d0}
 
 .mission-title,.travel-title{font-size:16px;font-weight:800}
 .mission-subtitle,.travel-summary{
@@ -368,6 +370,16 @@ button{
   letter-spacing:2px;
   padding:8px 0 25px
 }
+.dev-card{display:none;border-color:#f59e0b}
+.dev-card.active{display:block}
+.dev-title{font-size:15px;font-weight:900;color:#fbbf24;margin-bottom:10px}
+.dev-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;font-size:11px}
+.dev-metric{padding:8px;border:1px solid #30363d;border-radius:9px;background:#090c10}
+.dev-metric b{display:block;color:#fff;margin-top:3px}
+.dev-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.dev-test-result{margin-top:10px;color:#9fb0c8;font-size:11px;line-height:1.5}
+.dev-test-result.ok{color:#4ade80}.dev-test-result.error{color:#fca5a5}
+.dev-log{margin-top:10px;max-height:150px;overflow:auto;padding:8px;border-radius:9px;background:#05080c;color:#94a3b8;font:10px/1.5 monospace}
 
 /* RUBBELKARTE */
 
