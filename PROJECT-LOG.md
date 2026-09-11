@@ -21,6 +21,8 @@ Der Praxistest findet voraussichtlich morgen oder Sonntag statt. Zu prüfen sind
 
 Bestätigter Lauf mit vier Bots: 4/4 abgeschlossen, 32 öffentliche Wegrouten, 0 Notrouten und 0 Fehler. Mila, Jaro und Kara erreichten jeweils 2/2 Erkundungs- und 6/6 Aktivitätspunkte. Rico deckte seine Fahrstrecke auf, öffnete 0 Punkte und bestätigte 8/8 Fahrsperren. Der schwer erreichbare Sportplatz wurde nach dem ersten Testlauf mit einem sicheren Außenradius von 120 Metern korrigiert und anschließend von allen passenden Bots erreicht.
 
+Zusätzlich besteht die öffentliche Raven-Version den Zehn-Punkte-Grenzfalltest mit 10/10: Geschwindigkeitswechsel, GPS-Sprünge, GPS-Genauigkeit, exakte Radiusgrenzen, Speichern/Neustart, doppelte Aktivierung, Internetausfall, Ortsgrenze, getrennte Bot-Spielstände und Langzeitbegrenzung. Dabei wurde ein falsch Fürstenberg zugeordnetes Rückhaltebecken außerhalb der Ortsgrenze gefunden und durch das Rathaus innerhalb Fürstenbergs ersetzt. Alle acht aktuellen Testpunkte liegen damit in der Fürstenberg-Grenze.
+
 ## Danach
 
 1. Ergebnisse des Außentests auswerten und Kartenmechanik feinjustieren.
