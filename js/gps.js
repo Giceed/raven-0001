@@ -241,10 +241,10 @@ function handlePosition(position){
 
   lastPosition={lat,lon,time:Date.now()};
 
-  if(speedState==="free"){
-    saveExploredPoint(lat,lon);
-  }else if(typeof logRavenEvent==="function"){
-    logRavenEvent(speedState==="blocked"?"Autofahrt erkannt":"Bewegung zu schnell",`${measuredSpeed.toFixed(1)} km/h · kein Fog-Fortschritt`);
+  /* Reisen deckt die Karte immer auf – auch im Auto. Nur POIs bleiben gesperrt. */
+  saveExploredPoint(lat,lon);
+  if(speedState!=="free"&&typeof logRavenEvent==="function"){
+    logRavenEvent(speedState==="blocked"?"Autofahrt erkannt":"Bewegung zu schnell",`${measuredSpeed.toFixed(1)} km/h · Fog wird aufgedeckt, Punkte bleiben gesperrt`);
   }
   updateAllPointStates(lat,lon);
 
