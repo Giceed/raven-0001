@@ -14,7 +14,7 @@
     const source=Array.isArray(payload.points)?payload.points:(payload.candidates||[]);
     const curatedExplorations=new Set([
       "osm-node-12779747489",
-      "osm-node-5079038501"
+      "osm-way-248558859"
     ]);
     const curatedActivities=new Set([
       "osm-way-933203680",
