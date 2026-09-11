@@ -83,6 +83,7 @@
     else shared.forEach(point=>renderPointMarker(point,false,false,Infinity));
     if(typeof renderMainLists==="function") renderMainLists();
     if(typeof renderTravelBook==="function") renderTravelBook();
+    if(typeof redrawFog==="function") redrawFog();
     console.info(`Raven: ${shared.length} gemeinsame Studio-Punkte geladen.`);
   }catch(error){
     const syncStatus = document.getElementById("poiSyncStatus");
