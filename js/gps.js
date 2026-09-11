@@ -38,6 +38,7 @@ function startExploration(){
     "GPS wird gestartet …";
 
   setMessage("📡 Raven sucht deine Position …");
+  if(typeof logRavenEvent==="function")logRavenEvent("Erkundung gestartet");
 
   watchId=navigator.geolocation.watchPosition(
 
@@ -112,12 +113,20 @@ function handlePosition(position){
   const lon=coords.longitude;
   const accuracy=coords.accuracy;
 
+  let measuredSpeed=Number.isFinite(coords.speed)?Math.max(0,coords.speed*3.6):0;
+  if(!measuredSpeed&&lastPosition?.time){
+    const seconds=(Date.now()-lastPosition.time)/1000;
+    if(seconds>0)measuredSpeed=haversineDistance(lastPosition.lat,lastPosition.lon,lat,lon)/seconds*3.6;
+  }
+  window.currentSpeedKmh=measuredSpeed;
+
   if(accuracy && accuracy>35){
 
     document.getElementById("gpsInfo").textContent =
       `Warte auf genaues GPS · aktuell ±${Math.round(accuracy)} m`;
 
-    setMessage("📡 Grober Standort gefunden – Raven wartet auf deine genaue Position.");
+    setMessage("Grober Standort gefunden - Raven wartet auf deine genaue Position.");
+    if(typeof logRavenEvent==="function")logRavenEvent("GPS zu ungenau",`±${Math.round(accuracy)} m`);
     return;
   }
 
@@ -135,6 +144,7 @@ function handlePosition(position){
       "Aktiv";
 
     setMessage("📍 GPS aktiv – Raven folgt dir.");
+    if(typeof logRavenEvent==="function")logRavenEvent("Standort erkannt",`${lat.toFixed(5)}, ${lon.toFixed(5)}`);
 
     /* Nach einem God-Mode-Test sofort zum echten Standort zurückkehren. */
     internalMapMove=true;
@@ -198,9 +208,13 @@ function handlePosition(position){
     }
   }
 
-  lastPosition={lat,lon};
+  lastPosition={lat,lon,time:Date.now()};
 
-  saveExploredPoint(lat,lon);
+  if(measuredSpeed<=25){
+    saveExploredPoint(lat,lon);
+  }else if(typeof logRavenEvent==="function"){
+    logRavenEvent("Autofahrt erkannt",`${measuredSpeed.toFixed(1)} km/h · kein Fog-Fortschritt`);
+  }
   updateAllPointStates(lat,lon);
 
   maybeReverseGeocode(lat,lon);
