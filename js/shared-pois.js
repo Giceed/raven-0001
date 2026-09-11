@@ -47,7 +47,9 @@
         icon:point.category==="activity"?"◆":"?",
         lat:Number(point.lat),
         lon:Number(point.lon),
-        discoveryRadius:Number(point.radius)||60,
+        discoveryRadius:usingStudioData
+          ? (Number(point.radius)||60)
+          : (point.category==="activity"?80:60),
         access:"studio_review",
         accessHint:point.access||"Vor Ort prüfen",
         district:point.district,
@@ -58,15 +60,13 @@
 
     if(!shared.length) return;
     for(let index=ALL_POINTS.length-1;index>=0;index--){
-      if(usingStudioData||ALL_POINTS[index].conceptOnly){
-        const oldPoint=ALL_POINTS[index];
-        if(pointMarkers[oldPoint.id]){
-          map.removeLayer(pointMarkers[oldPoint.id]);
-          delete pointMarkers[oldPoint.id];
-        }
-        if(typeof removePointRadius==="function") removePointRadius(oldPoint.id);
-        ALL_POINTS.splice(index,1);
+      const oldPoint=ALL_POINTS[index];
+      if(pointMarkers[oldPoint.id]){
+        map.removeLayer(pointMarkers[oldPoint.id]);
+        delete pointMarkers[oldPoint.id];
       }
+      if(typeof removePointRadius==="function") removePointRadius(oldPoint.id);
+      ALL_POINTS.splice(index,1);
     }
     ALL_POINTS.push(...shared);
     const explorationCount = shared.filter(point => point.type === "exploration").length;
