@@ -142,11 +142,16 @@ const ravenBasePoints=[
 /* Kleine, bewusst kuratierte Fürstenberg-Erkundungsrunde.
    Schloss, St. Marien und Rathaus kommen bereits aus ravenBasePoints. */
 const CURATED_FUERSTENBERG_EXPLORATIONS=new Set([
-  "osm-way-251801441",      // Feuerwehr Fürstenberg
   "osm-node-12779747489",   // Handwerkerhäuser
-  "osm-node-12607148738",   // Kulturscheune 1a
-  "osm-node-8650312796",    // Königswege
   "osm-node-5079038501"     // Hochwasserrückhaltebecken
+]);
+const CURATED_FUERSTENBERG_ACTIVITIES=new Set([
+  "osm-way-933203680",      // Gerichtkump
+  "osm-way-711609936",      // Spielplatz West
+  "osm-way-257138078",      // Spielplatz Nord
+  "osm-way-815079785",      // Spielplatz Ost
+  "osm-way-32636625",       // Sportplatz Schulzentrum
+  "osm-way-249788369"       // Sportplatz Nordost
 ]);
 
 function mergeRavenBasePoints(){
@@ -171,8 +176,9 @@ async function mergeCityPoiCatalog(){
     /* Alte Suchergebnisse früherer großer Karten entfernen, Entscheidungen behalten. */
     const usableCatalogPoints=catalog.points.filter(point=>
       point.district!=="Fürstenberg" ||
-      point.category!=="exploration" ||
-      CURATED_FUERSTENBERG_EXPLORATIONS.has(point.id)
+      (point.category==="exploration"
+        ? CURATED_FUERSTENBERG_EXPLORATIONS.has(point.id)
+        : CURATED_FUERSTENBERG_ACTIVITIES.has(point.id))
     );
     const catalogIds=new Set(usableCatalogPoints.map(point=>point.id));
     const baseIds=new Set(ravenBasePoints.map(point=>point.id));
