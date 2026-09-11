@@ -106,6 +106,8 @@ function stopExploration(){
 const RAVEN_SPEED_PAUSE_KMH=12;
 const RAVEN_SPEED_BLOCK_KMH=20;
 const RAVEN_SPEED_RELEASE_MS=5000;
+const RAVEN_MAX_GPS_ACCURACY=35;
+const RAVEN_HISTORY_LIMIT=12000;
 let ravenSlowSince=0;
 window.ravenSpeedState="free";
 window.ravenMovementLocked=false;
@@ -151,7 +153,7 @@ function handlePosition(position){
   window.currentSpeedKmh=measuredSpeed;
   const speedState=updateRavenSpeedState(measuredSpeed);
 
-  if(accuracy && accuracy>35){
+  if(accuracy && accuracy>RAVEN_MAX_GPS_ACCURACY){
 
     document.getElementById("gpsInfo").textContent =
       `Warte auf genaues GPS · aktuell ±${Math.round(accuracy)} m`;
@@ -228,8 +230,8 @@ function handlePosition(position){
         time:Date.now()
       });
 
-      if(travelHistory.length>12000){
-        travelHistory=travelHistory.slice(-12000);
+      if(travelHistory.length>RAVEN_HISTORY_LIMIT){
+        travelHistory=travelHistory.slice(-RAVEN_HISTORY_LIMIT);
       }
 
       localStorage.setItem(
@@ -276,8 +278,8 @@ function saveExploredPoint(lat,lon){
     time:Date.now()
   });
 
-  if(exploredPoints.length>12000){
-    exploredPoints=exploredPoints.slice(-12000);
+  if(exploredPoints.length>RAVEN_HISTORY_LIMIT){
+    exploredPoints=exploredPoints.slice(-RAVEN_HISTORY_LIMIT);
   }
 
   localStorage.setItem(
