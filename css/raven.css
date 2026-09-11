@@ -249,6 +249,14 @@ button{
   filter:grayscale(1);
   opacity:.62
 }
+.poi-marker.exploration.done{
+  background:#6d28d9;
+  border-color:white;
+  color:white;
+  box-shadow:0 0 14px #6d28d9;
+  filter:none;
+  opacity:1
+}
 
 .message{
   text-align:center;
