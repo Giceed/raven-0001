@@ -9,6 +9,7 @@
 - Die Mission „Fürstenberg erwacht“ zeigt den Fortschritt und vergibt 100 XP sowie 3 Futter; bei vollem Inventar bleibt die Item-Belohnung vorgemerkt.
 - Die Spieleransicht versteckt God Mode, Bots und Testtechnik. Der Entwickler-Schalter macht diese Werkzeuge wieder erreichbar.
 - Der URL-Zusatz `?view=player` sperrt die Spieleransicht vollständig und entfernt auch den Entwickler-Schalter; dieser Link ist für spätere NFC-Tester vorgesehen.
+- Spieler- und Entwicklerseite synchronisieren Raven-Werte, Inventar, Mission, XP und Aktivitäts-Cooldowns live über denselben Browser-Speicher; ein Neuladen ist beim Wechsel zwischen offenen Seiten nicht mehr nötig.
 - Fürstenberg ist das begrenzte Testgebiet.
 - Reise- und Erkundungskarte besitzen getrennte Ansichten.
 - Der Fog wird aus einer zusammenhängenden, 80 Meter breiten Reisespur geöffnet.
