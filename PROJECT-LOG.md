@@ -2,6 +2,7 @@
 
 ## Aktueller Stand
 
+- Raven V3.4 ersetzt das sofortige Ausruhen durch einen gespeicherten Schlafmodus. Je 10 fehlende Energie plant Raven ungefähr eine Minute Schlaf, mindestens eine und höchstens zehn Minuten. Währenddessen sind Füttern, Spielen, Jumper und neuer Erkundungsstart gesperrt; ein Neuladen unterbricht den Countdown nicht.
 - Raven V3.3 gibt allen vier digitalen Testern einen getrennten Test-Raven mit Hunger, Energie, Stimmung und eigenem Inventar. Bewegung, Erkundungsfunde, Aktivitätsbelohnungen und automatisches Füttern werden im Bot-Protokoll geprüft.
 - Der Zeitverbrauch wurde im echten Ein-Minuten-Zeitraffer erfolgreich getestet und anschließend wieder auf Stundenbetrieb gestellt.
 - Eine neue Erkundung kann bei weniger als 10 Hunger oder 10 Energie nicht begonnen werden; laufende Touren werden nicht hart abgebrochen.

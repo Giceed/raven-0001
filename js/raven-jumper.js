@@ -8,6 +8,7 @@ function closeRavenJumper(){if(ravenJumper?.running)finishRavenJumper("geschloss
 function toggleRavenJumperRun(){if(ravenJumper?.running)finishRavenJumper("beendet");else startRavenJumper();}
 function startRavenJumper(){
   if(ravenJumper?.running)return;
+  if(typeof isRavenSleeping==="function"&&isRavenSleeping()){document.getElementById("jumperMessage").textContent=`${ravenProfile.name} schläft gerade.`;return;}
   if(typeof ravenLife!=="undefined"&&ravenLife.energy<6){document.getElementById("jumperMessage").textContent="Dein Raven ist zu müde. Lass ihn erst ausruhen.";return;}
   if(typeof ravenLife!=="undefined"){ravenLife.energy=clampRavenNeed(ravenLife.energy-6);ravenLife.hunger=clampRavenNeed(ravenLife.hunger-3);saveRavenLife();renderRavenGamePanel();}
   const canvas=document.getElementById("jumperCanvas");if(!canvas)return;

@@ -13,8 +13,8 @@ async function runRavenLifeTests(){
     results.push(ravenLifeTestResult("2 · Spielen",ravenLife.hunger===44&&ravenLife.energy===42&&ravenLife.mood===68,"Hunger −6 · Energie −8 · Stimmung +18"));
     ravenLife={hunger:50,energy:7,mood:50,updatedAt:Date.now()};playWithRaven();
     results.push(ravenLifeTestResult("3 · Erschöpfung",ravenLife.energy===7&&ravenLife.hunger===50&&ravenLife.mood===50,"unter 8 Energie wird Spielen blockiert"));
-    ravenLife={hunger:50,energy:50,mood:50,updatedAt:Date.now()};restRaven();
-    results.push(ravenLifeTestResult("4 · Ausruhen",ravenLife.energy===70&&ravenLife.hunger===47,"Energie +20 · Hunger −3"));
+    ravenLife={hunger:50,energy:50,mood:50,updatedAt:Date.now(),sleepStartedAt:0,sleepUntil:0,sleepStartEnergy:0};restRaven();const sleepScheduled=ravenLife.sleepUntil-ravenLife.sleepStartedAt===5*60000&&isRavenSleeping();ravenLife.sleepStartedAt=Date.now()-5*60000;ravenLife.sleepUntil=Date.now()-1;applyRavenSleep();
+    results.push(ravenLifeTestResult("4 · Schlafmodus",sleepScheduled&&ravenLife.energy===100&&!isRavenSleeping(),"bei 50 Energie werden 5 Minuten geplant · danach Energie 100"));
     results.push(ravenLifeTestResult("5 · Wertebegrenzung",clampRavenNeed(-20)===0&&clampRavenNeed(120)===100&&clampRavenNeed(49.6)===50,"kein Wert fällt unter 0 oder über 100"));
     ravenItems={futter:30,feder:0,glanzstein:0};
     results.push(ravenLifeTestResult("6 · Volles Inventar",addRavenItems({futter:1})===false&&ravenInventoryCount()===30,"der 31. Platz wird abgewiesen"));

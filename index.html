@@ -6,12 +6,12 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-  <meta name="raven-version" content="3.3-bot-ravens">
+  <meta name="raven-version" content="3.4-raven-sleep">
 <title>RAVEN #0001</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<link rel="stylesheet" href="css/raven.css?v=46raven-jumper1">
+<link rel="stylesheet" href="css/raven.css?v=51raven-sleep1">
 </head>
 
 <body>
@@ -70,7 +70,7 @@
     <div class="need-row"><span>🍖 Hunger</span><div class="need-bar"><i id="ravenHungerBar"></i></div><b id="ravenHungerValue">80</b></div>
     <div class="need-row"><span>⚡ Energie</span><div class="need-bar energy"><i id="ravenEnergyBar"></i></div><b id="ravenEnergyValue">80</b></div>
     <div class="need-row"><span>💜 Stimmung</span><div class="need-bar mood"><i id="ravenMoodBar"></i></div><b id="ravenMoodValue">80</b></div>
-    <div class="raven-actions"><button onclick="feedRaven()">🍖 Füttern</button><button onclick="restRaven()">🌙 Ausruhen</button><button onclick="playWithRaven()">💜 Spielen</button></div>
+    <div class="raven-actions"><button id="ravenFeedButton" onclick="feedRaven()">🍖 Füttern</button><button id="ravenRestButton" onclick="restRaven()">🌙 Schlafen</button><button id="ravenPlayButton" onclick="playWithRaven()">💜 Spielen</button></div>
     <button class="rename-raven" onclick="openRavenNaming()">✏ Raven benennen</button>
     <div class="raven-note" id="ravenLifeMessage">Raven ist bereit für sein erstes Abenteuer.</div>
   </div>
@@ -249,7 +249,7 @@
 </div>
 
 <div class="version">
-      RAVEN PROTOTYPE V3.3 · BOT RAVENS
+      RAVEN PROTOTYPE V3.4 · RAVEN SCHLAF
 </div>
 
 <div class="jumper-overlay" id="jumperOverlay">
@@ -309,8 +309,8 @@
 <script src="js/map.js?v=29testcenter2"></script>
 <script src="js/fog.js?v=41edge-tests1"></script>
 <script src="js/gps.js?v=48raven-readiness1"></script>
-<script src="js/raven-life.js?v=48raven-readiness1"></script>
-<script src="js/raven-jumper.js?v=47jumper-touch-save1"></script>
+<script src="js/raven-life.js?v=51raven-sleep1"></script>
+<script src="js/raven-jumper.js?v=51raven-sleep1"></script>
 <script src="js/poi.js?v=45raven-features1"></script>
 <script src="js/travelbook.js?v=28cache1"></script>
 <script src="js/app.js?v=28cache1"></script>
@@ -318,7 +318,7 @@
 <script src="js/test-tools.js?v=40sport-access1"></script>
 <script src="js/bot-testers.js?v=48bot-ravens1"></script>
 <script src="js/edge-tests.js?v=41edge-tests1"></script>
-<script src="js/game-tests.js?v=45raven-features1"></script>
+<script src="js/game-tests.js?v=51raven-sleep1"></script>
 
 </body>
 </html>

@@ -481,4 +481,5 @@ button{
 .poi-sync-status{margin:8px 0 14px;padding:9px 12px;border:1px solid #303746;border-radius:10px;color:#9fb0c8;background:#0b1017;font-size:12px}
 .poi-sync-status.live{border-color:#28c77a;color:#57e69d}
 .poi-sync-status.error{border-color:#ef5350;color:#ff8c89}
+.raven-actions button:disabled{opacity:.5;cursor:not-allowed;border-color:#334155}
 
