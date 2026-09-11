@@ -9,8 +9,12 @@ const RAVEN_BOT_DEFS=[
   {id:"driveonly",name:"Rico",icon:"🚙",label:"Auto bleibt drin",speed:42,color:"#dc2626",noExit:true}
 ];
 let ravenBots=[],ravenBotTimer=null,ravenBotMap=null,ravenBotLayer=null,ravenBotPoiLayer=null,ravenBotPoiMarkers={},ravenBotProtocol=[],ravenBotFogCanvas=null,activeRavenBotId="walker";
+let ravenBotBoundaryGeometry=null,ravenBotBoundaryLayer=null;
 
-function getRavenBotPoints(){return ALL_POINTS.filter(point=>normalizePlaceName(point.district||"Fürstenberg")===normalizePlaceName("Fürstenberg")).sort((a,b)=>(a.type==="exploration"?0:1)-(b.type==="exploration"?0:1));}
+function ravenBotPointInRing(lon,lat,ring){let inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1],hit=(yi>lat)!==(yj>lat)&&lon<(xj-xi)*(lat-yi)/(yj-yi)+xi;if(hit)inside=!inside;}return inside;}
+function ravenBotInsideBoundary(point){if(!ravenBotBoundaryGeometry)return true;const polygons=ravenBotBoundaryGeometry.type==="Polygon"?[ravenBotBoundaryGeometry.coordinates]:ravenBotBoundaryGeometry.coordinates||[];return polygons.some(polygon=>ravenBotPointInRing(point.lon,point.lat,polygon[0])&&!polygon.slice(1).some(hole=>ravenBotPointInRing(point.lon,point.lat,hole)));}
+function getRavenBotPoints(){return ALL_POINTS.filter(point=>normalizePlaceName(point.district||"Fürstenberg")===normalizePlaceName("Fürstenberg")&&ravenBotInsideBoundary(point)).sort((a,b)=>(a.type==="exploration"?0:1)-(b.type==="exploration"?0:1));}
+async function loadRavenBotBoundary(){try{const response=await fetch("data/fuerstenberg-boundary.json?v=1",{cache:"no-store"}),data=await response.json();ravenBotBoundaryGeometry=data.geojson;ravenBots=RAVEN_BOT_DEFS.map(makeRavenBot);if(ravenBotMap){if(ravenBotBoundaryLayer)ravenBotMap.removeLayer(ravenBotBoundaryLayer);ravenBotBoundaryLayer=L.geoJSON(ravenBotBoundaryGeometry,{style:{color:"#facc15",weight:3,fillOpacity:.03}}).addTo(ravenBotMap);ravenBotMap.fitBounds(ravenBotBoundaryLayer.getBounds(),{padding:[18,18]});drawRavenBotPois();}renderRavenBotCards();updateRavenBotSummary();}catch(error){addRavenBotProtocol({name:"System"},"error","Fürstenberg-Grenze konnte nicht geladen werden.");}}
 function makeRavenBot(definition,index){const start=[51.5157+(index-1.5)*.00012,8.741+(index-1.5)*.00012];return {...definition,lat:start[0],lon:start[1],start,targets:getRavenBotPoints(),targetIndex:0,target:null,segments:[],results:[],trail:[{lat:start[0],lon:start[1]}],blockedChecks:0,routeChecks:0,routeFallbacks:0,running:false,finished:false,state:"Bereit",ravenLife:{hunger:80,energy:80,mood:75,movementMeters:0},items:{beeren:1,futter:1,lieblingsfutter:0,energiekorn:0,feder:0,glanzstein:0},ravenEvents:[]};}
 function ravenBotItemCount(bot){return Object.values(bot.items).reduce((sum,value)=>sum+(Number(value)||0),0);}
 function ravenBotMood(bot){return Math.round(Math.min(bot.ravenLife.mood,(bot.ravenLife.hunger+bot.ravenLife.energy)/2+15));}
@@ -138,5 +142,5 @@ function stopRavenBot(id){const bot=ravenBots.find(item=>item.id===id);if(!bot||
 function startRavenBots(){ensureRavenBotMap();ravenBots.forEach(bot=>startRavenBot(bot.id));}
 function stopRavenBots(){ravenBots.forEach(bot=>stopRavenBot(bot.id));}
 
-ravenBots=RAVEN_BOT_DEFS.map(makeRavenBot);renderRavenBotCards();renderRavenBotProtocol();updateRavenBotSummary();renderRavenBotReport();
+ravenBots=RAVEN_BOT_DEFS.map(makeRavenBot);renderRavenBotCards();renderRavenBotProtocol();updateRavenBotSummary();renderRavenBotReport();loadRavenBotBoundary();
 

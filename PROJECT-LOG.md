@@ -2,6 +2,8 @@
 
 ## Aktueller Stand
 
+- Das Tageslabor nutzt jetzt exakt dieselbe Punkt-Auswahl wie Spiel und Studio, filtert zusätzlich hart gegen die amtliche Fürstenberg-Grenze und lässt zehn Balance-Ravens echte, vom Fußgänger-Router erzeugte Straßenschleifen laufen. POIs werden nur bei einem tatsächlichen Radiuskontakt im Vorbeigehen ausgelöst; ein direktes Abarbeiten von POI zu POI wurde entfernt.
+- Auch die vier Hauptbots filtern ihre Ziele gegen die amtliche Fürstenberg-Grenze und zeigen diese auf ihrer Testkarte.
 - Raven V3.4 ersetzt das sofortige Ausruhen durch einen gespeicherten Schlafmodus. Je 10 fehlende Energie plant Raven ungefähr eine Minute Schlaf, mindestens eine und höchstens zehn Minuten. Währenddessen sind Füttern, Spielen, Jumper und neuer Erkundungsstart gesperrt; ein Neuladen unterbricht den Countdown nicht.
 - Raven V3.3 gibt allen vier digitalen Testern einen getrennten Test-Raven mit Hunger, Energie, Stimmung und eigenem Inventar. Bewegung, Erkundungsfunde, Aktivitätsbelohnungen und automatisches Füttern werden im Bot-Protokoll geprüft.
 - Der Zeitverbrauch wurde im echten Ein-Minuten-Zeitraffer erfolgreich getestet und anschließend wieder auf Stundenbetrieb gestellt.
