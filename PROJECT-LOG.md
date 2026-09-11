@@ -2,6 +2,12 @@
 
 ## Aktueller Stand
 
+- Raven V3.0 besitzt einen ersten Spielkreislauf mit einem gespeicherten Begleiter.
+- Raven hat Hunger, Energie und Stimmung und kann gefüttert, ausgeruht und beschäftigt werden.
+- Das Inventar besitzt 30 Plätze für Futter, Rabenfedern und Glanzsteine.
+- Aktivitätspunkte liefern zufällige Items, 10 XP und haben 15 Minuten Abklingzeit.
+- Die Mission „Fürstenberg erwacht“ zeigt den Fortschritt und vergibt 100 XP sowie 3 Futter; bei vollem Inventar bleibt die Item-Belohnung vorgemerkt.
+- Die Spieleransicht versteckt God Mode, Bots und Testtechnik. Der Entwickler-Schalter macht diese Werkzeuge wieder erreichbar.
 - Fürstenberg ist das begrenzte Testgebiet.
 - Reise- und Erkundungskarte besitzen getrennte Ansichten.
 - Der Fog wird aus einer zusammenhängenden, 80 Meter breiten Reisespur geöffnet.
