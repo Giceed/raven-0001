@@ -13,6 +13,7 @@ function updateRavenDevPanel(){
   const card=document.getElementById("devCard");
   if(!card)return;
   card.classList.toggle("active",Boolean(godMode));
+  if(godMode&&typeof ensureRavenBotMap==="function")ensureRavenBotMap();
   const points=ALL_POINTS.filter(p=>(p.district||"Fürstenberg")==="Fürstenberg");
   const explorations=points.filter(p=>p.type==="exploration");
   const activities=points.filter(p=>p.type==="activity");
