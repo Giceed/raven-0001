@@ -3,7 +3,7 @@ function ravenLifeTestResult(name,ok,detail){return {name,ok:Boolean(ok),detail}
 async function runRavenLifeTests(){
   const output=document.getElementById("lifeTestResult");if(!output)return;
   output.className="edge-test-result running";output.textContent="⏳ Raven wird mit Extremfällen geprüft …";
-  const lifeSnapshot=JSON.parse(JSON.stringify(ravenLife)),itemSnapshot=JSON.parse(JSON.stringify(ravenItems)),pendingSnapshot=JSON.parse(JSON.stringify(ravenPendingItems));
+  const lifeSnapshot=JSON.parse(JSON.stringify(ravenLife)),itemSnapshot=JSON.parse(JSON.stringify(ravenItems)),pendingSnapshot=JSON.parse(JSON.stringify(ravenPendingItems)),messageSnapshot=document.getElementById("ravenLifeMessage")?.textContent||"";
   const storedLife=localStorage.getItem("ravenLife"),storedItems=localStorage.getItem("ravenItems"),storedPending=localStorage.getItem("ravenPendingItems"),results=[];
   try{
     ravenLife={hunger:50,energy:50,mood:50,updatedAt:Date.now()};ravenItems={futter:2,feder:0,glanzstein:0};feedRaven();
@@ -27,7 +27,7 @@ async function runRavenLifeTests(){
   finally{
     ravenLife=lifeSnapshot;ravenItems=itemSnapshot;ravenPendingItems=pendingSnapshot;
     [["ravenLife",storedLife],["ravenItems",storedItems],["ravenPendingItems",storedPending]].forEach(([key,value])=>value===null?localStorage.removeItem(key):localStorage.setItem(key,value));
-    renderRavenGamePanel();
+    renderRavenGamePanel();setRavenLifeMessage(messageSnapshot);
   }
   const passed=results.filter(result=>result.ok).length;output.className=`edge-test-result ${passed===10?"ok":"error"}`;
   output.innerHTML=`<strong>${passed===10?"✓":"⚠"} ${passed}/10 Raven-Stresstests bestanden</strong><div class="edge-test-grid">${results.map(result=>`<div class="edge-test-row ${result.ok?"ok":"error"}"><b>${result.ok?"✓":"✕"} ${escapeHTML(result.name)}</b><span>${escapeHTML(result.detail)}</span></div>`).join("")}</div>`;
