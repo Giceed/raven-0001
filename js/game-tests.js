@@ -21,7 +21,7 @@ async function runRavenLifeTests(){
     results.push(ravenLifeTestResult("7 · Vorgemerkte Belohnung",ravenItems.futter===30&&ravenPendingItems.futter===2,"ein freier Platz gefüllt · Rest bleibt sicher vorgemerkt"));
     const rewards=Array.from({length:250},createRavenActivityReward),valid=rewards.every(reward=>reward.futter>=1&&reward.futter<=2&&(reward.feder||0)<=1&&(reward.glanzstein||0)<=1&&Object.keys(reward).every(id=>RAVEN_ITEM_DEFS[id]));
     results.push(ravenLifeTestResult("8 · Zufallsfunde",valid,"250 Belohnungen ohne ungültige Items oder Mengen"));
-    results.push(ravenLifeTestResult("9 · Aktivitäts-Cooldown",typeof ACTIVITY_COOLDOWN_MS!=="undefined"&&ACTIVITY_COOLDOWN_MS===15*60*1000,"Aktivität bleibt exakt 15 Minuten erschöpft"));
+    results.push(ravenLifeTestResult("9 · Aktivitäts-Cooldown",typeof ACTIVITY_COOLDOWN_MS!=="undefined"&&ACTIVITY_COOLDOWN_MS===60*1000,"Aktivität bleibt im Prototyp exakt 1 Minute erschöpft"));
     results.push(ravenLifeTestResult("10 · NFC-Spielersperre",isRavenPlayerLocked("?view=player")&&!isRavenPlayerLocked("?v=developer"),"Spielerlink gesperrt · Entwicklerlink frei"));
   }catch(error){results.push(ravenLifeTestResult("Testsystem",false,error.message||String(error)));}
   finally{
