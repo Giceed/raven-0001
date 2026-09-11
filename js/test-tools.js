@@ -39,7 +39,7 @@ function runRavenSelfTest(){
   const checks=[
     [ALL_POINTS.some(p=>p.type==="exploration"),"Erkundungspunkte geladen"],
     [ALL_POINTS.some(p=>p.type==="activity"),"Aktivitätspunkte geladen"],
-    [ALL_POINTS.filter(p=>p.type==="activity").every(p=>getDiscoveryRadius(p)===80),"Aktivitätsradius 80 m"],
+    [ALL_POINTS.filter(p=>p.type==="activity").every(p=>[80,120].includes(getDiscoveryRadius(p))),"Aktivitätsradien 80/120 m"],
     [Boolean(map.getPane("ravenFogPane")&&map.getPane("ravenForegroundPane")),"Kartenebenen vorhanden"],
     [Number(map.getPane("ravenForegroundPane").style.zIndex)>Number(map.getPane("ravenFogPane").style.zIndex),"Marker vor Fog"],
     [Array.isArray(fuerstenbergMission.visitedPOIs),"Fortschritt lesbar"]
