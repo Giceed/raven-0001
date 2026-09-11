@@ -7,8 +7,19 @@
     if(!response.ok) throw new Error("POI-Datei nicht verfügbar");
     const payload=await response.json();
     const source=Array.isArray(payload.points)?payload.points:(payload.candidates||[]);
+    const curatedExplorations=new Set([
+      "osm-way-251801441",
+      "osm-node-12779747489",
+      "osm-node-12607148738",
+      "osm-node-8650312796",
+      "osm-node-5079038501"
+    ]);
     const shared=source
-      .filter(point=>point.status!=="rejected" && point.district==="Fürstenberg")
+      .filter(point=>
+        point.status!=="rejected" &&
+        point.district==="Fürstenberg" &&
+        (point.category!=="exploration" || curatedExplorations.has(point.id))
+      )
       .map(point=>({
         id:"shared-"+point.id,
         type:point.category==="activity"?"activity":"exploration",
