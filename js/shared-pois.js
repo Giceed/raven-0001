@@ -69,6 +69,15 @@
       }
     }
     ALL_POINTS.push(...shared);
+    const explorationCount = shared.filter(point => point.type === "exploration").length;
+    const activityCount = shared.filter(point => point.type === "activity").length;
+    const syncStatus = document.getElementById("poiSyncStatus");
+    if(syncStatus){
+      syncStatus.textContent = usingStudioData
+        ? `✓ Studio-Sync aktiv: ${explorationCount} Erkundung · ${activityCount} Aktivitäten`
+        : `Grunddaten geladen: ${explorationCount} Erkundung · ${activityCount} Aktivitäten`;
+      syncStatus.classList.toggle("live", usingStudioData);
+    }
 
     if(currentLat!==null&&currentLon!==null) updateAllPointStates(currentLat,currentLon);
     else shared.forEach(point=>renderPointMarker(point,false,false,Infinity));
@@ -76,6 +85,11 @@
     if(typeof renderTravelBook==="function") renderTravelBook();
     console.info(`Raven: ${shared.length} gemeinsame Studio-Punkte geladen.`);
   }catch(error){
+    const syncStatus = document.getElementById("poiSyncStatus");
+    if(syncStatus){
+      syncStatus.textContent = "⚠ Studio-Synchronisierung fehlgeschlagen";
+      syncStatus.classList.add("error");
+    }
     console.warn("Raven nutzt die eingebaute POI-Liste als Rückfalllösung.",error);
   }
 })();
