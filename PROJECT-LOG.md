@@ -2,6 +2,10 @@
 
 ## Aktueller Stand
 
+- Raven V3.3 gibt allen vier digitalen Testern einen getrennten Test-Raven mit Hunger, Energie, Stimmung und eigenem Inventar. Bewegung, Erkundungsfunde, Aktivitätsbelohnungen und automatisches Füttern werden im Bot-Protokoll geprüft.
+- Der Zeitverbrauch wurde im echten Ein-Minuten-Zeitraffer erfolgreich getestet und anschließend wieder auf Stundenbetrieb gestellt.
+- Eine neue Erkundung kann bei weniger als 10 Hunger oder 10 Energie nicht begonnen werden; laufende Touren werden nicht hart abgebrochen.
+- Raven Jumper besitzt Touch-, Maus- und Tastatursteuerung, Punkte je Landung sowie einen gespeicherten Highscore auch bei manuellem Beenden oder Schließen.
 - Raven V3.1 ergänzt den vollständigen Begleiter-Rohbau vor dem späteren Balancing-Cut.
 - Neue NFC-Spieler erhalten ein kurzes Start-Tutorial und können ihren Raven benennen.
 - Beeren, Futter und Lieblingsfutter sättigen unterschiedlich; Energiekörner stellen Energie her. Federn und Glanzsteine bleiben vorerst seltene Platzhalter.
@@ -43,10 +47,10 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 
 ## Danach
 
-1. Ergebnisse des Außentests auswerten und Kartenmechanik feinjustieren.
-2. Aktivitätspunkte mit Items und Abklingzeit ausbauen.
-3. Inventargrenze und Erweiterungen entwickeln.
-4. Raven als Begleiter mit Hunger, Energie, Stimmung und Fähigkeiten entwickeln.
-5. Erste richtige Mission und spielbaren Player View bauen.
+1. Rathaus als ersten wöchentlichen Minispiel-Ort mit Raven-Jumper-Highscore testen.
+2. Schlafmodus mit sichtbarem Raven und 5–10 Minuten Erholungszeit prototypisieren.
+3. Bot-Raven-Läufe vollständig auswerten und Bedürfnis-Balancing vormerken.
+4. Ergebnisse des Außentests auswerten und Kartenmechanik feinjustieren.
+5. Inventargrenze, Federn, Glanzsteine und Raven-Entwicklung definieren.
 6. Weitere Ortsteile erst nach stabilem Fürstenberg-Test ergänzen.
 

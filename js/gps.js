@@ -13,6 +13,11 @@ function toggleExploration(){
 
 function startExploration(){
 
+  if(typeof canRavenStartExploration==="function"){
+    const readiness=canRavenStartExploration();
+    if(!readiness.ok){setMessage(`🐦‍⬛ ${readiness.message}`);setRavenLifeMessage(readiness.message);return;}
+  }
+
   if(!navigator.geolocation){
 
     setMessage("GPS wird von diesem Gerät nicht unterstützt.");

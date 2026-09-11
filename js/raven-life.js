@@ -84,6 +84,11 @@ function ravenMoodStatus(){
   const lowest=Math.min(ravenLife.hunger,ravenLife.energy,effectiveRavenMood());
   if(lowest<20)return "Braucht dich";if(lowest<45)return "Unruhig";if(lowest<75)return "Zufrieden";return "Glücklich";
 }
+function canRavenStartExploration(){
+  if(ravenLife.hunger<10)return {ok:false,message:`${ravenProfile.name} ist zu hungrig für eine neue Erkundung. Füttere ihn zuerst.`};
+  if(ravenLife.energy<10)return {ok:false,message:`${ravenProfile.name} ist zu erschöpft für eine neue Erkundung. Lass ihn zuerst ausruhen.`};
+  return {ok:true,message:""};
+}
 function applyRavenMovement(meters){ravenLife.movementMeters=(ravenLife.movementMeters||0)+Math.max(0,meters||0);if(ravenLife.movementMeters<250)return;const steps=Math.floor(ravenLife.movementMeters/250);ravenLife.movementMeters-=steps*250;ravenLife.hunger=clampRavenNeed(ravenLife.hunger-steps);ravenLife.energy=clampRavenNeed(ravenLife.energy-steps*.6);saveRavenLife();renderRavenGamePanel();}
 function recordDailyTask(task,amount=1){if(ravenTestMode)return;ravenDaily=loadRavenDaily();ravenDaily[task]=(ravenDaily[task]||0)+amount;const done=ravenDaily.feed>0&&ravenDaily.play>0&&ravenDaily.collect>0;if(done&&!ravenDaily.rewarded){ravenDaily.rewarded=true;grantRavenMissionItems({lieblingsfutter:1});if(typeof addXP==="function")addXP(20);setRavenLifeMessage("☀️ Tagesaufgaben geschafft: Lieblingsfutter und 20 XP!");}localStorage.setItem("ravenDaily",JSON.stringify(ravenDaily));renderRavenGamePanel();}
 function openRavenNaming(){const overlay=document.getElementById("onboardingOverlay"),input=document.getElementById("ravenNameInput");if(overlay)overlay.style.display="flex";if(input){input.value=ravenProfile.name==="Raven"?"":ravenProfile.name;input.focus();}}

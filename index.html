@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-  <meta name="raven-version" content="3.2-raven-jumper">
+  <meta name="raven-version" content="3.3-bot-ravens">
 <title>RAVEN #0001</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -249,15 +249,15 @@
 </div>
 
 <div class="version">
-      RAVEN PROTOTYPE V3.2 · RAVEN JUMPER
+      RAVEN PROTOTYPE V3.3 · BOT RAVENS
 </div>
 
 <div class="jumper-overlay" id="jumperOverlay">
   <div class="jumper-shell">
     <div class="jumper-head"><button onclick="closeRavenJumper()">✕</button><strong>☁️ RAVEN JUMPER</strong><span id="jumperScore">0</span></div>
-    <canvas id="jumperCanvas" width="360" height="600"></canvas>
+    <canvas id="jumperCanvas" width="360" height="600" aria-label="Raven Jumper Spielfläche: links oder rechts gedrückt halten"></canvas>
     <div class="jumper-help" id="jumperMessage">Tippe auf START und steuere links oder rechts.</div>
-    <div class="jumper-controls"><button data-jumper="left">◀ LINKS</button><button class="jumper-start" id="jumperStartButton" onclick="startRavenJumper()">START</button><button data-jumper="right">RECHTS ▶</button></div>
+    <div class="jumper-controls"><button data-jumper="left">◀ LINKS</button><button class="jumper-start" id="jumperStartButton" onclick="toggleRavenJumperRun()">START</button><button data-jumper="right">RECHTS ▶</button></div>
   </div>
 </div>
 
@@ -308,15 +308,15 @@
 <script src="js/storage.js?v=28cache1"></script>
 <script src="js/map.js?v=29testcenter2"></script>
 <script src="js/fog.js?v=41edge-tests1"></script>
-<script src="js/gps.js?v=45raven-features1"></script>
-<script src="js/raven-life.js?v=46raven-jumper1"></script>
-<script src="js/raven-jumper.js?v=46raven-jumper1"></script>
+<script src="js/gps.js?v=48raven-readiness1"></script>
+<script src="js/raven-life.js?v=48raven-readiness1"></script>
+<script src="js/raven-jumper.js?v=47jumper-touch-save1"></script>
 <script src="js/poi.js?v=45raven-features1"></script>
 <script src="js/travelbook.js?v=28cache1"></script>
 <script src="js/app.js?v=28cache1"></script>
 <script src="js/shared-pois.js?v=41boundary-fix1"></script>
 <script src="js/test-tools.js?v=40sport-access1"></script>
-<script src="js/bot-testers.js?v=39bot-report1"></script>
+<script src="js/bot-testers.js?v=48bot-ravens1"></script>
 <script src="js/edge-tests.js?v=41edge-tests1"></script>
 <script src="js/game-tests.js?v=45raven-features1"></script>
 

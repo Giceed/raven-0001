@@ -401,6 +401,7 @@ button{
 .bot-name{font-size:11px;font-weight:900;color:#fff}.bot-state{min-height:28px;margin-top:5px;color:#cbd5e1;font-size:9px;line-height:1.4}
 .bot-progress{height:5px;margin-top:7px;border-radius:6px;background:#21262d;overflow:hidden}.bot-progress i{display:block;height:100%;width:0;background:#a855f7;transition:width .2s linear}
 .bot-score{margin-top:6px;color:#94a3b8;font-size:9px}.bot-summary{margin-top:9px;padding:8px;border-radius:8px;background:#111827;color:#cbd5e1;font-size:10px;line-height:1.45}
+.bot-raven-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:7px}.bot-raven-stats span{padding:5px 2px;border-radius:6px;background:#111827;text-align:center;color:#e2e8f0;font-size:9px;font-weight:800}.bot-raven-last{margin-top:5px;min-height:24px;color:#c4b5fd;font-size:8px;line-height:1.35}
 .bot-card-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:8px}.bot-card-actions button{padding:7px 4px;font-size:9px}.bot-card-actions .run{background:#312e81;color:#e0e7ff}.bot-card-actions .halt{background:#27272a;color:#d4d4d8}.bot-card-actions .view{background:#854d0e;color:#fef3c7}
 .bot-summary.ok{color:#86efac;border:1px solid #166534}.bot-summary.warn{color:#fde68a;border:1px solid #854d0e}
 .raven-bot-marker{width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;color:white;font-size:13px;box-shadow:0 0 12px currentColor}
