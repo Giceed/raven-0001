@@ -8,7 +8,8 @@ const RAVEN_ITEM_DEFS={
 let ravenItems=readRavenJSON("ravenItems",{futter:3,feder:0,glanzstein:0});
 let ravenLife=readRavenJSON("ravenLife",{hunger:78,energy:82,mood:76,updatedAt:Date.now()});
 let ravenPendingItems=readRavenJSON("ravenPendingItems",{futter:0,feder:0,glanzstein:0});
-const ravenPlayerLocked=new URLSearchParams(location.search).get("view")==="player";
+function isRavenPlayerLocked(search=location.search){return new URLSearchParams(search).get("view")==="player";}
+const ravenPlayerLocked=isRavenPlayerLocked();
 let ravenPlayerView=ravenPlayerLocked||localStorage.getItem("ravenPlayerView")!=="developer";
 
 function readRavenJSON(key,fallback){try{return {...fallback,...JSON.parse(localStorage.getItem(key)||"null")};}catch{return {...fallback};}}
