@@ -380,6 +380,24 @@ button{
 .dev-test-result{margin-top:10px;color:#9fb0c8;font-size:11px;line-height:1.5}
 .dev-test-result.ok{color:#4ade80}.dev-test-result.error{color:#fca5a5}
 .dev-log{margin-top:10px;max-height:150px;overflow:auto;padding:8px;border-radius:9px;background:#05080c;color:#94a3b8;font:10px/1.5 monospace}
+.bot-test-center{margin-top:13px;padding-top:13px;border-top:1px solid #3f2b0b}
+.bot-test-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.bot-test-head strong{display:block;color:#fde68a;font-size:12px}
+.bot-test-head span{display:block;margin-top:3px;color:#94a3b8;font-size:10px;line-height:1.35}
+.bot-test-actions{display:flex;gap:6px;flex:0 0 auto}
+.bot-test-actions button{width:auto;padding:8px 9px;font-size:10px}
+.bot-start{background:#ca8a04;color:#111827}.bot-stop{background:#3f3f46;color:#f4f4f5}
+.bot-stop:disabled,.bot-start:disabled{opacity:.45;cursor:not-allowed}
+.bot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+.bot-card{min-width:0;padding:9px;border:1px solid #30363d;border-radius:10px;background:#090c10}
+.bot-card.walker{border-color:#2563eb}.bot-card.jogger{border-color:#16a34a}.bot-card.car{border-color:#ea580c}
+.bot-name{font-size:11px;font-weight:900;color:#fff}.bot-state{min-height:28px;margin-top:5px;color:#cbd5e1;font-size:9px;line-height:1.4}
+.bot-progress{height:5px;margin-top:7px;border-radius:6px;background:#21262d;overflow:hidden}.bot-progress i{display:block;height:100%;width:0;background:#a855f7;transition:width .2s linear}
+.bot-score{margin-top:6px;color:#94a3b8;font-size:9px}.bot-summary{margin-top:9px;padding:8px;border-radius:8px;background:#111827;color:#cbd5e1;font-size:10px;line-height:1.45}
+.bot-summary.ok{color:#86efac;border:1px solid #166534}.bot-summary.warn{color:#fde68a;border:1px solid #854d0e}
+.raven-bot-marker{width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;color:white;font-size:13px;box-shadow:0 0 12px currentColor}
+.raven-bot-marker.walker{background:#2563eb}.raven-bot-marker.jogger{background:#16a34a}.raven-bot-marker.car{background:#ea580c}
+@media(max-width:520px){.bot-test-head{display:block}.bot-test-actions{margin-top:8px}.bot-grid{grid-template-columns:1fr}.bot-state{min-height:0}}
 
 /* RUBBELKARTE */
 
