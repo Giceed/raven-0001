@@ -103,6 +103,36 @@ function stopExploration(){
   updateUI();
 }
 
+const RAVEN_SPEED_PAUSE_KMH=12;
+const RAVEN_SPEED_BLOCK_KMH=20;
+const RAVEN_SPEED_RELEASE_MS=5000;
+let ravenSlowSince=0;
+window.ravenSpeedState="free";
+window.ravenMovementLocked=false;
+
+function updateRavenSpeedState(speed){
+  const previous=window.ravenSpeedState;
+  if(speed>RAVEN_SPEED_BLOCK_KMH){
+    window.ravenSpeedState="blocked";
+    ravenSlowSince=0;
+  }else if(speed>=RAVEN_SPEED_PAUSE_KMH){
+    window.ravenSpeedState="paused";
+    ravenSlowSince=0;
+  }else if(previous!=="free"){
+    if(!ravenSlowSince)ravenSlowSince=Date.now();
+    window.ravenSpeedState=Date.now()-ravenSlowSince>=RAVEN_SPEED_RELEASE_MS?"free":"cooldown";
+  }else{
+    window.ravenSpeedState="free";
+    ravenSlowSince=0;
+  }
+  window.ravenMovementLocked=window.ravenSpeedState!=="free";
+  if(previous!==window.ravenSpeedState&&typeof logRavenEvent==="function"){
+    const labels={blocked:"Fahrsperre",paused:"Bewegungspause",cooldown:"Warte auf Freigabe",free:"Bewegung freigegeben"};
+    logRavenEvent(labels[window.ravenSpeedState],`${speed.toFixed(1)} km/h`);
+  }
+  return window.ravenSpeedState;
+}
+
 function handlePosition(position){
 
   if(!tracking || godMode) return;
@@ -119,6 +149,7 @@ function handlePosition(position){
     if(seconds>0)measuredSpeed=haversineDistance(lastPosition.lat,lastPosition.lon,lat,lon)/seconds*3.6;
   }
   window.currentSpeedKmh=measuredSpeed;
+  const speedState=updateRavenSpeedState(measuredSpeed);
 
   if(accuracy && accuracy>35){
 
@@ -210,10 +241,10 @@ function handlePosition(position){
 
   lastPosition={lat,lon,time:Date.now()};
 
-  if(measuredSpeed<=25){
+  if(speedState==="free"){
     saveExploredPoint(lat,lon);
   }else if(typeof logRavenEvent==="function"){
-    logRavenEvent("Autofahrt erkannt",`${measuredSpeed.toFixed(1)} km/h · kein Fog-Fortschritt`);
+    logRavenEvent(speedState==="blocked"?"Autofahrt erkannt":"Bewegung zu schnell",`${measuredSpeed.toFixed(1)} km/h · kein Fog-Fortschritt`);
   }
   updateAllPointStates(lat,lon);
 
