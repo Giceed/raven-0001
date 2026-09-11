@@ -207,8 +207,6 @@ button{
 
 .raven-fog-svg{
   position:absolute;
-  inset:0;
-  z-index:650;
   pointer-events:none
 }
 
