@@ -35,8 +35,10 @@ function redrawFog(){
     point.type==="exploration"&&
     normalizePlaceName(point.district||"Fürstenberg")===normalizePlaceName(placeName)
   );
-  const placeFullyExplored=requiredExplorationPoints.length>0&&requiredExplorationPoints.every(point=>
-    fuerstenbergMission.visitedPOIs.includes(point.id)
+  const placeFullyExplored=fuerstenbergMission.completed||(
+    requiredExplorationPoints.length>0&&requiredExplorationPoints.every(point=>
+      fuerstenbergMission.visitedPOIs.includes(point.id)
+    )
   );
 
   /* Sind alle Pflicht-Erkundungspunkte entdeckt, ist die gesamte
