@@ -11,6 +11,7 @@
 - Vier Bots prüfen Gehen, Joggen, Auto mit Aussteigen und Auto ohne Aussteigen.
 - Jeder Bot besitzt einen eigenen Fog und eigenen Fortschritt.
 - Raven Studio und Spiel verwenden dieselben POI-Daten.
+- Der schwer erreichbare Sportplatz besitzt einen geprüften Außenradius von 120 Metern; normale Aktivitäten bleiben bei 80 Metern.
 
 ## Geparkt: echter Außentest
 
