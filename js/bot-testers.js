@@ -25,6 +25,9 @@ function drawRavenBotPois(){
   if(!ravenBotPoiLayer)return;ravenBotPoiLayer.clearLayers();ravenBotPoiMarkers={};
   getRavenBotPoints().forEach(point=>{
     const states=ravenBots.flatMap(bot=>bot.results).filter(result=>result.pointId===point.id),failed=states.some(result=>!result.ok),passed=states.some(result=>result.ok),status=failed?"failed":passed?"passed":"",symbol=failed?"✕":passed?"✓":"?";
+    const radius=getDiscoveryRadius(point),color=point.type==="activity"?"#f97316":"#8b5cf6";
+    L.circle([point.lat,point.lon],{radius,color,weight:3,opacity:.95,fillColor:color,fillOpacity:.14,interactive:false})
+      .bindTooltip(`${radius} m`,{permanent:true,direction:"right",className:`bot-radius-label ${point.type}`,offset:[8,0]}).addTo(ravenBotPoiLayer);
     const icon=L.divIcon({className:"",html:`<div class="bot-poi-marker ${point.type} ${status}">${symbol}</div>`,iconSize:[25,25],iconAnchor:[12,12]});
     ravenBotPoiMarkers[point.id]=L.marker([point.lat,point.lon],{icon}).bindPopup(`<b>${escapeHTML(point.name)}</b><br>${point.type==="exploration"?"Erkundungspunkt":"Aktivitätspunkt"}<br>Radius: ${getDiscoveryRadius(point)} m`).addTo(ravenBotPoiLayer);
   });
