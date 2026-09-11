@@ -8,17 +8,24 @@
     const payload=await response.json();
     const source=Array.isArray(payload.points)?payload.points:(payload.candidates||[]);
     const curatedExplorations=new Set([
-      "osm-way-251801441",
       "osm-node-12779747489",
-      "osm-node-12607148738",
-      "osm-node-8650312796",
       "osm-node-5079038501"
+    ]);
+    const curatedActivities=new Set([
+      "osm-way-933203680",
+      "osm-way-711609936",
+      "osm-way-257138078",
+      "osm-way-815079785",
+      "osm-way-32636625",
+      "osm-way-249788369"
     ]);
     const shared=source
       .filter(point=>
         point.status!=="rejected" &&
         point.district==="Fürstenberg" &&
-        (point.category!=="exploration" || curatedExplorations.has(point.id))
+        (point.category==="exploration"
+          ? curatedExplorations.has(point.id)
+          : curatedActivities.has(point.id))
       )
       .map(point=>({
         id:"shared-"+point.id,
