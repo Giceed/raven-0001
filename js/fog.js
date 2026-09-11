@@ -46,15 +46,25 @@ function redrawFog(){
   context.fillRect(0,0,size.x,size.y);
   context.globalCompositeOperation="destination-out";
 
-  exploredPoints.forEach(point=>{
-    const center=map.latLngToContainerPoint([point.lat,point.lon]);
-    const edge=destinationPoint(point.lat,point.lon,REVEAL_RADIUS_METERS,90);
+  function revealCircle(lat,lon,radiusMeters){
+    const center=map.latLngToContainerPoint([lat,lon]);
+    const edge=destinationPoint(lat,lon,radiusMeters,90);
     const edgePoint=map.latLngToContainerPoint(edge);
     const radius=Math.max(Math.abs(edgePoint.x-center.x),1);
     context.beginPath();
     context.arc(center.x,center.y,radius,0,Math.PI*2);
     context.fill();
+  }
+
+  exploredPoints.forEach(point=>{
+    revealCircle(point.lat,point.lon,REVEAL_RADIUS_METERS);
   });
+
+  /* Erkundungspunkte sind eine zweite dauerhafte Fog-Quelle.
+     Aktivitäten liefern Items, decken die Welt aber nicht auf. */
+  ALL_POINTS
+    .filter(point=>point.type==="exploration"&&fuerstenbergMission.visitedPOIs.includes(point.id))
+    .forEach(point=>revealCircle(point.lat,point.lon,Math.max(60,getDiscoveryRadius(point))));
   context.globalCompositeOperation="source-over";
 }
 
