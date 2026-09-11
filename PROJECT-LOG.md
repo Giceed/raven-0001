@@ -31,6 +31,8 @@ Bestätigter Lauf mit vier Bots: 4/4 abgeschlossen, 32 öffentliche Wegrouten, 0
 
 Zusätzlich besteht die öffentliche Raven-Version den Zehn-Punkte-Grenzfalltest mit 10/10: Geschwindigkeitswechsel, GPS-Sprünge, GPS-Genauigkeit, exakte Radiusgrenzen, Speichern/Neustart, doppelte Aktivierung, Internetausfall, Ortsgrenze, getrennte Bot-Spielstände und Langzeitbegrenzung. Dabei wurde ein falsch Fürstenberg zugeordnetes Rückhaltebecken außerhalb der Ortsgrenze gefunden und durch das Rathaus innerhalb Fürstenbergs ersetzt. Alle acht aktuellen Testpunkte liegen damit in der Fürstenberg-Grenze.
 
+Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Erschöpfung, Ausruhen, Wertebegrenzung, volles Inventar, vorgemerkte Missionsbelohnung, 250 Zufallsfunde, 15-Minuten-Cooldown und gesperrter NFC-Spielerlink. Der echte Raven-Spielstand wird nach dem Test vollständig wiederhergestellt.
+
 ## Danach
 
 1. Ergebnisse des Außentests auswerten und Kartenmechanik feinjustieren.
