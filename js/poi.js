@@ -2,6 +2,21 @@
    POI MARKER
    ========================================================== */
 
+let activeGamePointType="all";
+
+function setGamePointTypeFilter(type){
+  activeGamePointType=type;
+  document.getElementById("allPointsButton")?.classList.toggle("active",type==="all");
+  document.getElementById("explorationPointsButton")?.classList.toggle("active",type==="exploration");
+  document.getElementById("activityPointsButton")?.classList.toggle("active",type==="activity");
+  updateAllPointStates(currentLat??TEST_REGION.centerLat,currentLon??TEST_REGION.centerLon);
+  setTemporaryMessage(type==="exploration"
+    ? "🟣 Erkundungspunkte farbig – Aktivitäten bleiben grau sichtbar."
+    : type==="activity"
+      ? "🟠 Aktivitätspunkte farbig – Erkundungspunkte bleiben grau sichtbar."
+      : "Alle Punktarten werden farbig angezeigt.");
+}
+
 function isDiscovered(point){
 
   return point.type==="activity"
@@ -57,6 +72,10 @@ function renderPointMarker(point,discovered,inRange,distance){
 
   if(point.type==="activity"){
     css+=" activity";
+  }
+
+  if(activeGamePointType!=="all"&&point.type!==activeGamePointType){
+    css+=" muted-type";
   }
 
   if(discovered){
