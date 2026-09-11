@@ -28,6 +28,13 @@ function getDiscoveryRadius(point){
   return point.discoveryRadius || FUERSTENBERG.visitRadius;
 }
 
+function getEffectiveDiscoveryRadius(point){
+  const gpsTolerance=!godMode&&Number.isFinite(currentAccuracy)
+    ? Math.min(Math.max(currentAccuracy,0),30)
+    : 0;
+  return getDiscoveryRadius(point)+gpsTolerance;
+}
+
 function updateAllPointStates(lat,lon){
 
   ALL_POINTS.forEach(point=>{
@@ -40,7 +47,7 @@ function updateAllPointStates(lat,lon){
     );
 
     const discovered=isDiscovered(point);
-    const inRange=distance<=getDiscoveryRadius(point);
+    const inRange=distance<=getEffectiveDiscoveryRadius(point);
 
     renderPointMarker(
       point,
@@ -188,7 +195,7 @@ function tryOpenPoint(point){
     point.lon
   );
 
-  const discoveryRadius=getDiscoveryRadius(point);
+  const discoveryRadius=getEffectiveDiscoveryRadius(point);
 
   if(distance>discoveryRadius){
 
