@@ -89,6 +89,11 @@
     if(typeof renderMainLists==="function") renderMainLists();
     if(typeof renderTravelBook==="function") renderTravelBook();
     if(typeof redrawFog==="function") redrawFog();
+    if(typeof syncRavenBotTargets==="function"){
+      syncRavenBotTargets();
+      if(typeof renderRavenBotCards==="function") renderRavenBotCards();
+      if(typeof drawRavenBotPois==="function") drawRavenBotPois();
+    }
     if(explorationComplete&&fogCanvas){
       fogCanvas.style.display="none";
     }
