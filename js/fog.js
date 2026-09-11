@@ -13,9 +13,9 @@ function createFogLayer(){
   fogCanvas=document.createElement("canvas");
   fogCanvas.classList.add("raven-fog-svg");
 
-  /* Direkt über dem Kartenfenster platzieren. Dadurch bleibt der Fog
-     unabhängig von Leaflets Pane-Transformationen stabil sichtbar. */
-  map.getContainer().appendChild(fogCanvas);
+  /* Der Fog liegt in einer echten Leaflet-Ebene: über der Karte,
+     aber unter Erkundungspunkten und Standortmarker. */
+  map.getPane("ravenFogPane").appendChild(fogCanvas);
 
   redrawFog();
 }
@@ -56,6 +56,9 @@ function redrawFog(){
   fogCanvas.height=Math.round(size.y*dpr);
   fogCanvas.style.width=size.x+"px";
   fogCanvas.style.height=size.y+"px";
+  const panePosition=map._getMapPanePos?.()||L.point(0,0);
+  fogCanvas.style.left=(-panePosition.x)+"px";
+  fogCanvas.style.top=(-panePosition.y)+"px";
   const context=fogCanvas.getContext("2d");
   context.setTransform(dpr,0,0,dpr,0,0);
   context.globalCompositeOperation="source-over";
