@@ -8,6 +8,7 @@
 - Aktivitätspunkte liefern zufällige Items, 10 XP und haben 15 Minuten Abklingzeit.
 - Die Mission „Fürstenberg erwacht“ zeigt den Fortschritt und vergibt 100 XP sowie 3 Futter; bei vollem Inventar bleibt die Item-Belohnung vorgemerkt.
 - Die Spieleransicht versteckt God Mode, Bots und Testtechnik. Der Entwickler-Schalter macht diese Werkzeuge wieder erreichbar.
+- Der URL-Zusatz `?view=player` sperrt die Spieleransicht vollständig und entfernt auch den Entwickler-Schalter; dieser Link ist für spätere NFC-Tester vorgesehen.
 - Fürstenberg ist das begrenzte Testgebiet.
 - Reise- und Erkundungskarte besitzen getrennte Ansichten.
 - Der Fog wird aus einer zusammenhängenden, 80 Meter breiten Reisespur geöffnet.
