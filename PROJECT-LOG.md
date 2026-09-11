@@ -2,6 +2,14 @@
 
 ## Aktueller Stand
 
+- Raven V3.1 ergänzt den vollständigen Begleiter-Rohbau vor dem späteren Balancing-Cut.
+- Neue NFC-Spieler erhalten ein kurzes Start-Tutorial und können ihren Raven benennen.
+- Beeren, Futter und Lieblingsfutter sättigen unterschiedlich; Energiekörner stellen Energie her. Federn und Glanzsteine bleiben vorerst seltene Platzhalter.
+- Brunnen, Spielplätze, Sportplätze und sonstige Aktivitäten besitzen unterschiedliche Fundtabellen.
+- Raven reagiert sichtbar auf Glück, Hunger, Erschöpfung und schlechte Werte.
+- Stimmung wird durch Hunger und Energie begrenzt; volle Laune kann einen hungrigen Raven nicht mehr überdecken.
+- Echte Bewegung kostet nach jeweils 250 Metern Hunger und Energie. Zusätzlich sinken Werte langsam über reale Zeit.
+- Drei tägliche Aufgaben prüfen Füttern, Spielen und das Sammeln an einem Aktivitätspunkt; Abschluss gibt Lieblingsfutter und 20 XP.
 - Raven V3.0 besitzt einen ersten Spielkreislauf mit einem gespeicherten Begleiter.
 - Raven hat Hunger, Energie und Stimmung und kann gefüttert, ausgeruht und beschäftigt werden.
 - Das Inventar besitzt 30 Plätze für Futter, Rabenfedern und Glanzsteine.
