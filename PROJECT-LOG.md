@@ -5,7 +5,7 @@
 - Raven V3.0 besitzt einen ersten Spielkreislauf mit einem gespeicherten Begleiter.
 - Raven hat Hunger, Energie und Stimmung und kann gefüttert, ausgeruht und beschäftigt werden.
 - Das Inventar besitzt 30 Plätze für Futter, Rabenfedern und Glanzsteine.
-- Aktivitätspunkte liefern zufällige Items, 10 XP und haben 15 Minuten Abklingzeit.
+- Aktivitätspunkte liefern zufällige Items, 10 XP und haben für schnelle Prototyp-Tests 1 Minute Abklingzeit.
 - Die Mission „Fürstenberg erwacht“ zeigt den Fortschritt und vergibt 100 XP sowie 3 Futter; bei vollem Inventar bleibt die Item-Belohnung vorgemerkt.
 - Die Spieleransicht versteckt God Mode, Bots und Testtechnik. Der Entwickler-Schalter macht diese Werkzeuge wieder erreichbar.
 - Der URL-Zusatz `?view=player` sperrt die Spieleransicht vollständig und entfernt auch den Entwickler-Schalter; dieser Link ist für spätere NFC-Tester vorgesehen.
@@ -31,7 +31,7 @@ Bestätigter Lauf mit vier Bots: 4/4 abgeschlossen, 32 öffentliche Wegrouten, 0
 
 Zusätzlich besteht die öffentliche Raven-Version den Zehn-Punkte-Grenzfalltest mit 10/10: Geschwindigkeitswechsel, GPS-Sprünge, GPS-Genauigkeit, exakte Radiusgrenzen, Speichern/Neustart, doppelte Aktivierung, Internetausfall, Ortsgrenze, getrennte Bot-Spielstände und Langzeitbegrenzung. Dabei wurde ein falsch Fürstenberg zugeordnetes Rückhaltebecken außerhalb der Ortsgrenze gefunden und durch das Rathaus innerhalb Fürstenbergs ersetzt. Alle acht aktuellen Testpunkte liegen damit in der Fürstenberg-Grenze.
 
-Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Erschöpfung, Ausruhen, Wertebegrenzung, volles Inventar, vorgemerkte Missionsbelohnung, 250 Zufallsfunde, 15-Minuten-Cooldown und gesperrter NFC-Spielerlink. Der echte Raven-Spielstand wird nach dem Test vollständig wiederhergestellt.
+Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Erschöpfung, Ausruhen, Wertebegrenzung, volles Inventar, vorgemerkte Missionsbelohnung, 250 Zufallsfunde, 1-Minuten-Cooldown und gesperrter NFC-Spielerlink. Der echte Raven-Spielstand wird nach dem Test vollständig wiederhergestellt.
 
 ## Danach
 
