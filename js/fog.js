@@ -3,6 +3,14 @@
    ========================================================== */
 
 const REVEAL_RADIUS_METERS=40;
+const RAVEN_FOG_CONNECTION_LIMIT_METERS=350;
+const RAVEN_FOG_CONNECTION_TIME_MS=30000;
+
+function shouldConnectRevealPoints(from,to){
+  const distance=haversineDistance(from.lat,from.lon,to.lat,to.lon);
+  const timeGap=from.time&&to.time?Math.abs(to.time-from.time):0;
+  return distance<=RAVEN_FOG_CONNECTION_LIMIT_METERS&&(!timeGap||timeGap<=RAVEN_FOG_CONNECTION_TIME_MS);
+}
 
 let fogCanvas=null;
 
@@ -78,9 +86,7 @@ function redrawFog(){
   }
 
   function revealConnection(from,to,radiusMeters){
-    const distance=haversineDistance(from.lat,from.lon,to.lat,to.lon);
-    const timeGap=from.time&&to.time?Math.abs(to.time-from.time):0;
-    if(distance>350||(timeGap&&timeGap>30000))return;
+    if(!shouldConnectRevealPoints(from,to))return;
     const start=map.latLngToContainerPoint([from.lat,from.lon]);
     const end=map.latLngToContainerPoint([to.lat,to.lon]);
     const edge=destinationPoint(from.lat,from.lon,radiusMeters,90);
