@@ -64,7 +64,11 @@ function renderPointMarker(point,discovered,inRange,distance){
 
   const district=point.district||(point.id.startsWith("concept-")?"":"Fürstenberg");
   const districtActive=currentRavenDistrict&&normalizePlaceName(currentRavenDistrict)===normalizePlaceName(district);
-  if(!godMode&&!districtActive){
+  const visibleBeforeGps=mapMode==="explore"&&!currentRavenDistrict&&point.type==="exploration";
+  const visibleInDiscoveredPlace=mapMode==="explore"&&districtActive;
+  const visibleInTravel=mapMode==="travel"&&discovered;
+  const pointVisible=godMode||visibleBeforeGps||visibleInDiscoveredPlace||visibleInTravel;
+  if(!pointVisible){
     if(pointMarkers[point.id]){
       map.removeLayer(pointMarkers[point.id]);
       delete pointMarkers[point.id];
