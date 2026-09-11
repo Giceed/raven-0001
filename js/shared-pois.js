@@ -47,9 +47,9 @@
         icon:point.category==="activity"?"◆":"?",
         lat:Number(point.lat),
         lon:Number(point.lon),
-        discoveryRadius:usingStudioData
-          ? (Number(point.radius)||60)
-          : (point.category==="activity"?80:60),
+        discoveryRadius:point.category==="activity"
+          ? 80
+          : (usingStudioData ? (Number(point.radius)||60) : 60),
         access:"studio_review",
         accessHint:point.access||"Vor Ort prüfen",
         district:point.district,
