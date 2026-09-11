@@ -31,8 +31,9 @@ function ensureRavenBotMap(){
 
 function drawRavenBotPois(){
   if(!ravenBotPoiLayer)return;ravenBotPoiLayer.clearLayers();ravenBotPoiMarkers={};
+  const activeBot=ravenBots.find(bot=>bot.id===activeRavenBotId);
   getRavenBotPoints().forEach(point=>{
-    const states=ravenBots.flatMap(bot=>bot.results).filter(result=>result.pointId===point.id),failed=states.some(result=>!result.ok&&!result.blocked),passed=states.some(result=>result.ok),status=failed?"failed":passed?"passed":"",symbol=failed?"✕":passed?"✓":"?";
+    const states=(activeBot?.results||[]).filter(result=>result.pointId===point.id),failed=states.some(result=>!result.ok&&!result.blocked),passed=states.some(result=>result.ok),status=failed?"failed":passed?"passed":"",symbol=failed?"✕":passed?"✓":"?";
     const radius=getDiscoveryRadius(point),color=point.type==="activity"?"#f97316":"#8b5cf6";
     L.circle([point.lat,point.lon],{pane:"botPoiPane",radius,color,weight:3,opacity:.95,fillColor:color,fillOpacity:.14,interactive:false})
       .bindTooltip(`${radius} m`,{permanent:true,direction:"right",className:`bot-radius-label ${point.type}`,offset:[8,0]}).addTo(ravenBotPoiLayer);
@@ -48,20 +49,20 @@ function createRavenBotFog(){
 function botHasCompletedExploration(bot){const required=bot.targets.filter(point=>point.type==="exploration");return required.length>0&&required.every(point=>bot.results.some(result=>result.pointId===point.id&&result.ok));}
 function redrawRavenBotFog(){
   if(!ravenBotMap||!ravenBotFogCanvas)return;const bot=ravenBots.find(item=>item.id===activeRavenBotId);if(!bot)return;
-  const status=document.getElementById("botMapStatus"),complete=botHasCompletedExploration(bot);if(status)status.textContent=`Fog-Ansicht: ${bot.name} · ${complete?"Fürstenberg frei":"Fog aktiv"}`;
+  const status=document.getElementById("botMapStatus"),complete=botHasCompletedExploration(bot),exploration=bot.targets.filter(point=>point.type==="exploration"),found=exploration.filter(point=>bot.results.some(result=>result.pointId===point.id&&result.ok)).length;if(status)status.textContent=`${bot.icon} ${bot.name} · ${found}/${exploration.length} Erkundung · ${complete?"Fürstenberg frei":"Fog aktiv"}`;
   if(complete){ravenBotFogCanvas.style.display="none";return;}ravenBotFogCanvas.style.display="block";
   const size=ravenBotMap.getSize(),dpr=window.devicePixelRatio||1,panePosition=ravenBotMap._getMapPanePos?.()||L.point(0,0);ravenBotFogCanvas.width=Math.round(size.x*dpr);ravenBotFogCanvas.height=Math.round(size.y*dpr);ravenBotFogCanvas.style.width=size.x+"px";ravenBotFogCanvas.style.height=size.y+"px";ravenBotFogCanvas.style.left=(-panePosition.x)+"px";ravenBotFogCanvas.style.top=(-panePosition.y)+"px";
   const context=ravenBotFogCanvas.getContext("2d");context.setTransform(dpr,0,0,dpr,0,0);context.globalCompositeOperation="source-over";context.clearRect(0,0,size.x,size.y);context.fillStyle="rgba(0,0,0,.91)";context.fillRect(0,0,size.x,size.y);context.globalCompositeOperation="destination-out";
   bot.trail.forEach(position=>{const center=ravenBotMap.latLngToContainerPoint([position.lat,position.lon]),edge=destinationPoint(position.lat,position.lon,42,90),edgePoint=ravenBotMap.latLngToContainerPoint(edge),radius=Math.max(Math.abs(edgePoint.x-center.x),1);context.beginPath();context.arc(center.x,center.y,radius,0,Math.PI*2);context.fill();});context.globalCompositeOperation="source-over";
 }
-function showRavenBotFog(id){activeRavenBotId=id;ensureRavenBotMap();renderRavenBotCards();redrawRavenBotFog();const bot=ravenBots.find(item=>item.id===id);if(bot?.marker)ravenBotMap.panTo([bot.lat,bot.lon]);}
+function showRavenBotFog(id){activeRavenBotId=id;ensureRavenBotMap();drawRavenBotPois();renderRavenBotCards();redrawRavenBotFog();const bot=ravenBots.find(item=>item.id===id);if(bot?.marker)ravenBotMap.panTo([bot.lat,bot.lon]);}
 function recordRavenBotTrail(bot){
   if((bot.id==="car"&&!bot.carStopped)||bot.noExit)return;const last=bot.trail[bot.trail.length-1];if(!last||haversineDistance(last.lat,last.lon,bot.lat,bot.lon)>=18){bot.trail.push({lat:bot.lat,lon:bot.lon});if(bot.id===activeRavenBotId)redrawRavenBotFog();}
 }
 
 function renderRavenBotCards(){
   const grid=document.getElementById("botGrid");if(!grid)return;
-  grid.innerHTML=ravenBots.map(bot=>{const passed=bot.results.filter(result=>result.ok).length,total=bot.targets.length,score=bot.noExit?bot.blockedChecks:passed,percent=total?Math.round(score/total*100):0,scoreText=bot.noExit?`${bot.blockedChecks}/${total} korrekt gesperrt`:`${passed}/${total} bestanden`;return `<div class="bot-card ${bot.id} ${activeRavenBotId===bot.id?"viewed":""}"><div class="bot-name">${bot.icon} ${bot.name} · ${bot.label}</div><div class="bot-state">${escapeHTML(bot.state)}</div><div class="bot-progress"><i style="width:${percent}%"></i></div><div class="bot-score">${scoreText} · ${bot.routeChecks} Wegrouten</div><div class="bot-card-actions"><button class="run" onclick="startRavenBot('${bot.id}')">${bot.finished?"Neu starten":"Starten"}</button><button class="halt" onclick="stopRavenBot('${bot.id}')">Stoppen</button><button class="view" onclick="showRavenBotFog('${bot.id}')">Ansehen</button></div></div>`;}).join("");
+  grid.innerHTML=ravenBots.map(bot=>{const passed=bot.results.filter(result=>result.ok).length,total=bot.targets.length,score=bot.noExit?bot.blockedChecks:passed,percent=total?Math.round(score/total*100):0,scoreText=bot.noExit?`${bot.blockedChecks}/${total} korrekt gesperrt`:`${passed}/${total} bestanden`;return `<div class="bot-card ${bot.id} ${activeRavenBotId===bot.id?"viewed":""}"><div class="bot-name">${bot.icon} ${bot.name} · ${bot.label}</div><div class="bot-state">${escapeHTML(bot.state)}</div><div class="bot-progress"><i style="width:${percent}%"></i></div><div class="bot-score">${scoreText} · ${bot.routeChecks} Wegrouten</div><div class="bot-card-actions"><button class="run" onclick="startRavenBot('${bot.id}')">${bot.finished?"Neu starten":"Starten"}</button><button class="halt" onclick="stopRavenBot('${bot.id}')">Stoppen</button><button class="view" onclick="showRavenBotFog('${bot.id}')">${activeRavenBotId===bot.id?"Karte aktiv":"Karte ansehen"}</button></div></div>`;}).join("");
 }
 
 function addRavenBotProtocol(bot,kind,message){ravenBotProtocol.push({time:Date.now(),bot:bot.name,kind,message});ravenBotProtocol=ravenBotProtocol.slice(-100);renderRavenBotProtocol();}
@@ -108,7 +109,7 @@ function advanceRavenBot(bot,seconds){
 function ensureRavenBotClock(){if(ravenBotTimer)return;ravenBotTimer=setInterval(()=>{ravenBots.forEach(bot=>advanceRavenBot(bot,RAVEN_BOT_TICK_MS/1000*RAVEN_BOT_SPEEDUP));stopRavenBotClockWhenIdle();},RAVEN_BOT_TICK_MS);}
 function stopRavenBotClockWhenIdle(){if(ravenBots.some(bot=>bot.running))return;if(ravenBotTimer){clearInterval(ravenBotTimer);ravenBotTimer=null;}}
 function resetRavenBot(bot){bot.running=false;bot.finished=false;bot.lat=bot.start[0];bot.lon=bot.start[1];bot.targetIndex=0;bot.target=null;bot.segments=[];bot.results=[];bot.trail=[{lat:bot.start[0],lon:bot.start[1]}];bot.blockedChecks=0;bot.routeChecks=0;bot.routeFallbacks=0;bot.state="Startbereit";if(bot.routeLayer){ravenBotLayer.removeLayer(bot.routeLayer);bot.routeLayer=null;}createRavenBotMarker(bot);drawRavenBotPois();redrawRavenBotFog();}
-function startRavenBot(id){ensureRavenBotMap();const bot=ravenBots.find(item=>item.id===id);if(!bot||bot.running)return;if(bot.finished||bot.targetIndex>=bot.targets.length)resetRavenBot(bot);bot.running=true;bot.state="Startet …";createRavenBotMarker(bot);addRavenBotProtocol(bot,"info","Einzeltest gestartet.");ensureRavenBotClock();prepareRavenBotTarget(bot);renderRavenBotCards();updateRavenBotSummary();}
+function startRavenBot(id){activeRavenBotId=id;ensureRavenBotMap();const bot=ravenBots.find(item=>item.id===id);if(!bot||bot.running)return;if(bot.finished||bot.targetIndex>=bot.targets.length)resetRavenBot(bot);bot.running=true;bot.state="Startet …";createRavenBotMarker(bot);drawRavenBotPois();redrawRavenBotFog();addRavenBotProtocol(bot,"info","Einzeltest gestartet · eigene Kartenansicht aktiviert.");ensureRavenBotClock();prepareRavenBotTarget(bot);renderRavenBotCards();updateRavenBotSummary();}
 function stopRavenBot(id){const bot=ravenBots.find(item=>item.id===id);if(!bot||!bot.running)return;bot.running=false;bot.state="Gestoppt";if(bot.routeLayer){ravenBotLayer.removeLayer(bot.routeLayer);bot.routeLayer=null;}addRavenBotProtocol(bot,"info","Test gestoppt.");renderRavenBotCards();updateRavenBotSummary();stopRavenBotClockWhenIdle();}
 function startRavenBots(){ensureRavenBotMap();ravenBots.forEach(bot=>startRavenBot(bot.id));}
 function stopRavenBots(){ravenBots.forEach(bot=>stopRavenBot(bot.id));}
