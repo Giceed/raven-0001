@@ -184,6 +184,20 @@
     <button class="danger" onclick="resetRavenTestProgress()">Testfortschritt zurücksetzen</button>
   </div>
   <div class="dev-test-result" id="devTestResult">Noch kein Selbsttest ausgeführt.</div>
+  <div class="bot-test-center">
+    <div class="bot-test-head">
+      <div>
+        <strong>🤖 DIGITALE TESTER</strong>
+        <span>Erst Erkundung, danach Aktivitäten · Wege werden bevorzugt</span>
+      </div>
+      <div class="bot-test-actions">
+        <button class="bot-start" id="botStartButton" onclick="startRavenBots()">3 Bots einsetzen</button>
+        <button class="bot-stop" id="botStopButton" onclick="stopRavenBots()" disabled>Stoppen</button>
+      </div>
+    </div>
+    <div class="bot-grid" id="botGrid"></div>
+    <div class="bot-summary" id="botSummary">Noch kein Bot-Test gestartet.</div>
+  </div>
   <div class="dev-log" id="devLog"></div>
 </div>
 
@@ -231,7 +245,8 @@
 <script src="js/travelbook.js?v=28cache1"></script>
 <script src="js/app.js?v=28cache1"></script>
 <script src="js/shared-pois.js?v=29activity-radius-fix1"></script>
-<script src="js/test-tools.js?v=29testcenter2"></script>
+<script src="js/test-tools.js?v=30bots1"></script>
+<script src="js/bot-testers.js?v=30bots1"></script>
 
 </body>
 </html>
