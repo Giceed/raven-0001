@@ -83,6 +83,8 @@ function renderPointMarker(point,discovered,inRange,distance){
 
   if(point.type==="activity"){
     css+=" activity";
+  }else{
+    css+=" exploration";
   }
 
   if(activeGamePointType!=="all"&&point.type!==activeGamePointType){
