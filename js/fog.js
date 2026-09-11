@@ -77,7 +77,25 @@ function redrawFog(){
     context.fill();
   }
 
-  exploredPoints.forEach(point=>{
+  function revealConnection(from,to,radiusMeters){
+    const distance=haversineDistance(from.lat,from.lon,to.lat,to.lon);
+    const timeGap=from.time&&to.time?Math.abs(to.time-from.time):0;
+    if(distance>350||(timeGap&&timeGap>30000))return;
+    const start=map.latLngToContainerPoint([from.lat,from.lon]);
+    const end=map.latLngToContainerPoint([to.lat,to.lon]);
+    const edge=destinationPoint(from.lat,from.lon,radiusMeters,90);
+    const edgePoint=map.latLngToContainerPoint(edge);
+    context.lineWidth=Math.max(Math.abs(edgePoint.x-start.x)*2,2);
+    context.lineCap="round";
+    context.lineJoin="round";
+    context.beginPath();
+    context.moveTo(start.x,start.y);
+    context.lineTo(end.x,end.y);
+    context.stroke();
+  }
+
+  exploredPoints.forEach((point,index)=>{
+    if(index)revealConnection(exploredPoints[index-1],point,REVEAL_RADIUS_METERS);
     revealCircle(point.lat,point.lon,REVEAL_RADIUS_METERS);
   });
 
