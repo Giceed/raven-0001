@@ -204,10 +204,12 @@
   <div class="dev-actions">
     <button class="secondary" onclick="runRavenSelfTest()">Selbsttest starten</button>
     <button class="secondary edge-run" onclick="runRavenEdgeTests()">10 Grenzfälle testen</button>
+    <button class="secondary life-test-run" onclick="runRavenLifeTests()">Raven-Stresstest</button>
     <button class="danger" onclick="resetRavenTestProgress()">Testfortschritt zurücksetzen</button>
   </div>
   <div class="dev-test-result" id="devTestResult">Noch kein Selbsttest ausgeführt.</div>
   <div class="edge-test-result" id="edgeTestResult">Grenzfalltest noch nicht ausgeführt.</div>
+  <div class="edge-test-result" id="lifeTestResult">Raven-Stresstest noch nicht ausgeführt.</div>
   <div class="bot-test-center">
     <div class="bot-test-head">
       <div>
@@ -274,7 +276,7 @@
 <script src="js/map.js?v=29testcenter2"></script>
 <script src="js/fog.js?v=41edge-tests1"></script>
 <script src="js/gps.js?v=41edge-tests1"></script>
-<script src="js/raven-life.js?v=42live-sync1"></script>
+<script src="js/raven-life.js?v=43life-stress1"></script>
 <script src="js/poi.js?v=42game-loop2"></script>
 <script src="js/travelbook.js?v=28cache1"></script>
 <script src="js/app.js?v=28cache1"></script>
@@ -282,6 +284,7 @@
 <script src="js/test-tools.js?v=40sport-access1"></script>
 <script src="js/bot-testers.js?v=39bot-report1"></script>
 <script src="js/edge-tests.js?v=41edge-tests1"></script>
+<script src="js/game-tests.js?v=43life-stress1"></script>
 
 </body>
 </html>
