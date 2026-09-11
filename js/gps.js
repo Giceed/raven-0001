@@ -218,6 +218,7 @@ function handlePosition(position){
 
       totalDistance+=moved;
       sessionDistance+=moved;
+      if(typeof applyRavenMovement==="function")applyRavenMovement(moved);
 
       localStorage.setItem(
         "ravenDistance",
