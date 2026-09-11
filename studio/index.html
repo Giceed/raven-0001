@@ -200,7 +200,7 @@ async function mergeCityPoiCatalog(){
 }
 
 function esc(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));}
-function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderStats();renderList();}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));localStorage.setItem("ravenSharedPoisLive",JSON.stringify({version:1,savedAt:new Date().toISOString(),points:state.candidates}));renderStats();renderList();}
 function setMessage(text){document.getElementById("status").textContent=text;}
 function inFuerstenbergScope(c){return (!c.district||c.district==="Fürstenberg")&&BAD_WUENNENBERG_BOUNDS.contains([c.lat,c.lon]);}
 function renderStats(){const scoped=state.candidates.filter(inFuerstenbergScope),count=s=>scoped.filter(c=>c.status===s).length,p=count("pending"),a=count("approved"),r=count("rejected"),own=scoped.filter(c=>c.source==="Eigener Punkt"||String(c.id).startsWith("custom-")).length;document.getElementById("pending").textContent=p+" offen";document.getElementById("approved").textContent=a+" behalten";document.getElementById("rejected").textContent=r+" gelöscht";document.getElementById("customCount").textContent=own+" eigene";document.getElementById("filterPending").textContent=p;document.getElementById("filterApproved").textContent=a;document.getElementById("filterRejected").textContent=r;document.getElementById("filterCustom").textContent=own;}
@@ -348,7 +348,7 @@ async function renderBoundaries(){
 function exportProject(){const payload={format:"raven-shared-pois",version:2,exportedAt:new Date().toISOString(),center:state.center,points:state.candidates};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="raven-shared-pois.json";a.click();URL.revokeObjectURL(url);setMessage("Gemeinsame Punktedatei erstellt – schick sie jetzt im Karten-Chat an Codex.");}
 async function importProject(event){try{const data=JSON.parse(await event.target.files[0].text()),points=data.points||data.candidates;if(!Array.isArray(points))throw Error();state.center=data.center||state.center;state.candidates=points;save();renderMarkers();fitAll();setMessage("Gemeinsame Punktedatei importiert.");}catch(e){setMessage("Diese Datei ist keine gültige Raven-Punktedatei.");}event.target.value="";}
 
-async function initializeStudio(){mergeRavenBasePoints();await mergeCityPoiCatalog();state.center={lat:51.5157,lon:8.741,name:"Fürstenberg"};renderStats();renderList();renderMarkers();const scoped=state.candidates.filter(inFuerstenbergScope).length;setMessage(`${scoped} Punkte im Fürstenberg-Testgebiet geladen.`);}
+async function initializeStudio(){mergeRavenBasePoints();await mergeCityPoiCatalog();state.center={lat:51.5157,lon:8.741,name:"Fürstenberg"};save();renderStats();renderList();renderMarkers();const scoped=state.candidates.filter(inFuerstenbergScope).length;setMessage(`${scoped} Punkte im Fürstenberg-Testgebiet geladen und mit dem Spiel synchronisiert.`);}
 initializeStudio();
 </script>
 </body>
