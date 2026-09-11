@@ -105,6 +105,25 @@ button{
 }
 .mode-btn.active{background:#21262d;color:white}
 
+.point-type-switch{
+  margin-top:8px;
+  display:grid;
+  grid-template-columns:.7fr 1.25fr 1.25fr;
+  gap:5px
+}
+.point-type-btn{
+  padding:8px 5px;
+  border:1px solid #30363d;
+  border-radius:9px;
+  background:#090c10;
+  color:#8b949e;
+  font-size:9px;
+  font-weight:900
+}
+.point-type-btn.active{color:white;border-color:#e5e7eb;background:#374151}
+.point-type-btn.exploration.active{background:#6d28d9;border-color:#c4b5fd;box-shadow:0 0 11px #7c3aed88}
+.point-type-btn.activity.active{background:#c2410c;border-color:#fdba74;box-shadow:0 0 11px #f9731688}
+
 .location-box{
   margin-top:13px;
   background:#090c10;
@@ -218,7 +237,9 @@ button{
   font-weight:900;
   box-shadow:0 0 14px #6d28d9
 }
-.poi-marker.range{background:#ca8a04;box-shadow:0 0 14px #ca8a04}
+.poi-marker.activity{background:#ea580c;box-shadow:0 0 14px #f97316}
+.poi-marker.range{border-color:#fde047;transform:scale(1.13)}
+.poi-marker.muted-type{background:#4b5563!important;border-color:#9ca3af!important;color:#d1d5db!important;box-shadow:none!important;filter:grayscale(1);opacity:.58}
 .poi-marker.done,
 .poi-marker.activity.done{
   background:#4b5563;
