@@ -137,8 +137,8 @@ const ravenBasePoints=[
   {id:"raven-schloss",name:"Schloss Fürstenberg",lat:51.5155802,lon:8.7367807,rawType:"castle",category:"exploration",radius:160,score:100,access:"Außenradius / öffentliche Wege",status:"approved",source:"Raven-Karte"},
   {id:"raven-st-marien",name:"St. Marien / Sintfeld-Dom",lat:51.5157079,lon:8.7397917,rawType:"place_of_worship",category:"exploration",radius:50,score:100,access:"öffentliches Umfeld",status:"approved",source:"Raven-Karte"},
   {id:"raven-rathaus",name:"Rathaus",lat:51.5164455,lon:8.7449286,rawType:"townhall",category:"exploration",radius:50,score:100,access:"öffentlicher Straßenraum",status:"approved",source:"Raven-Karte"},
-  {id:"raven-beerenstelle",name:"Beerenstelle",lat:51.51325,lon:8.74215,rawType:"foraging",category:"activity",radius:35,score:100,access:"draußen",status:"approved",source:"Raven-Karte"},
-  {id:"raven-spielplatz",name:"Spielplatz",lat:51.51845,lon:8.74730,rawType:"playground",category:"activity",radius:35,score:100,access:"draußen",status:"approved",source:"Raven-Karte"}
+  {id:"raven-beerenstelle",name:"Brunnen-Sammelstelle",lat:51.514164328059515,lon:8.741700053215029,rawType:"fountain",category:"activity",radius:35,score:100,access:"draußen",status:"approved",source:"Raven-Karte"},
+  {id:"raven-spielplatz",name:"Spielplatz",lat:51.51308183260237,lon:8.745600332095771,rawType:"playground",category:"activity",radius:35,score:100,access:"draußen",status:"approved",source:"Raven-Karte"}
 ];
 
 /* Kleine, bewusst kuratierte Fürstenberg-Erkundungsrunde.
@@ -157,9 +157,13 @@ const CURATED_FUERSTENBERG_ACTIVITIES=new Set([
 ]);
 
 function mergeRavenBasePoints(){
-  const existing=new Set(state.candidates.map(candidate=>candidate.id));
+  const existing=new Map(state.candidates.map(candidate=>[candidate.id,candidate]));
   ravenBasePoints.forEach(point=>{
-    if(!existing.has(point.id)) state.candidates.unshift({...point});
+    const saved=existing.get(point.id);
+    if(saved){
+      const savedStatus=saved.status;
+      Object.assign(saved,point,{status:savedStatus});
+    }else state.candidates.unshift({...point});
   });
   localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
 }
