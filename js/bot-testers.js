@@ -57,7 +57,7 @@ function redrawRavenBotFog(){
 }
 function showRavenBotFog(id){activeRavenBotId=id;ensureRavenBotMap();drawRavenBotPois();renderRavenBotCards();redrawRavenBotFog();const bot=ravenBots.find(item=>item.id===id);if(bot?.marker)ravenBotMap.panTo([bot.lat,bot.lon]);}
 function recordRavenBotTrail(bot){
-  if((bot.id==="car"&&!bot.carStopped)||bot.noExit)return;const last=bot.trail[bot.trail.length-1];if(!last||haversineDistance(last.lat,last.lon,bot.lat,bot.lon)>=18){bot.trail.push({lat:bot.lat,lon:bot.lon});if(bot.id===activeRavenBotId)redrawRavenBotFog();}
+  const last=bot.trail[bot.trail.length-1];if(!last||haversineDistance(last.lat,last.lon,bot.lat,bot.lon)>=18){bot.trail.push({lat:bot.lat,lon:bot.lon});if(bot.id===activeRavenBotId)redrawRavenBotFog();}
 }
 
 function renderRavenBotCards(){
