@@ -30,6 +30,22 @@ function redrawFog(){
     return;
   }
 
+  const placeName=currentRavenDistrict||"Fürstenberg";
+  const requiredExplorationPoints=ALL_POINTS.filter(point=>
+    point.type==="exploration"&&
+    normalizePlaceName(point.district||"Fürstenberg")===normalizePlaceName(placeName)
+  );
+  const placeFullyExplored=requiredExplorationPoints.length>0&&requiredExplorationPoints.every(point=>
+    fuerstenbergMission.visitedPOIs.includes(point.id)
+  );
+
+  /* Sind alle Pflicht-Erkundungspunkte entdeckt, ist die gesamte
+     Ortskarte erkundet und der Fog verschwindet vollständig. */
+  if(placeFullyExplored){
+    fogCanvas.style.display="none";
+    return;
+  }
+
   fogCanvas.style.display="block";
 
   const size=map.getSize();
@@ -60,11 +76,6 @@ function redrawFog(){
     revealCircle(point.lat,point.lon,REVEAL_RADIUS_METERS);
   });
 
-  /* Erkundungspunkte sind eine zweite dauerhafte Fog-Quelle.
-     Aktivitäten liefern Items, decken die Welt aber nicht auf. */
-  ALL_POINTS
-    .filter(point=>point.type==="exploration"&&fuerstenbergMission.visitedPOIs.includes(point.id))
-    .forEach(point=>revealCircle(point.lat,point.lon,Math.max(60,getDiscoveryRadius(point))));
   context.globalCompositeOperation="source-over";
 }
 
