@@ -72,7 +72,22 @@ function renderRavenBotProtocol(){
 }
 function updateRavenBotSummary(){
   const box=document.getElementById("botSummary");if(!box)return;const active=ravenBots.filter(bot=>bot.running).length,finished=ravenBots.filter(bot=>bot.finished).length,errors=ravenBotProtocol.filter(entry=>entry.kind==="error").length;
-  const totalBots=ravenBots.length;box.className="bot-summary "+(finished===totalBots&&!errors?"ok":errors?"warn":"");box.textContent=active?`${active} Bot${active===1?"":"s"} unterwegs · ${finished}/${totalBots} fertig · ${errors} Fehler.`:finished===totalBots?`Test beendet · ${errors?errors+" Fehler im Protokoll":"alle Prüfungen bestanden"}.`:"Bots einzeln starten oder alle gemeinsam einsetzen.";
+  const totalBots=ravenBots.length;box.className="bot-summary "+(finished===totalBots&&!errors?"ok":errors?"warn":"");box.textContent=active?`${active} Bot${active===1?"":"s"} unterwegs · ${finished}/${totalBots} fertig · ${errors} Fehler.`:finished===totalBots?`Test beendet · ${errors?errors+" Fehler im Protokoll":"alle Prüfungen bestanden"}.`:"Bots einzeln starten oder alle gemeinsam einsetzen.";renderRavenBotReport();
+}
+
+function getRavenBotReportData(){
+  const errors=ravenBotProtocol.filter(entry=>entry.kind==="error");
+  return {createdAt:new Date(),points:getRavenBotPoints(),errors,bots:ravenBots.map(bot=>({bot,passed:bot.results.filter(result=>result.ok).length,failed:bot.results.filter(result=>!result.ok&&!result.blocked).length,blocked:bot.results.filter(result=>result.blocked).length,explorationPassed:bot.results.filter(result=>result.ok&&result.type==="exploration").length,activityPassed:bot.results.filter(result=>result.ok&&result.type==="activity").length}))};
+}
+function renderRavenBotReport(){
+  const box=document.getElementById("botReport");if(!box)return;const report=getRavenBotReportData(),finished=report.bots.filter(item=>item.bot.finished).length,active=report.bots.filter(item=>item.bot.running).length,totalRoutes=report.bots.reduce((sum,item)=>sum+item.bot.routeChecks,0),fallbacks=report.bots.reduce((sum,item)=>sum+item.bot.routeFallbacks,0),status=report.errors.length||fallbacks?"warn":finished===report.bots.length?"ok":"";
+  box.innerHTML=`<div class="bot-report-overall ${status}"><b>${active?active+" Bots unterwegs":finished===report.bots.length?"Test vollständig":"Test noch nicht vollständig"}</b> · ${finished}/${report.bots.length} fertig · ${totalRoutes} Wegrouten · ${fallbacks} Notrouten · ${report.errors.length} Fehler</div><div class="bot-report-grid">${report.bots.map(({bot,passed,failed,blocked,explorationPassed,activityPassed})=>`<div class="bot-report-card"><strong>${bot.icon} ${bot.name} · ${bot.speed} km/h</strong>Status: ${escapeHTML(bot.state)}<br>Fog-Spur: ${bot.trail.length} Messpunkte<br>Erkundung: ${explorationPassed}/${bot.targets.filter(point=>point.type==="exploration").length}<br>Aktivitäten: ${activityPassed}/${bot.targets.filter(point=>point.type==="activity").length}<br>${bot.noExit?`Fahrsperren: ${blocked}`:`Bestanden: ${passed}`} · Fehler: ${failed}<br>Wegrouten: ${bot.routeChecks} · Notrouten: ${bot.routeFallbacks}</div>`).join("")}</div>`;
+}
+function downloadRavenBotReport(){
+  const report=getRavenBotReportData(),lines=["RAVEN BOT-TESTBERICHT",report.createdAt.toLocaleString("de-DE"),`Punkte: ${report.points.length} · Fehler: ${report.errors.length}`,""];
+  report.bots.forEach(({bot,passed,failed,blocked,explorationPassed,activityPassed})=>{lines.push(`${bot.icon} ${bot.name} – ${bot.label} – ${bot.speed} km/h`,`Status: ${bot.state}`,`Fog-Spur: ${bot.trail.length} Messpunkte`,`Erkundung: ${explorationPassed}/${bot.targets.filter(point=>point.type==="exploration").length} · Aktivitäten: ${activityPassed}/${bot.targets.filter(point=>point.type==="activity").length}`,`Bestanden: ${passed} · korrekt gesperrt: ${blocked} · Fehler: ${failed}`,`Wegrouten: ${bot.routeChecks} · Notrouten: ${bot.routeFallbacks}`,"");});
+  if(report.errors.length){lines.push("FEHLER");report.errors.forEach(entry=>lines.push(`${new Date(entry.time).toLocaleTimeString("de-DE")} · ${entry.bot} · ${entry.message}`));}
+  const link=document.createElement("a");link.href=URL.createObjectURL(new Blob([lines.join("\n")],{type:"text/plain;charset=utf-8"}));link.download=`raven-bot-test-${new Date().toISOString().slice(0,10)}.txt`;link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
 }
 
 function createRavenBotMarker(bot){if(bot.marker)ravenBotLayer.removeLayer(bot.marker);const icon=L.divIcon({className:"",html:`<div class="raven-bot-marker ${bot.id}">${bot.icon}</div>`,iconSize:[25,25],iconAnchor:[12,12]});bot.marker=L.marker([bot.lat,bot.lon],{icon,pane:"botRoutePane",zIndexOffset:500}).bindTooltip(`${bot.name} · ${bot.label}`,{direction:"top"}).addTo(ravenBotLayer);}
@@ -114,5 +129,5 @@ function stopRavenBot(id){const bot=ravenBots.find(item=>item.id===id);if(!bot||
 function startRavenBots(){ensureRavenBotMap();ravenBots.forEach(bot=>startRavenBot(bot.id));}
 function stopRavenBots(){ravenBots.forEach(bot=>stopRavenBot(bot.id));}
 
-ravenBots=RAVEN_BOT_DEFS.map(makeRavenBot);renderRavenBotCards();renderRavenBotProtocol();updateRavenBotSummary();
+ravenBots=RAVEN_BOT_DEFS.map(makeRavenBot);renderRavenBotCards();renderRavenBotProtocol();updateRavenBotSummary();renderRavenBotReport();
 
