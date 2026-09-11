@@ -589,8 +589,12 @@ function discoverPoint(point){
         FUERSTENBERG.completionXP
       );
 
+      const missionItemsGranted=typeof grantRavenMissionItems!=="function"||grantRavenMissionItems({futter:3});
+
       setTemporaryMessage(
-        `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP`,
+        missionItemsGranted
+          ? `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP · 3 Futter`
+          : `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP · Inventar für 3 Futter leeren`,
         5000
       );
       if(typeof logRavenEvent==="function")logRavenEvent("Ort abgeschlossen","Fürstenberg · Fog frei");
