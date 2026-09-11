@@ -162,7 +162,7 @@ const FUERSTENBERG = {
       icon:"⛪",
       lat:51.5157079,
       lon:8.7397917,
-      discoveryRadius:50,
+      discoveryRadius:60,
       access:"public_surroundings",
       accessHint:"Vom öffentlichen Umfeld der Kirche aus entdeckbar."
     },
@@ -174,7 +174,7 @@ const FUERSTENBERG = {
       icon:"🏛️",
       lat:51.5164455,
       lon:8.7449286,
-      discoveryRadius:50,
+      discoveryRadius:60,
       access:"public_surroundings",
       accessHint:"Vom öffentlichen Straßenraum aus entdeckbar."
     }
@@ -190,7 +190,7 @@ const FUERSTENBERG = {
       icon:"⛲",
       lat:51.514164328059515,
       lon:8.741700053215029,
-      discoveryRadius:35,
+      discoveryRadius:80,
       access:"outdoor"
     },
 
@@ -201,7 +201,7 @@ const FUERSTENBERG = {
       icon:"🛝",
       lat:51.51308183260237,
       lon:8.745600332095771,
-      discoveryRadius:35,
+      discoveryRadius:80,
       access:"outdoor"
     }
 
