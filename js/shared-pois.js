@@ -71,6 +71,11 @@
     ALL_POINTS.push(...shared);
     const explorationCount = shared.filter(point => point.type === "exploration").length;
     const activityCount = shared.filter(point => point.type === "activity").length;
+    const explorationComplete=explorationCount>0&&shared
+      .filter(point=>point.type==="exploration")
+      .every(point=>fuerstenbergMission.visitedPOIs.includes(point.id));
+    fuerstenbergMission.completed=explorationComplete;
+    if(typeof saveMission==="function") saveMission();
     const syncStatus = document.getElementById("poiSyncStatus");
     if(syncStatus){
       syncStatus.textContent = usingStudioData
@@ -84,6 +89,9 @@
     if(typeof renderMainLists==="function") renderMainLists();
     if(typeof renderTravelBook==="function") renderTravelBook();
     if(typeof redrawFog==="function") redrawFog();
+    if(explorationComplete&&fogCanvas){
+      fogCanvas.style.display="none";
+    }
     console.info(`Raven: ${shared.length} gemeinsame Studio-Punkte geladen.`);
   }catch(error){
     const syncStatus = document.getElementById("poiSyncStatus");
