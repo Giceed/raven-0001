@@ -223,9 +223,15 @@ function tryOpenPoint(point){
 
   const discoveryRadius=getEffectiveDiscoveryRadius(point);
 
-  if((window.currentSpeedKmh||0)>25&&!godMode){
-    setTemporaryMessage("🚗 Zu schnell: Erkundungspunkte und Aktivitäten sind während der Autofahrt gesperrt.");
-    if(typeof logRavenEvent==="function")logRavenEvent("Punkt gesperrt","Geschwindigkeit zu hoch");
+  if(window.ravenMovementLocked&&!godMode){
+    const state=window.ravenSpeedState;
+    const message=state==="blocked"
+      ? "🚗 Fahrsperre: Punkte sind über 20 km/h gesperrt."
+      : state==="cooldown"
+        ? "⏳ Raven wartet fünf ruhige Sekunden, bevor Punkte wieder freigegeben werden."
+        : "⚠️ Zu schnell: Punkte pausieren ab 12 km/h.";
+    setTemporaryMessage(message);
+    if(typeof logRavenEvent==="function")logRavenEvent("Punkt gesperrt",`${(window.currentSpeedKmh||0).toFixed(1)} km/h`);
     return;
   }
 
