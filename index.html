@@ -11,7 +11,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<link rel="stylesheet" href="css/raven.css?v=42player-lock1">
+<link rel="stylesheet" href="css/raven.css?v=45raven-features1">
 </head>
 
 <body>
@@ -25,8 +25,8 @@
 
 <div class="card">
 
-<div class="raven">🐦‍⬛</div>
-<h1>RAVEN #0001</h1>
+<div class="raven" id="ravenAvatar">🐦‍⬛</div>
+<h1 id="ravenTitle">RAVEN #0001</h1>
 <div class="generation">Generation 1</div>
 
 <div class="level-line">
@@ -71,6 +71,7 @@
     <div class="need-row"><span>⚡ Energie</span><div class="need-bar energy"><i id="ravenEnergyBar"></i></div><b id="ravenEnergyValue">80</b></div>
     <div class="need-row"><span>💜 Stimmung</span><div class="need-bar mood"><i id="ravenMoodBar"></i></div><b id="ravenMoodValue">80</b></div>
     <div class="raven-actions"><button onclick="feedRaven()">🍖 Füttern</button><button onclick="restRaven()">🌙 Ausruhen</button><button onclick="playWithRaven()">💜 Spielen</button></div>
+    <button class="rename-raven" onclick="openRavenNaming()">✏ Raven benennen</button>
     <div class="raven-note" id="ravenLifeMessage">Raven ist bereit für sein erstes Abenteuer.</div>
   </div>
   <div class="card inventory-card">
@@ -78,6 +79,11 @@
     <div class="inventory-slots" id="inventorySlots"></div>
     <div class="inventory-note">Aktivitätspunkte liefern neue Items und sind im Prototyp danach 1 Minute erschöpft.</div>
   </div>
+</div>
+<div class="card daily-card">
+  <div class="panel-head"><div><span class="eyebrow">HEUTE</span><h2>☀️ Tagesaufgaben</h2></div><span id="dailyState">0/3</span></div>
+  <div class="daily-list" id="dailyList"></div>
+  <div class="story-reward">Tagesbelohnung: 1 Lieblingsfutter · 20 XP</div>
 </div>
 <div class="card story-mission-card">
   <div class="panel-head"><div><span class="eyebrow">ERSTE MISSION</span><h2>Fürstenberg erwacht</h2></div><span id="storyMissionState">0 %</span></div>
@@ -242,6 +248,18 @@
 
 </div>
 
+<div class="onboarding-overlay" id="onboardingOverlay">
+  <div class="onboarding-card">
+    <div class="onboarding-raven">🐦‍⬛</div>
+    <span class="eyebrow">WILLKOMMEN BEI RAVEN</span>
+    <h2>Dein erster Begleiter wartet</h2>
+    <p>Gib deinem Raven einen Namen. Danach entdeckt ihr gemeinsam Fürstenberg, sammelt Items und vertreibt den Fog.</p>
+    <input id="ravenNameInput" maxlength="18" placeholder="Name deines Ravens">
+    <button class="primary" onclick="finishRavenOnboarding()">Abenteuer beginnen</button>
+    <button class="secondary" onclick="skipRavenOnboarding()">Später benennen</button>
+  </div>
+</div>
+
 <div class="scratch-overlay" id="scratchOverlay">
 
 <div class="scratch-card">
@@ -275,16 +293,16 @@
 <script src="js/storage.js?v=28cache1"></script>
 <script src="js/map.js?v=29testcenter2"></script>
 <script src="js/fog.js?v=41edge-tests1"></script>
-<script src="js/gps.js?v=41edge-tests1"></script>
-<script src="js/raven-life.js?v=43life-stress1"></script>
-<script src="js/poi.js?v=44cooldown1"></script>
+<script src="js/gps.js?v=45raven-features1"></script>
+<script src="js/raven-life.js?v=45raven-features1"></script>
+<script src="js/poi.js?v=45raven-features1"></script>
 <script src="js/travelbook.js?v=28cache1"></script>
 <script src="js/app.js?v=28cache1"></script>
 <script src="js/shared-pois.js?v=41boundary-fix1"></script>
 <script src="js/test-tools.js?v=40sport-access1"></script>
 <script src="js/bot-testers.js?v=39bot-report1"></script>
 <script src="js/edge-tests.js?v=41edge-tests1"></script>
-<script src="js/game-tests.js?v=44cooldown1"></script>
+<script src="js/game-tests.js?v=45raven-features1"></script>
 
 </body>
 </html>
