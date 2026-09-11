@@ -231,6 +231,7 @@ function toggleGodMode(){
   updateFollowUI();
   updateUserMarker();
   updateAllPointStates(currentLat??TEST_REGION.centerLat,currentLon??TEST_REGION.centerLon);
+  if(typeof updateRavenDevPanel==="function")updateRavenDevPanel();
 }
 
 async function toggleGodModeView(){
