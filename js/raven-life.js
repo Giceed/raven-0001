@@ -7,6 +7,7 @@ const RAVEN_ITEM_DEFS={
 };
 let ravenItems=readRavenJSON("ravenItems",{futter:3,feder:0,glanzstein:0});
 let ravenLife=readRavenJSON("ravenLife",{hunger:78,energy:82,mood:76,updatedAt:Date.now()});
+let ravenPendingItems=readRavenJSON("ravenPendingItems",{futter:0,feder:0,glanzstein:0});
 let ravenPlayerView=localStorage.getItem("ravenPlayerView")!=="developer";
 
 function readRavenJSON(key,fallback){try{return {...fallback,...JSON.parse(localStorage.getItem(key)||"null")};}catch{return {...fallback};}}
@@ -35,6 +36,16 @@ function addRavenItems(reward){
   Object.entries(reward).forEach(([id,value])=>ravenItems[id]=(ravenItems[id]||0)+value);
   saveRavenItems();renderRavenGamePanel();return true;
 }
+function grantRavenMissionItems(reward){
+  if(addRavenItems(reward))return true;
+  Object.entries(reward).forEach(([id,value])=>ravenPendingItems[id]=(ravenPendingItems[id]||0)+value);
+  localStorage.setItem("ravenPendingItems",JSON.stringify(ravenPendingItems));return false;
+}
+function claimPendingRavenItems(){
+  let free=RAVEN_INVENTORY_CAPACITY-ravenInventoryCount(),changed=false;
+  Object.keys(ravenPendingItems).forEach(id=>{const amount=Math.min(free,ravenPendingItems[id]||0);if(amount>0){ravenItems[id]=(ravenItems[id]||0)+amount;ravenPendingItems[id]-=amount;free-=amount;changed=true;}});
+  if(changed){saveRavenItems();localStorage.setItem("ravenPendingItems",JSON.stringify(ravenPendingItems));}
+}
 function setRavenLifeMessage(text){const box=document.getElementById("ravenLifeMessage");if(box)box.textContent=text;}
 function feedRaven(){
   if((ravenItems.futter||0)<1){setRavenLifeMessage("Kein Futter mehr – besuche einen Aktivitätspunkt.");return;}
@@ -57,7 +68,7 @@ function ravenMoodStatus(){
   if(lowest<20)return "Braucht dich";if(lowest<45)return "Unruhig";if(lowest<75)return "Zufrieden";return "Glücklich";
 }
 function renderRavenGamePanel(){
-  applyRavenTime();
+  applyRavenTime();claimPendingRavenItems();
   [["ravenHunger",ravenLife.hunger],["ravenEnergy",ravenLife.energy],["ravenMood",ravenLife.mood]].forEach(([id,value])=>{const bar=document.getElementById(id+"Bar"),text=document.getElementById(id+"Value");if(bar)bar.style.width=value+"%";if(text)text.textContent=value;});
   const mood=document.getElementById("ravenMoodLabel");if(mood)mood.textContent=ravenMoodStatus();
   const inventory=document.getElementById("inventoryCapacity");if(inventory)inventory.textContent=`${ravenInventoryCount()} / ${RAVEN_INVENTORY_CAPACITY}`;
