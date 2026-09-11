@@ -170,8 +170,8 @@ const FUERSTENBERG = {
     {
       id:"beerenstelle_dev",
       type:"activity",
-      name:"Beerenstelle",
-      icon:"🫐",
+      name:"Brunnen-Sammelstelle",
+      icon:"⛲",
       lat:51.514164328059515,
       lon:8.741700053215029,
       discoveryRadius:35,
