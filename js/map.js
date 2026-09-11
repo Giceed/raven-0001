@@ -354,6 +354,7 @@ function setMapMode(mode){
   localStorage.setItem("ravenMapMode",mode);
 
   updateMapModeUI();
+  updateAllPointStates(currentLat??TEST_REGION.centerLat,currentLon??TEST_REGION.centerLon);
   redrawFog();
 }
 
