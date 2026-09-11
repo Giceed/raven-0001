@@ -191,12 +191,15 @@
         <span>Erst Erkundung, danach Aktivitäten · Wege werden bevorzugt</span>
       </div>
       <div class="bot-test-actions">
-        <button class="bot-start" id="botStartButton" onclick="startRavenBots()">3 Bots einsetzen</button>
-        <button class="bot-stop" id="botStopButton" onclick="stopRavenBots()" disabled>Stoppen</button>
+        <button class="bot-start" id="botStartButton" onclick="startRavenBots()">Alle starten</button>
+        <button class="bot-stop" id="botStopButton" onclick="stopRavenBots()">Alle stoppen</button>
       </div>
     </div>
+    <div class="bot-map" id="botMap"></div>
+    <div class="bot-map-legend"><span>🟣 Erkundung</span><span>🟠 Aktivität</span><span>✓ geschafft</span><span>✕ Fehler</span></div>
     <div class="bot-grid" id="botGrid"></div>
     <div class="bot-summary" id="botSummary">Noch kein Bot-Test gestartet.</div>
+    <details class="bot-protocol" open><summary>Fehlerprotokoll <b id="botErrorCount">0</b></summary><div id="botProtocol">Noch keine Fehler gefunden.</div></details>
   </div>
   <div class="dev-log" id="devLog"></div>
 </div>
@@ -246,7 +249,7 @@
 <script src="js/app.js?v=28cache1"></script>
 <script src="js/shared-pois.js?v=29activity-radius-fix1"></script>
 <script src="js/test-tools.js?v=30bots1"></script>
-<script src="js/bot-testers.js?v=30bots2"></script>
+<script src="js/bot-testers.js?v=31botmap1"></script>
 
 </body>
 </html>
