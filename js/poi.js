@@ -3,6 +3,26 @@
    ========================================================== */
 
 let activeGamePointType="all";
+const ACTIVITY_COOLDOWN_MS=5*60*1000;
+
+function getActivityCooldowns(){return JSON.parse(localStorage.getItem("ravenActivityCooldowns")||"{}");}
+function getActivityCooldownRemaining(point){return Math.max(0,(getActivityCooldowns()[point.id]||0)-Date.now());}
+function collectActivityReward(point){
+  const remaining=getActivityCooldownRemaining(point);
+  if(remaining>0){
+    setTemporaryMessage(`⏳ ${point.name} ist in ${Math.ceil(remaining/60000)} Min. wieder bereit.`);
+    if(typeof logRavenEvent==="function")logRavenEvent("Aktivität im Cooldown",point.name);
+    return false;
+  }
+  const cooldowns=getActivityCooldowns();cooldowns[point.id]=Date.now()+ACTIVITY_COOLDOWN_MS;
+  localStorage.setItem("ravenActivityCooldowns",JSON.stringify(cooldowns));
+  const items=JSON.parse(localStorage.getItem("ravenItems")||'{"futter":0}');items.futter=(items.futter||0)+1;
+  localStorage.setItem("ravenItems",JSON.stringify(items));
+  addXP(FUERSTENBERG.activityXP);
+  setTemporaryMessage(`🎒 ${point.name}: 1 Futter gesammelt · +${FUERSTENBERG.activityXP} XP`,4500);
+  if(typeof logRavenEvent==="function")logRavenEvent("Item gesammelt",`${point.name} · 1 Futter`);
+  return true;
+}
 
 function setGamePointTypeFilter(type){
   activeGamePointType=type;
@@ -176,7 +196,7 @@ function renderPointRadius(point){
 
 function tryOpenPoint(point){
 
-  if(isDiscovered(point)){
+  if(isDiscovered(point)&&point.type!=="activity"){
 
     setTemporaryMessage(
       `${point.icon} ${point.name} wurde bereits entdeckt.`
@@ -203,12 +223,26 @@ function tryOpenPoint(point){
 
   const discoveryRadius=getEffectiveDiscoveryRadius(point);
 
+  if((window.currentSpeedKmh||0)>25&&!godMode){
+    setTemporaryMessage("🚗 Zu schnell: Erkundungspunkte und Aktivitäten sind während der Autofahrt gesperrt.");
+    if(typeof logRavenEvent==="function")logRavenEvent("Punkt gesperrt","Geschwindigkeit zu hoch");
+    return;
+  }
+
   if(distance>discoveryRadius){
 
     setTemporaryMessage(
       `? Dieser Punkt ist noch ${Math.round(distance)} m entfernt (Radius ${discoveryRadius} m).`
     );
 
+    return;
+  }
+
+  if(typeof logRavenEvent==="function")logRavenEvent("Punkt in Reichweite",`${point.name} · ${Math.round(distance)} m`);
+
+  if(point.type==="activity"&&isDiscovered(point)){
+    collectActivityReward(point);
+    renderMainLists();
     return;
   }
 
@@ -267,7 +301,11 @@ function renderPointList(elementId,points){
       </div>
 
       <div class="poi-state">
-        ${discovered ? "ENTDECKT ✓" : "UNBEKANNT"}
+        ${discovered
+          ? (point.type==="activity"&&getActivityCooldownRemaining(point)>0
+            ? `BEREIT IN ${Math.ceil(getActivityCooldownRemaining(point)/60000)} MIN.`
+            : point.type==="activity" ? "SAMMELBEREIT" : "ENTDECKT ✓")
+          : "UNBEKANNT"}
       </div>
     `;
 
@@ -501,12 +539,7 @@ function discoverPoint(point){
       .visitedActivities
       .push(point.id);
 
-    addXP(FUERSTENBERG.activityXP);
-
-    setTemporaryMessage(
-      `✨ ${point.name} entdeckt! +${FUERSTENBERG.activityXP} XP`,
-      4500
-    );
+    collectActivityReward(point);
 
   }else{
 
@@ -515,6 +548,7 @@ function discoverPoint(point){
       .push(point.id);
 
     addXP(FUERSTENBERG.poiXP);
+    if(typeof logRavenEvent==="function")logRavenEvent("Erkundungspunkt entdeckt",point.name);
 
     const requiredExplorationPoints=ALL_POINTS.filter(candidate=>
       candidate.type==="exploration"&&
@@ -543,6 +577,7 @@ function discoverPoint(point){
         `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP`,
         5000
       );
+      if(typeof logRavenEvent==="function")logRavenEvent("Ort abgeschlossen","Fürstenberg · Fog frei");
 
     }else{
 
