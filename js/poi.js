@@ -3,14 +3,15 @@
    ========================================================== */
 
 let activeGamePointType="all";
-const ACTIVITY_COOLDOWN_MS=15*60*1000;
+const ACTIVITY_COOLDOWN_MS=60*1000;
 
 function getActivityCooldowns(){return JSON.parse(localStorage.getItem("ravenActivityCooldowns")||"{}");}
 function getActivityCooldownRemaining(point){return Math.max(0,(getActivityCooldowns()[point.id]||0)-Date.now());}
+function formatActivityCooldown(milliseconds){return `${Math.max(1,Math.ceil(milliseconds/1000))} Sek.`;}
 function collectActivityReward(point){
   const remaining=getActivityCooldownRemaining(point);
   if(remaining>0){
-    setTemporaryMessage(`⏳ ${point.name} ist in ${Math.ceil(remaining/60000)} Min. wieder bereit.`);
+    setTemporaryMessage(`⏳ ${point.name} ist in ${formatActivityCooldown(remaining)} wieder bereit.`);
     if(typeof logRavenEvent==="function")logRavenEvent("Aktivität im Cooldown",point.name);
     return false;
   }
@@ -319,7 +320,7 @@ function renderPointList(elementId,points){
       <div class="poi-state">
         ${discovered
           ? (point.type==="activity"&&getActivityCooldownRemaining(point)>0
-            ? `BEREIT IN ${Math.ceil(getActivityCooldownRemaining(point)/60000)} MIN.`
+            ? `BEREIT IN ${formatActivityCooldown(getActivityCooldownRemaining(point)).toUpperCase()}`
             : point.type==="activity" ? "SAMMELBEREIT" : "ENTDECKT ✓")
           : "UNBEKANNT"}
       </div>
@@ -689,4 +690,9 @@ function addXP(amount){
 
   updateUI();
 }
+
+/* Kurzer Prototyp-Cooldown: Countdown sichtbar sekündlich aktualisieren. */
+setInterval(()=>{
+  if(Object.values(getActivityCooldowns()).some(readyAt=>readyAt>Date.now()))renderMainLists();
+},1000);
 
