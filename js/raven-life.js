@@ -60,8 +60,8 @@ function restRaven(){
 }
 function playWithRaven(){
   if(ravenLife.energy<8){setRavenLifeMessage("Raven ist zu müde zum Spielen.");return;}
-  ravenLife.energy=clampRavenNeed(ravenLife.energy-8);ravenLife.mood=clampRavenNeed(ravenLife.mood+18);
-  saveRavenLife();setRavenLifeMessage("Raven hüpft neugierig um dich herum.");renderRavenGamePanel();
+  ravenLife.energy=clampRavenNeed(ravenLife.energy-8);ravenLife.hunger=clampRavenNeed(ravenLife.hunger-6);ravenLife.mood=clampRavenNeed(ravenLife.mood+18);
+  saveRavenLife();setRavenLifeMessage("Raven spielt begeistert – das kostet Energie und macht hungrig.");renderRavenGamePanel();
 }
 function ravenMoodStatus(){
   const lowest=Math.min(ravenLife.hunger,ravenLife.energy,ravenLife.mood);
