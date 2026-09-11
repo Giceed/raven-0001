@@ -6,12 +6,12 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-  <meta name="raven-version" content="3.1-raven-rohbau">
+  <meta name="raven-version" content="3.2-raven-jumper">
 <title>RAVEN #0001</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<link rel="stylesheet" href="css/raven.css?v=45raven-features1">
+<link rel="stylesheet" href="css/raven.css?v=46raven-jumper1">
 </head>
 
 <body>
@@ -79,6 +79,12 @@
     <div class="inventory-slots" id="inventorySlots"></div>
     <div class="inventory-note">Aktivitätspunkte liefern neue Items und sind im Prototyp danach 1 Minute erschöpft.</div>
   </div>
+</div>
+<div class="card minigame-card">
+  <div class="panel-head"><div><span class="eyebrow">MINISPIEL</span><h2>☁️ Raven Jumper</h2></div><strong id="jumperHighscore">Rekord 0</strong></div>
+  <p>Spring mit deinem Raven durch die Wolken. Tippe links oder rechts – oder benutze die Pfeiltasten.</p>
+  <button class="primary" onclick="openRavenJumper()">Spiel starten</button>
+  <div class="inventory-note">Eine Runde kostet 6 Energie und 3 Hunger. Gute Flüge heben die Stimmung.</div>
 </div>
 <div class="card daily-card">
   <div class="panel-head"><div><span class="eyebrow">HEUTE</span><h2>☀️ Tagesaufgaben</h2></div><span id="dailyState">0/3</span></div>
@@ -243,7 +249,16 @@
 </div>
 
 <div class="version">
-      RAVEN PROTOTYPE V3.1 · FIRST RAVEN
+      RAVEN PROTOTYPE V3.2 · RAVEN JUMPER
+</div>
+
+<div class="jumper-overlay" id="jumperOverlay">
+  <div class="jumper-shell">
+    <div class="jumper-head"><button onclick="closeRavenJumper()">✕</button><strong>☁️ RAVEN JUMPER</strong><span id="jumperScore">0</span></div>
+    <canvas id="jumperCanvas" width="360" height="600"></canvas>
+    <div class="jumper-help" id="jumperMessage">Tippe auf START und steuere links oder rechts.</div>
+    <div class="jumper-controls"><button data-jumper="left">◀ LINKS</button><button class="jumper-start" id="jumperStartButton" onclick="startRavenJumper()">START</button><button data-jumper="right">RECHTS ▶</button></div>
+  </div>
 </div>
 
 </div>
@@ -294,7 +309,8 @@
 <script src="js/map.js?v=29testcenter2"></script>
 <script src="js/fog.js?v=41edge-tests1"></script>
 <script src="js/gps.js?v=45raven-features1"></script>
-<script src="js/raven-life.js?v=45raven-features1"></script>
+<script src="js/raven-life.js?v=46raven-jumper1"></script>
+<script src="js/raven-jumper.js?v=46raven-jumper1"></script>
 <script src="js/poi.js?v=45raven-features1"></script>
 <script src="js/travelbook.js?v=28cache1"></script>
 <script src="js/app.js?v=28cache1"></script>
