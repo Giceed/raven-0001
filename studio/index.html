@@ -135,11 +135,24 @@ const endpoints=["https://overpass.kumi.systems/api/interpreter","https://overpa
 
 const ravenBasePoints=[
   {id:"raven-schloss",name:"Schloss Fürstenberg",lat:51.5155802,lon:8.7367807,rawType:"castle",category:"exploration",radius:160,score:100,access:"Außenradius / öffentliche Wege",status:"approved",source:"Raven-Karte"},
-  {id:"raven-st-marien",name:"St. Marien / Sintfeld-Dom",lat:51.5157079,lon:8.7397917,rawType:"place_of_worship",category:"exploration",radius:50,score:100,access:"öffentliches Umfeld",status:"approved",source:"Raven-Karte"},
-  {id:"raven-rathaus",name:"Rathaus",lat:51.5164455,lon:8.7449286,rawType:"townhall",category:"exploration",radius:50,score:100,access:"öffentlicher Straßenraum",status:"approved",source:"Raven-Karte"},
-  {id:"raven-beerenstelle",name:"Brunnen-Sammelstelle",lat:51.514164328059515,lon:8.741700053215029,rawType:"fountain",category:"activity",radius:35,score:100,access:"draußen",status:"approved",source:"Raven-Karte"},
-  {id:"raven-spielplatz",name:"Spielplatz",lat:51.51308183260237,lon:8.745600332095771,rawType:"playground",category:"activity",radius:35,score:100,access:"draußen",status:"approved",source:"Raven-Karte"}
+  {id:"raven-st-marien",name:"St. Marien / Sintfeld-Dom",lat:51.5157079,lon:8.7397917,rawType:"place_of_worship",category:"exploration",radius:60,score:100,access:"öffentliches Umfeld",status:"approved",source:"Raven-Karte"},
+  {id:"raven-rathaus",name:"Rathaus",lat:51.5164455,lon:8.7449286,rawType:"townhall",category:"exploration",radius:60,score:100,access:"öffentlicher Straßenraum",status:"approved",source:"Raven-Karte"},
+  {id:"raven-beerenstelle",name:"Brunnen-Sammelstelle",lat:51.514164328059515,lon:8.741700053215029,rawType:"fountain",category:"activity",radius:80,score:100,access:"draußen",status:"approved",source:"Raven-Karte"},
+  {id:"raven-spielplatz",name:"Spielplatz",lat:51.51308183260237,lon:8.745600332095771,rawType:"playground",category:"activity",radius:80,score:100,access:"draußen",status:"approved",source:"Raven-Karte"}
 ];
+
+function balancedRadius(point){
+  if(point.category==="activity") return 80;
+  const protectedTypes=new Set(["castle","manor","school","kindergarten","fire_station","police","tower","water_tower","aerodrome","terminal"]);
+  const accessText=String(point.access||"").toLowerCase();
+  return protectedTypes.has(point.rawType)||accessText.includes("nicht betreten")||accessText.includes("außenradius")?160:60;
+}
+
+function applyRadiusBalanceOnce(){
+  if(localStorage.getItem("ravenRadiusBalanceV1Done")) return;
+  state.candidates.forEach(point=>point.radius=balancedRadius(point));
+  localStorage.setItem("ravenRadiusBalanceV1Done","1");
+}
 
 /* Kleine, bewusst kuratierte Fürstenberg-Erkundungsrunde.
    Schloss, St. Marien und Rathaus kommen bereits aus ravenBasePoints. */
@@ -348,7 +361,7 @@ async function renderBoundaries(){
 function exportProject(){const payload={format:"raven-shared-pois",version:2,exportedAt:new Date().toISOString(),center:state.center,points:state.candidates};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="raven-shared-pois.json";a.click();URL.revokeObjectURL(url);setMessage("Gemeinsame Punktedatei erstellt – schick sie jetzt im Karten-Chat an Codex.");}
 async function importProject(event){try{const data=JSON.parse(await event.target.files[0].text()),points=data.points||data.candidates;if(!Array.isArray(points))throw Error();state.center=data.center||state.center;state.candidates=points;save();renderMarkers();fitAll();setMessage("Gemeinsame Punktedatei importiert.");}catch(e){setMessage("Diese Datei ist keine gültige Raven-Punktedatei.");}event.target.value="";}
 
-async function initializeStudio(){mergeRavenBasePoints();await mergeCityPoiCatalog();state.center={lat:51.5157,lon:8.741,name:"Fürstenberg"};save();renderStats();renderList();renderMarkers();const scoped=state.candidates.filter(inFuerstenbergScope).length;setMessage(`${scoped} Punkte im Fürstenberg-Testgebiet geladen und mit dem Spiel synchronisiert.`);}
+async function initializeStudio(){mergeRavenBasePoints();await mergeCityPoiCatalog();applyRadiusBalanceOnce();state.center={lat:51.5157,lon:8.741,name:"Fürstenberg"};save();renderStats();renderList();renderMarkers();const scoped=state.candidates.filter(inFuerstenbergScope).length;setMessage(`${scoped} Punkte geladen · Aktivitäten 80 m · Erkundung 60 m · geschützte Orte 160 m.`);}
 initializeStudio();
 </script>
 </body>
