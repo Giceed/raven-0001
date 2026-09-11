@@ -66,7 +66,7 @@ function renderPointMarker(point,discovered,inRange,distance){
   const districtActive=currentRavenDistrict&&normalizePlaceName(currentRavenDistrict)===normalizePlaceName(district);
   const visibleBeforeGps=mapMode==="explore"&&!currentRavenDistrict&&point.type==="exploration";
   const visibleInDiscoveredPlace=mapMode==="explore"&&districtActive;
-  const visibleInTravel=mapMode==="travel"&&discovered;
+  const visibleInTravel=mapMode==="travel"&&point.type==="exploration";
   const pointVisible=godMode||visibleBeforeGps||visibleInDiscoveredPlace||visibleInTravel;
   if(!pointVisible){
     if(pointMarkers[point.id]){
