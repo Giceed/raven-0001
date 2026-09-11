@@ -17,6 +17,10 @@
 
 Der Praxistest findet voraussichtlich morgen oder Sonntag statt. Zu prüfen sind GPS-Lücken, Fog-Spur, 60-/80-Meter-Radien, Fahrsperre, Freigabe nach dem Anhalten, Speicherung, Leistung und Akkuverbrauch.
 
+## Automatischer Kompletttest
+
+Bestätigter Lauf mit vier Bots: 4/4 abgeschlossen, 32 öffentliche Wegrouten, 0 Notrouten und 0 Fehler. Mila, Jaro und Kara erreichten jeweils 2/2 Erkundungs- und 6/6 Aktivitätspunkte. Rico deckte seine Fahrstrecke auf, öffnete 0 Punkte und bestätigte 8/8 Fahrsperren. Der schwer erreichbare Sportplatz wurde nach dem ersten Testlauf mit einem sicheren Außenradius von 120 Metern korrigiert und anschließend von allen passenden Bots erreicht.
+
 ## Danach
 
 1. Ergebnisse des Außentests auswerten und Kartenmechanik feinjustieren.
