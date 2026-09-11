@@ -88,5 +88,23 @@ function applyRavenPlayerView(){
   if(ravenPlayerView&&typeof godMode!=="undefined"&&godMode&&typeof toggleGodMode==="function")toggleGodMode();
 }
 function toggleRavenPlayerView(){if(ravenPlayerLocked)return;ravenPlayerView=!ravenPlayerView;applyRavenPlayerView();}
+window.addEventListener("storage",event=>{
+  if(event.key==="ravenLife"&&event.newValue)ravenLife=readRavenJSON("ravenLife",ravenLife);
+  if(event.key==="ravenItems"&&event.newValue)ravenItems=readRavenJSON("ravenItems",ravenItems);
+  if(event.key==="ravenPendingItems"&&event.newValue)ravenPendingItems=readRavenJSON("ravenPendingItems",ravenPendingItems);
+  if(event.key==="ravenFuerstenbergMission"&&event.newValue){
+    try{fuerstenbergMission=JSON.parse(event.newValue);}catch{}
+  }
+  if(event.key==="ravenXP")xp=Number(event.newValue)||0;
+  if(event.key==="ravenLevel")level=Number(event.newValue)||1;
+  if(["ravenLife","ravenItems","ravenPendingItems","ravenFuerstenbergMission","ravenXP","ravenLevel","ravenActivityCooldowns"].includes(event.key)){
+    renderRavenGamePanel();
+    if(typeof updateUI==="function")updateUI();
+    if(typeof renderMainLists==="function")renderMainLists();
+    if(typeof renderTravelBook==="function")renderTravelBook();
+    if(typeof updateAllPointStates==="function"&&currentLat!==null&&currentLon!==null)updateAllPointStates(currentLat,currentLon);
+  }
+  if(event.key==="ravenSharedPoisLive")location.reload();
+});
 window.addEventListener("DOMContentLoaded",()=>{applyRavenTime();applyRavenPlayerView();renderRavenGamePanel();setInterval(()=>{renderRavenGamePanel();if(typeof renderMainLists==="function")renderMainLists();},30000);});
 
