@@ -71,4 +71,10 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Bewegung kostet jetzt in Spiel, Testbots und Tageslabor einheitlich 1 Hunger sowie 0,6 Energie pro Kilometer.
 - Der vorherige Spielwert von 1 Hunger pro 250 Meter war versehentlich viermal härter als das im Tageslabor empfohlene Profil „Hugo · Aktuell“.
 - Der Bewegungstest prüft jetzt ausdrücklich die Grenze bei 999/1000 Metern.
+## V3.8 – Aktivitäts-Cooldowns gehärtet
+
+- Beschädigte Cooldown-Daten aus dem lokalen Speicher werden abgefangen, statt die Aktivitätspunkte zu blockieren.
+- Abgelaufene und ungültige Einträge werden ignoriert.
+- Unrealistisch lange Sperren werden im Prototyp sicher auf höchstens eine Minute begrenzt.
+- Raven-Stresstest auf 19 Prüfungen erweitert; Testdaten werden anschließend vollständig zurückgesetzt.
 

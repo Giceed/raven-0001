@@ -5,8 +5,12 @@
 let activeGamePointType="all";
 const ACTIVITY_COOLDOWN_MS=60*1000;
 
-function getActivityCooldowns(){return JSON.parse(localStorage.getItem("ravenActivityCooldowns")||"{}");}
-function getActivityCooldownRemaining(point){return Math.max(0,(getActivityCooldowns()[point.id]||0)-Date.now());}
+function getActivityCooldowns(now=Date.now()){
+  let saved={};try{saved=JSON.parse(localStorage.getItem("ravenActivityCooldowns")||"{}");}catch{return {};}
+  if(!saved||typeof saved!=="object"||Array.isArray(saved))return {};
+  return Object.fromEntries(Object.entries(saved).flatMap(([id,value])=>{const expires=Number(value);return Number.isFinite(expires)&&expires>now?[[id,Math.min(expires,now+ACTIVITY_COOLDOWN_MS)]]:[];}));
+}
+function getActivityCooldownRemaining(point,now=Date.now()){return Math.max(0,(getActivityCooldowns(now)[point.id]||0)-now);}
 function formatActivityCooldown(milliseconds){return `${Math.max(1,Math.ceil(milliseconds/1000))} Sek.`;}
 function collectActivityReward(point){
   const remaining=getActivityCooldownRemaining(point);

@@ -4,7 +4,7 @@ async function runRavenLifeTests(){
   const output=document.getElementById("lifeTestResult");if(!output)return;
   output.className="edge-test-result running";output.textContent="⏳ Raven wird mit Extremfällen geprüft …";
   const lifeSnapshot=JSON.parse(JSON.stringify(ravenLife)),itemSnapshot=JSON.parse(JSON.stringify(ravenItems)),pendingSnapshot=JSON.parse(JSON.stringify(ravenPendingItems)),messageSnapshot=document.getElementById("ravenLifeMessage")?.textContent||"";
-  const storedLife=localStorage.getItem("ravenLife"),storedItems=localStorage.getItem("ravenItems"),storedPending=localStorage.getItem("ravenPendingItems"),results=[];
+  const storedLife=localStorage.getItem("ravenLife"),storedItems=localStorage.getItem("ravenItems"),storedPending=localStorage.getItem("ravenPendingItems"),storedCooldowns=localStorage.getItem("ravenActivityCooldowns"),results=[];
   try{
     ravenTestMode=true;
     ravenLife={hunger:50,energy:50,mood:50,updatedAt:Date.now()};ravenItems={futter:2,feder:0,glanzstein:0};feedRaven();
@@ -36,11 +36,16 @@ async function runRavenLifeTests(){
     results.push(ravenLifeTestResult("15 · Uhrzeit in der Zukunft",ravenLife.hunger===50&&ravenLife.energy===50&&ravenLife.mood===50,"eine falsche Gerätezeit zieht keine Bedürfnisse ab"));
     ravenLife={hunger:0,energy:0,mood:15,movementMeters:0,updatedAt:Date.now(),sleepStartedAt:0,sleepUntil:0,sleepStartEnergy:0};ravenItems={futter:1,feder:0,glanzstein:0};feedRaven("futter");restRaven();
     results.push(ravenLifeTestResult("16 · Erschöpfter Raven erholt sich",ravenLife.hunger===24&&ravenLife.mood===19&&isRavenSleeping()&&ravenLife.sleepUntil-ravenLife.sleepStartedAt===10*60000,"Füttern und Schlafen lösen den Nullzustand ohne Reset"));
+    localStorage.setItem("ravenActivityCooldowns","{kaputt");
+    results.push(ravenLifeTestResult("17 · Kaputter Cooldown-Speicher",Object.keys(getActivityCooldowns()).length===0,"beschädigte Daten blockieren keinen Aktivitätspunkt"));
+    const cooldownNow=Date.now();localStorage.setItem("ravenActivityCooldowns",JSON.stringify({alt:cooldownNow-1,okay:cooldownNow+30000,falsch:"nie",zuLang:cooldownNow+3600000}));const cooldowns=getActivityCooldowns(cooldownNow);
+    results.push(ravenLifeTestResult("18 · Abgelaufener Cooldown",!("alt" in cooldowns)&&cooldowns.okay===cooldownNow+30000&&!("falsch" in cooldowns),"abgelaufene und ungültige Einträge werden verworfen"));
+    results.push(ravenLifeTestResult("19 · Cooldown-Begrenzung",cooldowns.zuLang===cooldownNow+ACTIVITY_COOLDOWN_MS,"ein fehlerhafter Cooldown kann höchstens eine Minute sperren"));
   }catch(error){results.push(ravenLifeTestResult("Testsystem",false,error.message||String(error)));}
   finally{
     ravenTestMode=false;
     ravenLife=lifeSnapshot;ravenItems=itemSnapshot;ravenPendingItems=pendingSnapshot;
-    [["ravenLife",storedLife],["ravenItems",storedItems],["ravenPendingItems",storedPending]].forEach(([key,value])=>value===null?localStorage.removeItem(key):localStorage.setItem(key,value));
+    [["ravenLife",storedLife],["ravenItems",storedItems],["ravenPendingItems",storedPending],["ravenActivityCooldowns",storedCooldowns]].forEach(([key,value])=>value===null?localStorage.removeItem(key):localStorage.setItem(key,value));
     renderRavenGamePanel();setRavenLifeMessage(messageSnapshot);
   }
   const passed=results.filter(result=>result.ok).length,total=results.length;output.className=`edge-test-result ${passed===total?"ok":"error"}`;
