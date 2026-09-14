@@ -8,6 +8,41 @@
 function parseRavenJSONText(raw,fallback){try{const parsed=JSON.parse(raw);return parsed??fallback;}catch{return fallback;}}
 function readRavenStorageJSON(key,fallback){return parseRavenJSONText(localStorage.getItem(key),fallback);}
 
+/* Ein bewusst aufgerufener Frischstart setzt nur Spielerdaten zurück.
+   Studio-Punkte und die gemeinsame Kartenkonfiguration bleiben erhalten. */
+const RAVEN_FRESH_START_TOKEN="fieldtest1";
+function applyRavenFreshStart(search=location.search){
+  const params=new URLSearchParams(search);
+  if(params.get("fresh")!==RAVEN_FRESH_START_TOKEN)return false;
+  [
+    "ravenActivityCooldowns","ravenActivityVisited","ravenDiagnosticsV1","ravenDiscoveredPlaces",
+    "ravenDistance","ravenExploredPoints","ravenFieldTestV1","ravenFuerstenbergMission",
+    "ravenJumperHighscore","ravenMissionVisited","ravenPendingItems","ravenProfile",
+    "ravenTestEvents","ravenTourReportsV1","ravenTourStartV1","ravenTravelHistory"
+  ].forEach(key=>localStorage.removeItem(key));
+  localStorage.setItem("ravenXP","0");
+  localStorage.setItem("ravenLevel","1");
+  localStorage.setItem("ravenDistance","0");
+  localStorage.setItem("ravenMapMode","explore");
+  localStorage.setItem("ravenPlayerView","player");
+  localStorage.setItem("ravenExploredPoints","[]");
+  localStorage.setItem("ravenTravelHistory","[]");
+  localStorage.setItem("ravenDiscoveredPlaces","[]");
+  localStorage.setItem("ravenMissionVisited","[]");
+  localStorage.setItem("ravenActivityVisited","[]");
+  localStorage.setItem("ravenFuerstenbergMission",JSON.stringify({visitedPOIs:[],visitedActivities:[],completed:false,rewarded:false}));
+  localStorage.setItem("ravenItems",JSON.stringify({beeren:2,futter:3,lieblingsfutter:0,energiekorn:0,feder:0,glanzstein:0}));
+  localStorage.setItem("ravenPendingItems",JSON.stringify({beeren:0,futter:0,lieblingsfutter:0,energiekorn:0,feder:0,glanzstein:0}));
+  localStorage.setItem("ravenLife",JSON.stringify({hunger:78,energy:82,mood:76,movementMeters:0,updatedAt:Date.now(),sleepStartedAt:0,sleepUntil:0,sleepStartEnergy:0}));
+  localStorage.setItem("ravenProfile",JSON.stringify({name:"Raven",onboardingDone:false}));
+  localStorage.setItem("ravenDaily",JSON.stringify({date:new Date().toISOString().slice(0,10),feed:0,play:0,collect:0,rewarded:false}));
+  params.delete("fresh");
+  const cleanQuery=params.toString();
+  history.replaceState(null,"",`${location.pathname}${cleanQuery?`?${cleanQuery}`:""}${location.hash}`);
+  return true;
+}
+applyRavenFreshStart();
+
 if (!localStorage.getItem("ravenV25DistrictResetDone")) {
 
   localStorage.removeItem("ravenExploredPoints");

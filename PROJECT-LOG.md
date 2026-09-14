@@ -137,4 +137,11 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Tagesaufgabe verlangt jetzt drei erfolgreich gesammelte Aktivitätspunkte statt nur eines.
 - Sichtbarer Fortschritt zeigt 0/3 bis 3/3 direkt in der Aufgabenzeile.
 - Tagesbelohnung wird erst nach Füttern, Spielen und exakt mindestens drei erfolgreichen Sammlungen freigegeben.
+# V4.6.3 – Sicherer Spieler-Teststart
+
+- Neuer einmaliger Frischstart über `?view=player&fresh=fieldtest1`.
+- Setzt XP, Level, Strecke, Raven, Inventar, Tagesaufgaben, Kartenfortschritt, Fog, Reisen und Cooldowns zurück.
+- Startbestand: 2 Beeren und 3 Futter; Raven beginnt mit 0 XP auf Level 1.
+- Studio-Punkte und gemeinsame Kartenkonfiguration bleiben ausdrücklich erhalten.
+- Der Reset-Parameter wird nach der Ausführung aus der URL entfernt, damit ein normales Neuladen nicht erneut zurücksetzt.
 
