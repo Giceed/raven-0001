@@ -8,5 +8,5 @@ async function installRavenApp(){
 window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();ravenInstallPrompt=event;updateRavenInstallButton();});
 window.addEventListener("appinstalled",()=>{ravenInstallPrompt=null;updateRavenInstallButton();setTemporaryMessage("🐦‍⬛ Raven wurde als App installiert.");});
 window.addEventListener("online",updateRavenConnectionState);window.addEventListener("offline",updateRavenConnectionState);
-window.addEventListener("DOMContentLoaded",()=>{updateRavenConnectionState();updateRavenInstallButton();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js?v=68-field-test-reset1").catch(error=>console.warn("Raven App-Service konnte nicht gestartet werden.",error));});
+window.addEventListener("DOMContentLoaded",()=>{updateRavenConnectionState();updateRavenInstallButton();if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js?v=69-habitat-animations1").catch(error=>console.warn("Raven App-Service konnte nicht gestartet werden.",error));});
 

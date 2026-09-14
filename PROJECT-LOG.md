@@ -144,4 +144,11 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Startbestand: 2 Beeren und 3 Futter; Raven beginnt mit 0 XP auf Level 1.
 - Studio-Punkte und gemeinsame Kartenkonfiguration bleiben ausdrücklich erhalten.
 - Der Reset-Parameter wird nach der Ausführung aus der URL entfernt, damit ein normales Neuladen nicht erneut zurücksetzt.
+# V4.7 – Habitat-Animationen
+
+- Ruhigerer, lebendiger Idle-Zyklus für Raven im Spieler-Habitat und Habitat Lab.
+- Füttern zeigt nun ein sichtbares Futter, das zu Raven fliegt, plus Fressbewegung.
+- Spielen kombiniert Hüpfen/Flattern mit einem aufsteigenden Herz.
+- Schlaf zeigt dauerhaft animierte Zzz, solange der Schlafzustand aktiv ist.
+- Mobile Größen und `prefers-reduced-motion` werden berücksichtigt.
 
