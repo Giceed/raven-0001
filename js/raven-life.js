@@ -1,6 +1,7 @@
 /* Erster spielbarer Raven: Bedürfnisse, Inventar, Mission und Player View. */
 const RAVEN_INVENTORY_CAPACITY=30;
 const RAVEN_OFFLINE_DECAY_CAP_HOURS=24;
+const RAVEN_MOVEMENT_STEP_METERS=1000;
 const RAVEN_ITEM_DEFS={
   beeren:{name:"Beeren",icon:"🫐",use:"food",hunger:10,mood:1},
   futter:{name:"Futter",icon:"🍖",use:"food",hunger:24,mood:4},
@@ -114,7 +115,7 @@ function canRavenStartExploration(){
   if(ravenLife.energy<10)return {ok:false,message:`${ravenProfile.name} ist zu erschöpft für eine neue Erkundung. Lass ihn zuerst ausruhen.`};
   return {ok:true,message:""};
 }
-function applyRavenMovement(meters){ravenLife.movementMeters=(ravenLife.movementMeters||0)+Math.max(0,meters||0);if(ravenLife.movementMeters<250)return;const steps=Math.floor(ravenLife.movementMeters/250);ravenLife.movementMeters-=steps*250;ravenLife.hunger=clampRavenNeed(ravenLife.hunger-steps);ravenLife.energy=clampRavenNeed(ravenLife.energy-steps*.6);saveRavenLife();renderRavenGamePanel();}
+function applyRavenMovement(meters){ravenLife.movementMeters=(ravenLife.movementMeters||0)+Math.max(0,meters||0);if(ravenLife.movementMeters<RAVEN_MOVEMENT_STEP_METERS)return;const steps=Math.floor(ravenLife.movementMeters/RAVEN_MOVEMENT_STEP_METERS);ravenLife.movementMeters-=steps*RAVEN_MOVEMENT_STEP_METERS;ravenLife.hunger=clampRavenNeed(ravenLife.hunger-steps);ravenLife.energy=clampRavenNeed(ravenLife.energy-steps*.6);saveRavenLife();renderRavenGamePanel();}
 function recordDailyTask(task,amount=1){if(ravenTestMode)return;ravenDaily=loadRavenDaily();ravenDaily[task]=(ravenDaily[task]||0)+amount;const done=ravenDaily.feed>0&&ravenDaily.play>0&&ravenDaily.collect>0;if(done&&!ravenDaily.rewarded){ravenDaily.rewarded=true;grantRavenMissionItems({lieblingsfutter:1});if(typeof addXP==="function")addXP(20);setRavenLifeMessage("☀️ Tagesaufgaben geschafft: Lieblingsfutter und 20 XP!");}localStorage.setItem("ravenDaily",JSON.stringify(ravenDaily));renderRavenGamePanel();}
 function openRavenNaming(){const overlay=document.getElementById("onboardingOverlay"),input=document.getElementById("ravenNameInput");if(overlay)overlay.style.display="flex";if(input){input.value=ravenProfile.name==="Raven"?"":ravenProfile.name;input.focus();}}
 function finishRavenOnboarding(){const input=document.getElementById("ravenNameInput"),name=String(input?.value||"").trim().slice(0,18);ravenProfile.name=name||"Raven";ravenProfile.onboardingDone=true;localStorage.setItem("ravenProfile",JSON.stringify(ravenProfile));document.getElementById("onboardingOverlay").style.display="none";setRavenLifeMessage(`${ravenProfile.name} ist bereit für euer Abenteuer.`);renderRavenGamePanel();}

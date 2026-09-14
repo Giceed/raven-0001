@@ -24,8 +24,8 @@ async function runRavenLifeTests(){
     results.push(ravenLifeTestResult("8 · Ortsabhängige Funde",valid,"300 Brunnen-, Spielplatz-, Sportplatz- und Park-Funde geprüft"));
     results.push(ravenLifeTestResult("9 · Aktivitäts-Cooldown",typeof ACTIVITY_COOLDOWN_MS!=="undefined"&&ACTIVITY_COOLDOWN_MS===60*1000,"Aktivität bleibt im Prototyp exakt 1 Minute erschöpft"));
     results.push(ravenLifeTestResult("10 · NFC-Spielersperre",isRavenPlayerLocked("?view=player")&&!isRavenPlayerLocked("?v=developer"),"Spielerlink gesperrt · Entwicklerlink frei"));
-    ravenLife={hunger:50,energy:50,mood:50,movementMeters:0,updatedAt:Date.now()};applyRavenMovement(249);const beforeStep=ravenLife.hunger===50&&ravenLife.energy===50;applyRavenMovement(1);
-    results.push(ravenLifeTestResult("11 · Bewegungskosten",beforeStep&&ravenLife.hunger===49&&ravenLife.energy===49,"nach 250 m sinken Hunger und Energie"));
+    ravenLife={hunger:50,energy:50,mood:50,movementMeters:0,updatedAt:Date.now()};applyRavenMovement(999);const beforeStep=ravenLife.hunger===50&&ravenLife.energy===50;applyRavenMovement(1);
+    results.push(ravenLifeTestResult("11 · Bewegungskosten",beforeStep&&ravenLife.hunger===49&&ravenLife.energy===49,"nach 1 km sinken Hunger um 1 und Energie um 0,6"));
     ravenLife={hunger:20,energy:100,mood:100,movementMeters:0,updatedAt:Date.now()};
     results.push(ravenLifeTestResult("12 · Abhängige Stimmung",effectiveRavenMood()===75&&ravenMoodStatus()==="Unruhig","volle Laune kann Hunger nicht überdecken"));
     const offlineNow=Date.now();ravenLife={hunger:80,energy:80,mood:80,movementMeters:0,updatedAt:offlineNow-7*24*3600000};applyRavenTime(offlineNow);

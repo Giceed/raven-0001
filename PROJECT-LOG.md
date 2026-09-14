@@ -66,4 +66,9 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Schlafzeiten können Raven nicht länger als zehn Minuten blockieren.
 - Der vollständig erschöpfte Zustand wurde als heilbar getestet: füttern und schlafen funktionieren ohne Datenreset.
 - Raven-Stresstest auf 16 Prüfungen erweitert.
+## V3.7 – Hugo-Balance vereinheitlicht
+
+- Bewegung kostet jetzt in Spiel, Testbots und Tageslabor einheitlich 1 Hunger sowie 0,6 Energie pro Kilometer.
+- Der vorherige Spielwert von 1 Hunger pro 250 Meter war versehentlich viermal härter als das im Tageslabor empfohlene Profil „Hugo · Aktuell“.
+- Der Bewegungstest prüft jetzt ausdrücklich die Grenze bei 999/1000 Metern.
 
