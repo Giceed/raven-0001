@@ -498,4 +498,5 @@ button{
 .jumper-controls button{min-height:44px}
 .inventory-slot button{min-width:58px}
 .install-raven{width:auto;min-height:36px;padding:7px 10px;border:1px solid #7c3aed;border-radius:8px;background:#2e1065;color:#e9d5ff;font-size:9px;font-weight:900}.install-raven[hidden]{display:none}.online.offline{color:#fbbf24}
+.habitat-link{display:inline-flex;align-items:center;min-height:36px;padding:7px 10px;border:1px solid #334155;border-radius:8px;color:#ddd6fe;text-decoration:none;font-size:9px;font-weight:900;background:#111827}.player-locked .habitat-link{display:none}@media(max-width:520px){body:not(.player-locked) .habitat-link{display:none}}
 

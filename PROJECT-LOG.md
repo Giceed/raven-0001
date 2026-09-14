@@ -109,4 +109,10 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Hunger, Müdigkeit, schlechte Stimmung, Glück und Schlaf verändern die sichtbare Szene automatisch.
 - Füttern, Spielen, Energiekorn und Schlafen lösen kurze, mobile Animationen und passende Reaktionen aus.
 - Die Zustandslogik ist vom Spielstand getrennt und wird als 21. Raven-Stresstest geprüft.
+# V4.4 – Raven Habitat Lab
+
+- Eigene fünfte Entwicklerseite für Raven, Animationen und die spätere Hubworld ergänzt.
+- Live-Interaktionen lesen und schreiben dieselben lokalen Raven-Daten wie die Spieleransicht.
+- Sechs Tierzustände, vier Aktionsanimationen und drei Umgebungsstimmungen sind direkt vorführbar.
+- Vorschau-Zustände verändern keine echten Spielwerte; Live-Füttern, Spielen und Schlafen dagegen schon.
 
