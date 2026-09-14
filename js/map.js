@@ -37,8 +37,8 @@ L.tileLayer(
   {
     maxZoom:19,
     noWrap:true,
-    bounds:BAD_WUENNENBERG_BOUNDS.pad(.15),
-    keepBuffer:2,
+    keepBuffer:1,
+    updateWhenIdle:true,
     attribution:"© OpenStreetMap"
   }
 ).addTo(map);

@@ -127,4 +127,9 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Exportierbarer TXT-Bericht bündelt Gerät, Raven-Werte, Reisen, Diagnose und Spielereignisse.
 - Bis zu 30 Reiseberichte werden lokal gesichert; Diagnose bleibt auf 100 Einträge begrenzt.
 - GPS-Fehler unterscheiden nun fehlende Berechtigung, nicht verfügbare Position und Zeitüberschreitung.
+# V4.6.1 – God-Mode-Zoomfix
+
+- Schwarze Kartenfläche beim Rauszoomen auf God-Mode-Zoomstufe 11 behoben.
+- OSM-Kacheln werden nur für den sichtbaren Bildschirm geladen und nicht mehr an einer zu engen Rechteckgrenze abgeschnitten.
+- Kartenmittelpunkt, Fürstenberg-Maske und Testgebiet bleiben weiterhin begrenzt.
 
