@@ -115,4 +115,10 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Live-Interaktionen lesen und schreiben dieselben lokalen Raven-Daten wie die Spieleransicht.
 - Sechs Tierzustände, vier Aktionsanimationen und drei Umgebungsstimmungen sind direkt vorführbar.
 - Vorschau-Zustände verändern keine echten Spielwerte; Live-Füttern, Spielen und Schlafen dagegen schon.
+# V4.5 – Habitat und Karte als Spielablauf
+
+- Spieleransicht startet jetzt im Habitat und wechselt innerhalb derselben App zur Karte.
+- Eine Erkundung kann direkt im Habitat begonnen und auf der Karte beendet werden.
+- Nach der Rückkehr zeigt das Habitat Strecke, neue Punkte, Aktivitäten, Items und XP der Tour.
+- Entwickleransicht, Studio, Bots und Tageslabor bleiben eigenständige Werkzeuge.
 
