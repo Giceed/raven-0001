@@ -2,6 +2,9 @@
 
 ## Aktueller Stand
 
+- Raven V3.5 begrenzt den passiven Werteverlust bei geschlossener App auf höchstens 24 Stunden. Eine längere Pause bestraft den Spieler nicht mehrfach; der neue Abwesenheitstest erweitert den Raven-Stresstest auf 13/13 Fälle.
+- Härtungslauf vom 14. September: 10/10 Karten-Grenzfälle, 12/12 Raven-Stresstests und ein vollständiger 24-Stunden-Straßenlauf bestanden. Spielerzustand blieb nach Neuladen identisch; Entwicklerwerkzeuge waren im NFC-Spielerlink verborgen; Entwickler-, Spieler- und Laborseite meldeten keine Browserfehler.
+- Vierzehn zentrale Spieler-Schaltflächen besitzen jetzt mindestens 44 Pixel Höhe für zuverlässige Touch-Bedienung. Der veröffentlichte Handy-Stand wurde nach dem GitHub-Pages-Update erneut vermessen.
 - Das Tageslabor nutzt jetzt exakt dieselbe Punkt-Auswahl wie Spiel und Studio, filtert zusätzlich hart gegen die amtliche Fürstenberg-Grenze und lässt zehn Balance-Ravens echte, vom Fußgänger-Router erzeugte Straßenschleifen laufen. POIs werden nur bei einem tatsächlichen Radiuskontakt im Vorbeigehen ausgelöst; ein direktes Abarbeiten von POI zu POI wurde entfernt.
 - Auch die vier Hauptbots filtern ihre Ziele gegen die amtliche Fürstenberg-Grenze und zeigen diese auf ihrer Testkarte.
 - Raven V3.4 ersetzt das sofortige Ausruhen durch einen gespeicherten Schlafmodus. Je 10 fehlende Energie plant Raven ungefähr eine Minute Schlaf, mindestens eine und höchstens zehn Minuten. Währenddessen sind Füttern, Spielen, Jumper und neuer Erkundungsstart gesperrt; ein Neuladen unterbricht den Countdown nicht.
@@ -50,10 +53,10 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 
 ## Danach
 
-1. Rathaus als ersten wöchentlichen Minispiel-Ort mit Raven-Jumper-Highscore testen.
-2. Schlafmodus mit sichtbarem Raven und 5–10 Minuten Erholungszeit prototypisieren.
-3. Bot-Raven-Läufe vollständig auswerten und Bedürfnis-Balancing vormerken.
-4. Ergebnisse des Außentests auswerten und Kartenmechanik feinjustieren.
+1. Den korrigierten 24-Stunden-Straßenlauf im Tageslabor erneut ausführen und die zehn Raven-Profile vergleichen.
+2. Finn/Hugo und die übrigen Balance-Profile auswerten und einen ersten offiziellen Hunger-/Energie-Vorschlag festlegen.
+3. Rathaus als ersten wöchentlichen Minispiel-Ort mit Raven-Jumper-Highscore testen.
+4. Ergebnisse des echten GPS-Außentests auswerten und Kartenmechanik feinjustieren.
 5. Inventargrenze, Federn, Glanzsteine und Raven-Entwicklung definieren.
 6. Weitere Ortsteile erst nach stabilem Fürstenberg-Test ergänzen.
 

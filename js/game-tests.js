@@ -28,6 +28,8 @@ async function runRavenLifeTests(){
     results.push(ravenLifeTestResult("11 · Bewegungskosten",beforeStep&&ravenLife.hunger===49&&ravenLife.energy===49,"nach 250 m sinken Hunger und Energie"));
     ravenLife={hunger:20,energy:100,mood:100,movementMeters:0,updatedAt:Date.now()};
     results.push(ravenLifeTestResult("12 · Abhängige Stimmung",effectiveRavenMood()===75&&ravenMoodStatus()==="Unruhig","volle Laune kann Hunger nicht überdecken"));
+    const offlineNow=Date.now();ravenLife={hunger:80,energy:80,mood:80,movementMeters:0,updatedAt:offlineNow-7*24*3600000};applyRavenTime(offlineNow);
+    results.push(ravenLifeTestResult("13 · Faire Abwesenheit",ravenLife.hunger===27&&ravenLife.energy===49&&ravenLife.mood===61,"eine Woche Abwesenheit wird höchstens wie 24 Stunden berechnet"));
   }catch(error){results.push(ravenLifeTestResult("Testsystem",false,error.message||String(error)));}
   finally{
     ravenTestMode=false;

@@ -1,5 +1,6 @@
 /* Erster spielbarer Raven: Bedürfnisse, Inventar, Mission und Player View. */
 const RAVEN_INVENTORY_CAPACITY=30;
+const RAVEN_OFFLINE_DECAY_CAP_HOURS=24;
 const RAVEN_ITEM_DEFS={
   beeren:{name:"Beeren",icon:"🫐",use:"food",hunger:10,mood:1},
   futter:{name:"Futter",icon:"🍖",use:"food",hunger:24,mood:4},
@@ -33,14 +34,14 @@ function applyRavenSleep(now=Date.now()){
   ravenLife.energy=clampRavenNeed(Math.max(ravenLife.energy,startEnergy+(100-startEnergy)*progress));
   if(now>=until){ravenLife.energy=100;ravenLife.sleepUntil=0;ravenLife.sleepStartedAt=0;ravenLife.sleepStartEnergy=0;saveRavenLife();setRavenLifeMessage(`${ravenProfile.name} ist ausgeschlafen und wieder bereit.`);}
 }
-function applyRavenTime(){
-  applyRavenSleep();
-  const elapsed=Math.min(48,(Date.now()-(Number(ravenLife.updatedAt)||Date.now()))/3600000);
+function applyRavenTime(now=Date.now()){
+  applyRavenSleep(now);
+  const elapsed=Math.max(0,Math.min(RAVEN_OFFLINE_DECAY_CAP_HOURS,(now-(Number(ravenLife.updatedAt)||now))/3600000));
   if(elapsed<=.02)return;
   ravenLife.hunger=clampRavenNeed(ravenLife.hunger-elapsed*2.2);
   ravenLife.energy=clampRavenNeed(ravenLife.energy-elapsed*1.3);
   ravenLife.mood=clampRavenNeed(ravenLife.mood-elapsed*.8);
-  saveRavenLife();
+  ravenLife.updatedAt=now;localStorage.setItem("ravenLife",JSON.stringify(ravenLife));
 }
 function createRavenActivityReward(point={}){
   const name=String(point.name||"").toLowerCase(),roll=Math.random();let reward;
