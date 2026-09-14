@@ -59,4 +59,11 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 4. Ergebnisse des echten GPS-Außentests auswerten und Kartenmechanik feinjustieren.
 5. Inventargrenze, Federn, Glanzsteine und Raven-Entwicklung definieren.
 6. Weitere Ortsteile erst nach stabilem Fürstenberg-Test ergänzen.
+## V3.6 – Speicherzustand gehärtet
+
+- Raven-Werte aus dem lokalen Speicher werden beim Laden auf gültige Zahlen und sichere Grenzen normalisiert.
+- Fehlerhafte Gerätezeiten ziehen keine Bedürfnisse ab.
+- Schlafzeiten können Raven nicht länger als zehn Minuten blockieren.
+- Der vollständig erschöpfte Zustand wurde als heilbar getestet: füttern und schlafen funktionieren ohne Datenreset.
+- Raven-Stresstest auf 16 Prüfungen erweitert.
 

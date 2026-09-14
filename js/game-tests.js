@@ -30,6 +30,12 @@ async function runRavenLifeTests(){
     results.push(ravenLifeTestResult("12 · Abhängige Stimmung",effectiveRavenMood()===75&&ravenMoodStatus()==="Unruhig","volle Laune kann Hunger nicht überdecken"));
     const offlineNow=Date.now();ravenLife={hunger:80,energy:80,mood:80,movementMeters:0,updatedAt:offlineNow-7*24*3600000};applyRavenTime(offlineNow);
     results.push(ravenLifeTestResult("13 · Faire Abwesenheit",ravenLife.hunger===27&&ravenLife.energy===49&&ravenLife.mood===61,"eine Woche Abwesenheit wird höchstens wie 24 Stunden berechnet"));
+    const broken=normalizeRavenLifeState({hunger:-500,energy:Infinity,mood:240,movementMeters:-12,updatedAt:"kaputt",sleepUntil:Infinity},offlineNow);
+    results.push(ravenLifeTestResult("14 · Kaputte Speicherdaten",broken.hunger===0&&broken.energy===82&&broken.mood===100&&broken.movementMeters===0&&broken.updatedAt===offlineNow&&broken.sleepUntil===0,"ungültige Werte werden sicher repariert und begrenzt"));
+    ravenLife={hunger:50,energy:50,mood:50,movementMeters:0,updatedAt:offlineNow+24*3600000};applyRavenTime(offlineNow);
+    results.push(ravenLifeTestResult("15 · Uhrzeit in der Zukunft",ravenLife.hunger===50&&ravenLife.energy===50&&ravenLife.mood===50,"eine falsche Gerätezeit zieht keine Bedürfnisse ab"));
+    ravenLife={hunger:0,energy:0,mood:15,movementMeters:0,updatedAt:Date.now(),sleepStartedAt:0,sleepUntil:0,sleepStartEnergy:0};ravenItems={futter:1,feder:0,glanzstein:0};feedRaven("futter");restRaven();
+    results.push(ravenLifeTestResult("16 · Erschöpfter Raven erholt sich",ravenLife.hunger===24&&ravenLife.mood===19&&isRavenSleeping()&&ravenLife.sleepUntil-ravenLife.sleepStartedAt===10*60000,"Füttern und Schlafen lösen den Nullzustand ohne Reset"));
   }catch(error){results.push(ravenLifeTestResult("Testsystem",false,error.message||String(error)));}
   finally{
     ravenTestMode=false;

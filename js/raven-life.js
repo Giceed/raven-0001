@@ -10,7 +10,7 @@ const RAVEN_ITEM_DEFS={
   glanzstein:{name:"Glanzstein",icon:"💎"}
 };
 let ravenItems=readRavenJSON("ravenItems",{beeren:2,futter:3,lieblingsfutter:0,energiekorn:0,feder:0,glanzstein:0});
-let ravenLife=readRavenJSON("ravenLife",{hunger:78,energy:82,mood:76,movementMeters:0,updatedAt:Date.now(),sleepStartedAt:0,sleepUntil:0,sleepStartEnergy:0});
+let ravenLife=normalizeRavenLifeState(readRavenJSON("ravenLife",{hunger:78,energy:82,mood:76,movementMeters:0,updatedAt:Date.now(),sleepStartedAt:0,sleepUntil:0,sleepStartEnergy:0}));
 let ravenPendingItems=readRavenJSON("ravenPendingItems",{beeren:0,futter:0,lieblingsfutter:0,energiekorn:0,feder:0,glanzstein:0});
 let ravenProfile=readRavenJSON("ravenProfile",{name:"Raven",onboardingDone:false});
 let ravenDaily=loadRavenDaily();
@@ -20,6 +20,16 @@ const ravenPlayerLocked=isRavenPlayerLocked();
 let ravenPlayerView=ravenPlayerLocked||localStorage.getItem("ravenPlayerView")!=="developer";
 
 function readRavenJSON(key,fallback){try{return {...fallback,...JSON.parse(localStorage.getItem(key)||"null")};}catch{return {...fallback};}}
+function finiteRavenNumber(value,fallback){const number=Number(value);return Number.isFinite(number)?number:fallback;}
+function normalizeRavenLifeState(value={},now=Date.now()){
+  const sleepUntil=Math.min(Math.max(0,finiteRavenNumber(value.sleepUntil,0)),now+10*60000);
+  const sleepStartedAt=Math.min(Math.max(0,finiteRavenNumber(value.sleepStartedAt,0)),sleepUntil||now);
+  return {...value,
+    hunger:clampRavenNeed(finiteRavenNumber(value.hunger,78)),energy:clampRavenNeed(finiteRavenNumber(value.energy,82)),mood:clampRavenNeed(finiteRavenNumber(value.mood,76)),
+    movementMeters:Math.max(0,finiteRavenNumber(value.movementMeters,0)),updatedAt:Math.max(0,finiteRavenNumber(value.updatedAt,now)),
+    sleepStartedAt,sleepUntil,sleepStartEnergy:clampRavenNeed(finiteRavenNumber(value.sleepStartEnergy,0))
+  };
+}
 function ravenToday(){return new Date().toISOString().slice(0,10);}
 function loadRavenDaily(){const saved=readRavenJSON("ravenDaily",{});return saved.date===ravenToday()?{date:ravenToday(),feed:saved.feed||0,play:saved.play||0,collect:saved.collect||0,rewarded:Boolean(saved.rewarded)}:{date:ravenToday(),feed:0,play:0,collect:0,rewarded:false};}
 function clampRavenNeed(value){return Math.max(0,Math.min(100,Math.round(value)));}
@@ -35,6 +45,7 @@ function applyRavenSleep(now=Date.now()){
   if(now>=until){ravenLife.energy=100;ravenLife.sleepUntil=0;ravenLife.sleepStartedAt=0;ravenLife.sleepStartEnergy=0;saveRavenLife();setRavenLifeMessage(`${ravenProfile.name} ist ausgeschlafen und wieder bereit.`);}
 }
 function applyRavenTime(now=Date.now()){
+  ravenLife=normalizeRavenLifeState(ravenLife,now);
   applyRavenSleep(now);
   const elapsed=Math.max(0,Math.min(RAVEN_OFFLINE_DECAY_CAP_HOURS,(now-(Number(ravenLife.updatedAt)||now))/3600000));
   if(elapsed<=.02)return;
@@ -135,7 +146,7 @@ function applyRavenPlayerView(){
 }
 function toggleRavenPlayerView(){if(ravenPlayerLocked)return;ravenPlayerView=!ravenPlayerView;applyRavenPlayerView();}
 window.addEventListener("storage",event=>{
-  if(event.key==="ravenLife"&&event.newValue)ravenLife=readRavenJSON("ravenLife",ravenLife);
+  if(event.key==="ravenLife"&&event.newValue)ravenLife=normalizeRavenLifeState(readRavenJSON("ravenLife",ravenLife));
   if(event.key==="ravenItems"&&event.newValue)ravenItems=readRavenJSON("ravenItems",ravenItems);
   if(event.key==="ravenPendingItems"&&event.newValue)ravenPendingItems=readRavenJSON("ravenPendingItems",ravenPendingItems);
   if(event.key==="ravenProfile"&&event.newValue)ravenProfile=readRavenJSON("ravenProfile",ravenProfile);
