@@ -483,3 +483,12 @@ button{
 .poi-sync-status.error{border-color:#ef5350;color:#ff8c89}
 .raven-actions button:disabled{opacity:.5;cursor:not-allowed;border-color:#334155}
 
+/* Verlässliche Fingertasten – dieselben Bedienelemente werden später in der App genutzt. */
+.raven-actions button,
+.rename-raven,
+.inventory-slot button,
+.mode-btn,
+.point-type-btn,
+#exploreButton{min-height:44px}
+.inventory-slot button{min-width:58px}
+
