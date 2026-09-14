@@ -90,4 +90,11 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Mobile Ansicht bei 390 × 844 Pixeln ohne horizontales Überlaufen geprüft; auch Raven Jumper besitzt jetzt mindestens 44 Pixel hohe Fingertasten.
 - Raven Studio lädt die Fürstenberg-Punkte fehlerfrei. Das Tageslabor absolvierte einen vollständigen 24-Stunden-Lauf mit zehn Bots und zwölf Punkten innerhalb der Ortsgrenze; Fynn war bei diesem Datenstand der ausgeglichenste Kandidat.
 - Echte GPS-, Radius- und Bewegungsprüfung draußen bleibt als letzter Pflicht-Praxistest offen.
+## V4.1 – Installierbare PWA-Grundlage
+
+- Die Spieleransicht kann über das Browsermenü beziehungsweise den eingeblendeten App-Knopf als Raven-App installiert werden.
+- App-Starts führen direkt in die gesperrte Spieleransicht; Manifest, normales Icon und Maskable-Icon sind vorhanden.
+- Ein Service Worker hält Oberfläche, Spiellogik und Fürstenberg-Grunddaten verfügbar und entfernt veraltete Raven-Caches automatisch.
+- OpenStreetMap-Kartenkacheln werden bewusst nicht massenhaft offline gespeichert, damit Raven nicht erneut Speicher- und Ruckelprobleme bekommt.
+- Online-/Offline-Zustand wird im Kopfbereich sichtbar. Die eigentliche Live-Karte und GPS-Ortsauflösung benötigen weiterhin eine Verbindung.
 
