@@ -3,7 +3,7 @@
    der Exportdatei lädt die Spielkarte die Änderungen automatisch. */
 (async function loadSharedRavenPoints(){
   try{
-    const localPayload=JSON.parse(localStorage.getItem("ravenSharedPoisLive")||"null");
+    const localPayload=readRavenStorageJSON("ravenSharedPoisLive",null);
     const usingStudioData=Array.isArray(localPayload?.points);
     let payload=localPayload;
     if(!usingStudioData){

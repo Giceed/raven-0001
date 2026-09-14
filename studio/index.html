@@ -81,7 +81,8 @@ map.createPane("territoryMaskPane");map.getPane("territoryMaskPane").style.zInde
 function joinBoundaryLines(lines){const rest=lines.map(line=>line.map(point=>[point[0],point[1]])),ring=rest.shift()||[],key=point=>point[0].toFixed(6)+","+point[1].toFixed(6);while(rest.length){const end=key(ring[ring.length-1]),index=rest.findIndex(line=>key(line[0])===end||key(line[line.length-1])===end);if(index<0)break;let next=rest.splice(index,1)[0];if(key(next[next.length-1])===end)next.reverse();ring.push(...next.slice(1));}if(ring.length&&key(ring[0])!==key(ring[ring.length-1]))ring.push(ring[0]);return ring;}
 async function cutMapToBadWuennenberg(){const south=51.492,west=8.713,north=51.538,east=8.774,ring=[[south,west],[south,east],[north,east],[north,west],[south,west]],outside=[[-85,-180],[-85,180],[85,180],[85,-180],[-85,-180]];L.polygon([outside,ring],{pane:"territoryMaskPane",stroke:false,fillColor:"#05070b",fillOpacity:1,fillRule:"evenodd",interactive:false}).addTo(map);L.polyline(ring,{color:"#a855f7",weight:3,opacity:.9,dashArray:"8 6",interactive:false}).addTo(map);map.fitBounds(ring,{padding:[14,14]});}
 cutMapToBadWuennenberg();
-const state=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")||{center:{lat:51.5157,lon:8.741,name:"Fürstenberg, Bad Wünnenberg"},candidates:[]};
+function parseStudioState(raw){try{const parsed=JSON.parse(raw);if(parsed&&typeof parsed==="object"&&!Array.isArray(parsed)&&Array.isArray(parsed.candidates))return parsed;}catch{}return{center:{lat:51.5157,lon:8.741,name:"Fürstenberg, Bad Wünnenberg"},candidates:[]};}
+const state=parseStudioState(localStorage.getItem(STORAGE_KEY));
 let markers=new Map(),markerLayer=L.layerGroup().addTo(map),selectedId=null,radiusCircle=null,moveId=null,addPointMode=false;
 let activePoiGroup="all";
 let activePointType="all";

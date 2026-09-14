@@ -6,14 +6,14 @@ let xp = Number(localStorage.getItem("ravenXP")) || 0;
 let level = Number(localStorage.getItem("ravenLevel")) || 1;
 let totalDistance = Number(localStorage.getItem("ravenDistance")) || 0;
 
-let exploredPoints =
-  JSON.parse(localStorage.getItem("ravenExploredPoints")) || [];
+let exploredPoints = readRavenStorageJSON("ravenExploredPoints",[]);
+if(!Array.isArray(exploredPoints))exploredPoints=[];
 
-let travelHistory =
-  JSON.parse(localStorage.getItem("ravenTravelHistory")) || [];
+let travelHistory = readRavenStorageJSON("ravenTravelHistory",[]);
+if(!Array.isArray(travelHistory))travelHistory=[];
 
-let discoveredPlaces =
-  JSON.parse(localStorage.getItem("ravenDiscoveredPlaces")) || [];
+let discoveredPlaces = readRavenStorageJSON("ravenDiscoveredPlaces",[]);
+if(!Array.isArray(discoveredPlaces))discoveredPlaces=[];
 
 /* Alte Testreisen außerhalb des aktuellen Stadtgebiets entfernen. */
 const ravenAllowedDistricts=new Set([

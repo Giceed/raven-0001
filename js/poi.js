@@ -27,7 +27,7 @@ function collectActivityReward(point){
   const cooldowns=getActivityCooldowns();cooldowns[point.id]=Date.now()+ACTIVITY_COOLDOWN_MS;
   localStorage.setItem("ravenActivityCooldowns",JSON.stringify(cooldowns));
   if(typeof addRavenItems!=="function"){
-    const items=JSON.parse(localStorage.getItem("ravenItems")||'{"futter":0}');items.futter=(items.futter||0)+1;localStorage.setItem("ravenItems",JSON.stringify(items));
+    const items=readRavenStorageJSON("ravenItems",{futter:0});items.futter=(Number(items.futter)||0)+1;localStorage.setItem("ravenItems",JSON.stringify(items));
   }
   addXP(FUERSTENBERG.activityXP);
   const rewardText=typeof ravenRewardText==="function"?ravenRewardText(reward):"1 Futter";

@@ -77,4 +77,17 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Abgelaufene und ungültige Einträge werden ignoriert.
 - Unrealistisch lange Sperren werden im Prototyp sicher auf höchstens eine Minute begrenzt.
 - Raven-Stresstest auf 19 Prüfungen erweitert; Testdaten werden anschließend vollständig zurückgesetzt.
+## V3.9 – Gesamtspeicher gehärtet
+
+- Mission, Fog-Verlauf, Reisebuch, entdeckte Orte, Studio-Synchronisierung und Testprotokoll lesen lokale Daten jetzt fehlertolerant.
+- Falsche Datentypen werden durch sichere leere Grundzustände ersetzt.
+- Raven Studio stellt bei beschädigtem Projektspeicher eine leere Fürstenberg-Arbeitskarte her, statt beim Start abzustürzen.
+- Raven-Stresstest auf 20 Prüfungen erweitert.
+## V4.0 – Gehärteter Fürstenberg-Prototyp
+
+- Abschlusslauf: 6/6 Selbstprüfungen, 10/10 Karten-Grenzfälle und 20/20 Raven-Stresstests bestanden.
+- Spielerlink behält Name, Inventar und Mission nach Neuladen und verbirgt Entwickler- sowie God-Mode-Werkzeuge.
+- Mobile Ansicht bei 390 × 844 Pixeln ohne horizontales Überlaufen geprüft; auch Raven Jumper besitzt jetzt mindestens 44 Pixel hohe Fingertasten.
+- Raven Studio lädt die Fürstenberg-Punkte fehlerfrei. Das Tageslabor absolvierte einen vollständigen 24-Stunden-Lauf mit zehn Bots und zwölf Punkten innerhalb der Ortsgrenze; Fynn war bei diesem Datenstand der ausgeglichenste Kandidat.
+- Echte GPS-, Radius- und Bewegungsprüfung draußen bleibt als letzter Pflicht-Praxistest offen.
 

@@ -489,6 +489,8 @@ button{
 .inventory-slot button,
 .mode-btn,
 .point-type-btn,
-#exploreButton{min-height:44px}
+#exploreButton,
+.minigame-card>.primary,
+.jumper-controls button{min-height:44px}
 .inventory-slot button{min-width:58px}
 

@@ -5,6 +5,9 @@
      bereits freigeschaltet.
    ========================================================== */
 
+function parseRavenJSONText(raw,fallback){try{const parsed=JSON.parse(raw);return parsed??fallback;}catch{return fallback;}}
+function readRavenStorageJSON(key,fallback){return parseRavenJSONText(localStorage.getItem(key),fallback);}
+
 if (!localStorage.getItem("ravenV25DistrictResetDone")) {
 
   localStorage.removeItem("ravenExploredPoints");
@@ -32,9 +35,7 @@ if (!localStorage.getItem("ravenV25DistrictResetDone")) {
 
 /* V2.6: Einen Pflichtpunkt für Radius- und God-Mode-Tests offenhalten. */
 if (!localStorage.getItem("ravenV26RadiusTestResetDone")) {
-  const mission = JSON.parse(
-    localStorage.getItem("ravenFuerstenbergMission") || "{}"
-  );
+  const mission = readRavenStorageJSON("ravenFuerstenbergMission",{});
 
   mission.visitedPOIs = (mission.visitedPOIs || [])
     .filter(id => id !== "rathaus");
@@ -50,9 +51,7 @@ if (!localStorage.getItem("ravenV26RadiusTestResetDone")) {
 
 /* Zweiter V2.6-Testreset: Schloss und Rathaus bleiben offen. */
 if (!localStorage.getItem("ravenV26RadiusTestReset2Done")) {
-  const mission = JSON.parse(
-    localStorage.getItem("ravenFuerstenbergMission") || "{}"
-  );
+  const mission = readRavenStorageJSON("ravenFuerstenbergMission",{});
 
   mission.visitedPOIs = (mission.visitedPOIs || [])
     .filter(id => id !== "schloss" && id !== "rathaus");
@@ -67,9 +66,7 @@ if (!localStorage.getItem("ravenV26RadiusTestReset2Done")) {
 
 /* V2.6 r4: Teststand auch in getrennten Browser-Speichern herstellen. */
 if (!localStorage.getItem("ravenV26RadiusTestR4Done")) {
-  const mission = JSON.parse(
-    localStorage.getItem("ravenFuerstenbergMission") || "{}"
-  );
+  const mission = readRavenStorageJSON("ravenFuerstenbergMission",{});
 
   mission.visitedPOIs = ["st_marien"];
   mission.visitedActivities = mission.visitedActivities || [];
@@ -216,11 +213,13 @@ const ALL_POINTS = [
 ];
 
 let fuerstenbergMission =
-  JSON.parse(localStorage.getItem("ravenFuerstenbergMission")) || {
+  readRavenStorageJSON("ravenFuerstenbergMission",{
     visitedPOIs:[],
     visitedActivities:[],
     completed:false
-  };
+  });
+
+if(!fuerstenbergMission||typeof fuerstenbergMission!=="object"||Array.isArray(fuerstenbergMission))fuerstenbergMission={visitedPOIs:[],visitedActivities:[],completed:false};
 
 fuerstenbergMission.visitedPOIs =
   (fuerstenbergMission.visitedPOIs || []).filter(id =>

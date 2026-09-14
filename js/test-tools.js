@@ -1,6 +1,6 @@
 /* Raven Testzentrale – Diagnose, Protokoll und reproduzierbarer Testreset. */
 const RAVEN_EVENT_KEY="ravenTestEvents";
-let ravenTestEvents=JSON.parse(localStorage.getItem(RAVEN_EVENT_KEY)||"[]");
+let ravenTestEvents=readRavenStorageJSON(RAVEN_EVENT_KEY,[]);if(!Array.isArray(ravenTestEvents))ravenTestEvents=[];
 
 function logRavenEvent(type,detail=""){
   ravenTestEvents.push({time:Date.now(),type,detail});
@@ -18,7 +18,7 @@ function updateRavenDevPanel(){
   const explorations=points.filter(p=>p.type==="exploration");
   const activities=points.filter(p=>p.type==="activity");
   const nearest=currentLat==null?null:points.map(p=>({p,d:haversineDistance(currentLat,currentLon,p.lat,p.lon)})).sort((a,b)=>a.d-b.d)[0];
-  const items=JSON.parse(localStorage.getItem("ravenItems")||'{"futter":0}');
+  const items=readRavenStorageJSON("ravenItems",{futter:0});
   document.getElementById("devGrid").innerHTML=`
     <div class="dev-metric">Ort<b>${escapeHTML(currentRavenDistrict||"unbekannt")}</b></div>
     <div class="dev-metric">GPS<b>${currentAccuracy==null?"–":"±"+Math.round(currentAccuracy)+" m"}</b></div>

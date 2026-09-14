@@ -41,6 +41,8 @@ async function runRavenLifeTests(){
     const cooldownNow=Date.now();localStorage.setItem("ravenActivityCooldowns",JSON.stringify({alt:cooldownNow-1,okay:cooldownNow+30000,falsch:"nie",zuLang:cooldownNow+3600000}));const cooldowns=getActivityCooldowns(cooldownNow);
     results.push(ravenLifeTestResult("18 · Abgelaufener Cooldown",!("alt" in cooldowns)&&cooldowns.okay===cooldownNow+30000&&!("falsch" in cooldowns),"abgelaufene und ungültige Einträge werden verworfen"));
     results.push(ravenLifeTestResult("19 · Cooldown-Begrenzung",cooldowns.zuLang===cooldownNow+ACTIVITY_COOLDOWN_MS,"ein fehlerhafter Cooldown kann höchstens eine Minute sperren"));
+    const jsonFallback={safe:true};
+    results.push(ravenLifeTestResult("20 · Allgemeine Speicherdaten",parseRavenJSONText("{defekt",jsonFallback)===jsonFallback&&parseRavenJSONText("null",jsonFallback)===jsonFallback&&parseRavenJSONText('{"ok":1}',jsonFallback).ok===1,"Mission, Fog, Reisen und Studio überstehen beschädigte JSON-Daten"));
   }catch(error){results.push(ravenLifeTestResult("Testsystem",false,error.message||String(error)));}
   finally{
     ravenTestMode=false;
