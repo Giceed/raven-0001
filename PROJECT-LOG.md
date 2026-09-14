@@ -103,4 +103,10 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Wenn Android die native Installation anbietet, öffnet der Knopf direkt den Systemdialog. Andernfalls zeigt Raven den Weg über Chrome und „Zum Startbildschirm hinzufügen“ an.
 - Manifest und App-Cache wurden für eine erneute Android-Erkennung aktualisiert.
 - Auf iPhone und iPad erklärt Raven den Safari-Weg über „Teilen“ und „Zum Home-Bildschirm“; Appmodus und Apple-Touch-Icon werden ausdrücklich geprüft.
+## V4.3 – Tamagotchi-Reaktionen
+
+- Raven besitzt jetzt einen eigenen kleinen Lebensraum mit Sitzast, Nachthimmel, Zustandszeile und Sprechblase.
+- Hunger, Müdigkeit, schlechte Stimmung, Glück und Schlaf verändern die sichtbare Szene automatisch.
+- Füttern, Spielen, Energiekorn und Schlafen lösen kurze, mobile Animationen und passende Reaktionen aus.
+- Die Zustandslogik ist vom Spielstand getrennt und wird als 21. Raven-Stresstest geprüft.
 

@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-  <meta name="raven-version" content="4.2-mobile-install">
+  <meta name="raven-version" content="4.3-tamagotchi-reactions">
 <title>RAVEN #0001</title>
 
 <link rel="manifest" href="manifest.webmanifest?v=61-install-fix1">
@@ -20,7 +20,7 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<link rel="stylesheet" href="css/raven.css?v=61-install-fix1">
+<link rel="stylesheet" href="css/raven.css?v=62-tamagotchi1">
 </head>
 
 <body>
@@ -34,9 +34,15 @@
 
 <div class="card">
 
-<div class="raven" id="ravenAvatar">🐦‍⬛</div>
+<div class="raven-habitat" id="ravenHabitat" data-state="content">
+  <div class="raven-sky"><i></i><i></i><i></i></div>
+  <div class="raven-reaction" id="ravenReaction" aria-live="polite"></div>
+  <div class="raven" id="ravenAvatar">🐦‍⬛</div>
+  <div class="raven-perch"></div>
+</div>
 <h1 id="ravenTitle">RAVEN #0001</h1>
 <div class="generation">Generation 1</div>
+<div class="raven-state-line" id="ravenStateLine">Raven beobachtet neugierig seine Umgebung.</div>
 
 <div class="level-line">
   <span>Level <strong id="level">1</strong></span>
@@ -258,7 +264,7 @@
 </div>
 
 <div class="version">
-      RAVEN PROTOTYPE V4.2 · MOBILE INSTALL
+      RAVEN PROTOTYPE V4.3 · TAMAGOTCHI
 </div>
 
 <div class="jumper-overlay" id="jumperOverlay">
@@ -318,7 +324,7 @@
 <script src="js/map.js?v=29testcenter2"></script>
 <script src="js/fog.js?v=41edge-tests1"></script>
 <script src="js/gps.js?v=48raven-readiness1"></script>
-<script src="js/raven-life.js?v=56-hugo-balance1"></script>
+<script src="js/raven-life.js?v=62-tamagotchi1"></script>
 <script src="js/raven-jumper.js?v=51raven-sleep1"></script>
 <script src="js/poi.js?v=58-storage-hardening1"></script>
 <script src="js/travelbook.js?v=28cache1"></script>
@@ -327,8 +333,8 @@
 <script src="js/test-tools.js?v=58-storage-hardening1"></script>
 <script src="js/bot-testers.js?v=56-hugo-balance1"></script>
 <script src="js/edge-tests.js?v=41edge-tests1"></script>
-<script src="js/game-tests.js?v=58-storage-hardening1"></script>
-<script src="js/pwa.js?v=61-install-fix1"></script>
+<script src="js/game-tests.js?v=62-tamagotchi1"></script>
+<script src="js/pwa.js?v=62-tamagotchi1"></script>
 
 </body>
 </html>

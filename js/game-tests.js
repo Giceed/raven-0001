@@ -43,6 +43,8 @@ async function runRavenLifeTests(){
     results.push(ravenLifeTestResult("19 · Cooldown-Begrenzung",cooldowns.zuLang===cooldownNow+ACTIVITY_COOLDOWN_MS,"ein fehlerhafter Cooldown kann höchstens eine Minute sperren"));
     const jsonFallback={safe:true};
     results.push(ravenLifeTestResult("20 · Allgemeine Speicherdaten",parseRavenJSONText("{defekt",jsonFallback)===jsonFallback&&parseRavenJSONText("null",jsonFallback)===jsonFallback&&parseRavenJSONText('{"ok":1}',jsonFallback).ok===1,"Mission, Fog, Reisen und Studio überstehen beschädigte JSON-Daten"));
+    const visualHungry=ravenVisualState({hunger:10,energy:90,mood:90},false,65),visualTired=ravenVisualState({hunger:90,energy:10,mood:90},false,65),visualHappy=ravenVisualState({hunger:90,energy:90,mood:90},false,90);
+    results.push(ravenLifeTestResult("21 · Tamagotchi-Zustände",visualHungry.state==="hungry"&&visualTired.state==="tired"&&visualHappy.state==="happy"&&ravenVisualState({},true,90).state==="sleeping","Hunger, Müdigkeit, Glück und Schlaf erzeugen eindeutige Ansichten"));
   }catch(error){results.push(ravenLifeTestResult("Testsystem",false,error.message||String(error)));}
   finally{
     ravenTestMode=false;

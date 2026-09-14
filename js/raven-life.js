@@ -16,6 +16,7 @@ let ravenPendingItems=readRavenJSON("ravenPendingItems",{beeren:0,futter:0,liebl
 let ravenProfile=readRavenJSON("ravenProfile",{name:"Raven",onboardingDone:false});
 let ravenDaily=loadRavenDaily();
 let ravenTestMode=false;
+let ravenReactionTimer=null;
 function isRavenPlayerLocked(search=location.search){return new URLSearchParams(search).get("view")==="player";}
 const ravenPlayerLocked=isRavenPlayerLocked();
 let ravenPlayerView=ravenPlayerLocked||localStorage.getItem("ravenPlayerView")!=="developer";
@@ -83,26 +84,39 @@ function claimPendingRavenItems(){
   if(changed){saveRavenItems();localStorage.setItem("ravenPendingItems",JSON.stringify(ravenPendingItems));}
 }
 function setRavenLifeMessage(text){const box=document.getElementById("ravenLifeMessage");if(box)box.textContent=text;}
+function ravenVisualState(life=ravenLife,sleeping=isRavenSleeping(),shownMood=effectiveRavenMood()){
+  if(sleeping)return{state:"sleeping",line:`${ravenProfile.name} schläft und sammelt Energie.`};
+  if(life.hunger<25)return{state:"hungry",line:`${ravenProfile.name} hat Hunger und wartet auf Futter.`};
+  if(life.energy<25)return{state:"tired",line:`${ravenProfile.name} ist müde und möchte schlafen.`};
+  if(shownMood<40)return{state:"sad",line:`${ravenProfile.name} braucht gerade etwas Aufmerksamkeit.`};
+  if(shownMood>=80)return{state:"happy",line:`${ravenProfile.name} ist glücklich und abenteuerlustig.`};
+  return{state:"content",line:`${ravenProfile.name} beobachtet neugierig seine Umgebung.`};
+}
+function showRavenReaction(action,text,duration=1700){
+  const habitat=document.getElementById("ravenHabitat"),bubble=document.getElementById("ravenReaction");if(!habitat||!bubble)return;
+  clearTimeout(ravenReactionTimer);habitat.dataset.action=action;bubble.textContent=text;bubble.classList.add("active");
+  ravenReactionTimer=setTimeout(()=>{delete habitat.dataset.action;bubble.classList.remove("active");ravenReactionTimer=null;},duration);
+}
 function feedRaven(itemId){
   if(isRavenSleeping()){setRavenLifeMessage(`${ravenProfile.name} schläft gerade.`);return;}
   const chosen=itemId||(ravenItems.beeren>0?"beeren":ravenItems.futter>0?"futter":ravenItems.lieblingsfutter>0?"lieblingsfutter":null),item=RAVEN_ITEM_DEFS[chosen];
   if(!chosen||!item||item.use!=="food"||(ravenItems[chosen]||0)<1){setRavenLifeMessage("Kein Futter mehr – besuche einen Aktivitätspunkt.");return;}
   if(ravenLife.hunger>=100){setRavenLifeMessage("Raven ist bereits satt.");return;}
   ravenItems[chosen]--;ravenLife.hunger=clampRavenNeed(ravenLife.hunger+item.hunger);ravenLife.mood=clampRavenNeed(ravenLife.mood+item.mood);
-  saveRavenItems();saveRavenLife();recordDailyTask("feed");setRavenLifeMessage(`${item.icon} ${item.name}: Raven hat gefressen und wirkt zufrieden.`);renderRavenGamePanel();
+  saveRavenItems();saveRavenLife();recordDailyTask("feed");setRavenLifeMessage(`${item.icon} ${item.name}: Raven hat gefressen und wirkt zufrieden.`);renderRavenGamePanel();showRavenReaction("eating",chosen==="lieblingsfutter"?"Mein Lieblingsfutter! ✨":"Mjam! Danke! 🍽️");
 }
-function useRavenItem(itemId){const item=RAVEN_ITEM_DEFS[itemId];if(!item)return;if(item.use==="food")return feedRaven(itemId);if(item.use==="energy"&&(ravenItems[itemId]||0)>0){if(ravenLife.energy>=100){setRavenLifeMessage("Raven hat bereits volle Energie.");return;}ravenItems[itemId]--;ravenLife.energy=clampRavenNeed(ravenLife.energy+item.energy);saveRavenItems();saveRavenLife();setRavenLifeMessage(`${item.icon} Raven erhält ${item.energy} Energie.`);renderRavenGamePanel();}}
+function useRavenItem(itemId){const item=RAVEN_ITEM_DEFS[itemId];if(!item)return;if(item.use==="food")return feedRaven(itemId);if(item.use==="energy"&&(ravenItems[itemId]||0)>0){if(ravenLife.energy>=100){setRavenLifeMessage("Raven hat bereits volle Energie.");return;}ravenItems[itemId]--;ravenLife.energy=clampRavenNeed(ravenLife.energy+item.energy);saveRavenItems();saveRavenLife();setRavenLifeMessage(`${item.icon} Raven erhält ${item.energy} Energie.`);renderRavenGamePanel();showRavenReaction("energized","Neue Energie! ⚡");}}
 function restRaven(){
   if(isRavenSleeping()){setRavenLifeMessage(`${ravenProfile.name} schläft noch ${Math.ceil(ravenSleepRemaining()/60)} Minute(n).`);return;}
   if(ravenLife.energy>=100){setRavenLifeMessage("Raven ist bereits ausgeruht.");return;}
   const minutes=Math.max(1,Math.min(10,Math.ceil((100-ravenLife.energy)/10)));ravenLife.sleepStartedAt=Date.now();ravenLife.sleepUntil=Date.now()+minutes*60000;ravenLife.sleepStartEnergy=ravenLife.energy;
-  saveRavenLife();setRavenLifeMessage(`${ravenProfile.name} schläft jetzt ungefähr ${minutes} Minute(n).`);renderRavenGamePanel();
+  saveRavenLife();setRavenLifeMessage(`${ravenProfile.name} schläft jetzt ungefähr ${minutes} Minute(n).`);renderRavenGamePanel();showRavenReaction("sleeping","Gute Nacht … 💤",2200);
 }
 function playWithRaven(){
   if(isRavenSleeping()){setRavenLifeMessage(`${ravenProfile.name} schläft gerade.`);return;}
   if(ravenLife.energy<8){setRavenLifeMessage("Raven ist zu müde zum Spielen.");return;}
   ravenLife.energy=clampRavenNeed(ravenLife.energy-8);ravenLife.hunger=clampRavenNeed(ravenLife.hunger-6);ravenLife.mood=clampRavenNeed(ravenLife.mood+18);
-  saveRavenLife();recordDailyTask("play");setRavenLifeMessage("Raven spielt begeistert – das kostet Energie und macht hungrig.");renderRavenGamePanel();
+  saveRavenLife();recordDailyTask("play");setRavenLifeMessage("Raven spielt begeistert – das kostet Energie und macht hungrig.");renderRavenGamePanel();showRavenReaction("playing","Nochmal! 💜");
 }
 function effectiveRavenMood(){return Math.min(ravenLife.mood,clampRavenNeed((ravenLife.hunger+ravenLife.energy)/2+15));}
 function ravenMoodStatus(){
@@ -123,10 +137,11 @@ function skipRavenOnboarding(){ravenProfile.onboardingDone=true;localStorage.set
 function renderRavenGamePanel(){
   applyRavenTime();claimPendingRavenItems();
   const shownMood=effectiveRavenMood();
+  const sleeping=isRavenSleeping(),visual=ravenVisualState(ravenLife,sleeping,shownMood),habitat=document.getElementById("ravenHabitat"),stateLine=document.getElementById("ravenStateLine");if(habitat)habitat.dataset.state=visual.state;if(stateLine)stateLine.textContent=visual.line;
   [["ravenHunger",ravenLife.hunger],["ravenEnergy",ravenLife.energy],["ravenMood",shownMood]].forEach(([id,value])=>{const bar=document.getElementById(id+"Bar"),text=document.getElementById(id+"Value");if(bar)bar.style.width=value+"%";if(text)text.textContent=Math.round(value);});
   const mood=document.getElementById("ravenMoodLabel");if(mood)mood.textContent=ravenMoodStatus();
   const title=document.getElementById("ravenTitle");if(title)title.textContent=`${ravenProfile.name.toUpperCase()} #0001`;
-  const sleeping=isRavenSleeping(),avatar=document.getElementById("ravenAvatar");if(avatar){const status=ravenMoodStatus();avatar.textContent=sleeping?"🐦‍⬛💤":status==="Braucht dich"?"🐦‍⬛❗":ravenLife.energy<30?"🐦‍⬛💤":ravenLife.hunger<30?"🐦‍⬛🍽️":shownMood>80?"🐦‍⬛✨":"🐦‍⬛";avatar.dataset.mood=sleeping?"Schläft":status;}
+  const avatar=document.getElementById("ravenAvatar");if(avatar){const status=ravenMoodStatus();avatar.textContent=sleeping?"🐦‍⬛💤":status==="Braucht dich"?"🐦‍⬛❗":ravenLife.energy<30?"🐦‍⬛💤":ravenLife.hunger<30?"🐦‍⬛🍽️":shownMood>80?"🐦‍⬛✨":"🐦‍⬛";avatar.dataset.mood=sleeping?"Schläft":status;}
   const feedButton=document.getElementById("ravenFeedButton"),restButton=document.getElementById("ravenRestButton"),playButton=document.getElementById("ravenPlayButton");if(feedButton)feedButton.disabled=sleeping;if(playButton)playButton.disabled=sleeping;if(restButton){restButton.disabled=sleeping;restButton.textContent=sleeping?`💤 ${Math.floor(ravenSleepRemaining()/60)}:${String(ravenSleepRemaining()%60).padStart(2,"0")}`:"🌙 Schlafen";}
   const inventory=document.getElementById("inventoryCapacity");if(inventory)inventory.textContent=`${ravenInventoryCount()} / ${RAVEN_INVENTORY_CAPACITY}`;
   const slots=document.getElementById("inventorySlots");if(slots)slots.innerHTML=Object.entries(RAVEN_ITEM_DEFS).map(([id,item])=>`<div class="inventory-slot"><span>${item.icon}</span><div><b>${item.name}</b><small>${ravenItems[id]||0} Stück</small></div>${item.use?`<button onclick="useRavenItem('${id}')" ${(ravenItems[id]||0)<1?"disabled":""}>Nutzen</button>`:""}</div>`).join("");
