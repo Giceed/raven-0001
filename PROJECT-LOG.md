@@ -121,4 +121,10 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Eine Erkundung kann direkt im Habitat begonnen und auf der Karte beendet werden.
 - Nach der Rückkehr zeigt das Habitat Strecke, neue Punkte, Aktivitäten, Items und XP der Tour.
 - Entwickleransicht, Studio, Bots und Tageslabor bleiben eigenständige Werkzeuge.
+# V4.6 – Stabilität und Außentest
+
+- Außentest-Checkliste mit persistenten Notizen und Fortschritt in die Testzentrale eingebaut.
+- Exportierbarer TXT-Bericht bündelt Gerät, Raven-Werte, Reisen, Diagnose und Spielereignisse.
+- Bis zu 30 Reiseberichte werden lokal gesichert; Diagnose bleibt auf 100 Einträge begrenzt.
+- GPS-Fehler unterscheiden nun fehlende Berechtigung, nicht verfügbare Position und Zeitüberschreitung.
 

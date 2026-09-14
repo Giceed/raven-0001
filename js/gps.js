@@ -49,7 +49,7 @@ function startExploration(){
 
     handlePosition,
 
-    ()=>{
+    error=>{
 
       tracking=false;
 
@@ -65,7 +65,11 @@ function startExploration(){
       document.getElementById("gpsInfo").textContent =
         "GPS-Fehler";
 
-      setMessage("GPS-Fehler. Standortzugriff prüfen.");
+      const reasons={1:"Standortzugriff wurde nicht erlaubt.",2:"Das Gerät konnte gerade keine Position bestimmen.",3:"Die Standortsuche hat zu lange gedauert."};
+      const reason=reasons[error?.code]||"Der Standort konnte nicht bestimmt werden.";
+      setMessage(`GPS-Fehler: ${reason} Prüfe Ortungsdienste und versuche es erneut.`);
+      if(typeof reportRavenGpsProblem==="function")reportRavenGpsProblem(reason,error?.message||"");
+      if(typeof logRavenEvent==="function")logRavenEvent("GPS-Fehler",reason);
     },
 
     {
