@@ -97,4 +97,10 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Ein Service Worker hält Oberfläche, Spiellogik und Fürstenberg-Grunddaten verfügbar und entfernt veraltete Raven-Caches automatisch.
 - OpenStreetMap-Kartenkacheln werden bewusst nicht massenhaft offline gespeichert, damit Raven nicht erneut Speicher- und Ruckelprobleme bekommt.
 - Online-/Offline-Zustand wird im Kopfbereich sichtbar. Die eigentliche Live-Karte und GPS-Ortsauflösung benötigen weiterhin eine Verbindung.
+## V4.2 – Mobile Installation sichtbar gemacht
+
+- Der eigene „⬇ APP“-Knopf ist jetzt sofort sichtbar und wartet nicht mehr auf ein möglicherweise verspätetes Chrome-Installationssignal.
+- Wenn Android die native Installation anbietet, öffnet der Knopf direkt den Systemdialog. Andernfalls zeigt Raven den Weg über Chrome und „Zum Startbildschirm hinzufügen“ an.
+- Manifest und App-Cache wurden für eine erneute Android-Erkennung aktualisiert.
+- Auf iPhone und iPad erklärt Raven den Safari-Weg über „Teilen“ und „Zum Home-Bildschirm“; Appmodus und Apple-Touch-Icon werden ausdrücklich geprüft.
 

@@ -1,12 +1,12 @@
-const RAVEN_CACHE="raven-app-v60";
+const RAVEN_CACHE="raven-app-v61";
 const RAVEN_SHELL=[
   "./index.html","./manifest.webmanifest","./icons/raven-icon.svg","./icons/raven-maskable.svg","./icons/raven-192.png","./icons/raven-512.png",
-  "./css/raven.css?v=60-pwa1","./data/bad-wuennenberg-pois.json?v=28sync1","./data/fuerstenberg-boundary.json?v=1",
+  "./css/raven.css?v=61-install-fix1","./data/bad-wuennenberg-pois.json?v=28sync1","./data/fuerstenberg-boundary.json?v=1",
   "./js/city-concept-points.js?v=28cache1","./js/config.js?v=58-storage-hardening1","./js/storage.js?v=58-storage-hardening1",
   "./js/map.js?v=29testcenter2","./js/fog.js?v=41edge-tests1","./js/gps.js?v=48raven-readiness1","./js/raven-life.js?v=56-hugo-balance1",
   "./js/raven-jumper.js?v=51raven-sleep1","./js/poi.js?v=58-storage-hardening1","./js/travelbook.js?v=28cache1","./js/app.js?v=28cache1",
   "./js/shared-pois.js?v=58-storage-hardening1","./js/test-tools.js?v=58-storage-hardening1","./js/bot-testers.js?v=56-hugo-balance1",
-  "./js/edge-tests.js?v=41edge-tests1","./js/game-tests.js?v=58-storage-hardening1","./js/pwa.js?v=60-pwa1"
+  "./js/edge-tests.js?v=41edge-tests1","./js/game-tests.js?v=58-storage-hardening1","./js/pwa.js?v=61-install-fix1"
 ];
 self.addEventListener("install",event=>event.waitUntil(caches.open(RAVEN_CACHE).then(cache=>cache.addAll(RAVEN_SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith("raven-app-")&&key!==RAVEN_CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
