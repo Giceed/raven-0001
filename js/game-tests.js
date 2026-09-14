@@ -45,6 +45,7 @@ async function runRavenLifeTests(){
     results.push(ravenLifeTestResult("20 · Allgemeine Speicherdaten",parseRavenJSONText("{defekt",jsonFallback)===jsonFallback&&parseRavenJSONText("null",jsonFallback)===jsonFallback&&parseRavenJSONText('{"ok":1}',jsonFallback).ok===1,"Mission, Fog, Reisen und Studio überstehen beschädigte JSON-Daten"));
     const visualHungry=ravenVisualState({hunger:10,energy:90,mood:90},false,65),visualTired=ravenVisualState({hunger:90,energy:10,mood:90},false,65),visualHappy=ravenVisualState({hunger:90,energy:90,mood:90},false,90);
     results.push(ravenLifeTestResult("21 · Tamagotchi-Zustände",visualHungry.state==="hungry"&&visualTired.state==="tired"&&visualHappy.state==="happy"&&ravenVisualState({},true,90).state==="sleeping","Hunger, Müdigkeit, Glück und Schlaf erzeugen eindeutige Ansichten"));
+    results.push(ravenLifeTestResult("22 · Drei Tages-Aktivitäten",!ravenDailyComplete({feed:1,play:1,collect:2})&&ravenDailyComplete({feed:1,play:1,collect:3}),"Tagesbelohnung bleibt bis 2/3 gesperrt und wird exakt ab 3/3 möglich"));
   }catch(error){results.push(ravenLifeTestResult("Testsystem",false,error.message||String(error)));}
   finally{
     ravenTestMode=false;

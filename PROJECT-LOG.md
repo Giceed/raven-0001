@@ -132,4 +132,9 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Schwarze Kartenfläche beim Rauszoomen auf God-Mode-Zoomstufe 11 behoben.
 - OSM-Kacheln werden nur für den sichtbaren Bildschirm geladen und nicht mehr an einer zu engen Rechteckgrenze abgeschnitten.
 - Kartenmittelpunkt, Fürstenberg-Maske und Testgebiet bleiben weiterhin begrenzt.
+# V4.6.2 – Drei Tages-Aktivitäten
+
+- Tagesaufgabe verlangt jetzt drei erfolgreich gesammelte Aktivitätspunkte statt nur eines.
+- Sichtbarer Fortschritt zeigt 0/3 bis 3/3 direkt in der Aufgabenzeile.
+- Tagesbelohnung wird erst nach Füttern, Spielen und exakt mindestens drei erfolgreichen Sammlungen freigegeben.
 

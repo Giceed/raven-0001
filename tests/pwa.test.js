@@ -6,7 +6,7 @@ assert.equal(manifest.display,"standalone");
 assert.match(manifest.start_url,/view=player/);
 assert.ok(manifest.icons.some(icon=>icon.purpose==="maskable"));
 for(const icon of manifest.icons)assert.ok(fs.existsSync(icon.src),`Icon fehlt: ${icon.src}`);
-assert.match(worker,/raven-app-v66/);
+assert.match(worker,/raven-app-v67/);
 assert.match(worker,/request\.mode==="navigate"/);
 assert.doesNotMatch(worker,/tile\.openstreetmap|\/tile\//i,"Kartenkacheln dürfen den App-Cache nicht aufblasen.");
 const shellBlock=worker.match(/const RAVEN_SHELL=\[([\s\S]*?)\];/)[1];
