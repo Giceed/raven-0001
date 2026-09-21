@@ -1,0 +1,131 @@
+# Raven: gemeinsame App-Basis, iOS zuerst
+
+Stand: 21.09.2026. Untersucht wurde GitHub `Giceed/raven-0001`, Hauptzweig
+`main`, Commit `ec4a9c058e7804cca8b9296f4b78441378fa62d7`.
+Dies ist eine Analyse des GitHub-Stands, keine Synchronisierung mit dem separaten
+lokalen Raven-Projekt oder dessen Wissensdateien und Chats.
+
+## Versionsbefund
+
+`index.html` nennt `4.7-habitat-animations` und V4.7; `PROJECT-LOG.md` endet
+bei V4.7. Die abgefragte Zweigliste enthält nur main, die Tag-Liste ist leer.
+Im Quellstand gibt es keinen V4.8-Nachweis. Eine gegebenenfalls außerhalb dieses
+Repositorys vorhandene V4.8 muss vor dem endgültigen Gameplay-Freeze verglichen
+werden. Diese App-Vorbereitung basiert ausdrücklich auf V4.7.
+
+## Bestandsaufnahme
+
+| Bereich | Ist-Stand und Folge für die Migration |
+| --- | --- |
+| Oberfläche | Statisches `index.html`, `css/raven.css`, geordnet geladene klassische Skripte mit gemeinsamen globalen Variablen und Inline-Handlern. Kein Framework, Paketmanager oder Buildsystem vorhanden. Reihenfolge erhalten; keine Umstellung auf React oder ES-Module erforderlich. |
+| Spielablauf | Habitat/Karte im Hauptdokument, `raven-life.js`, `raven-jumper.js`, `poi.js`, `hub-flow.js`, Fog und Reisebuch bleiben erhalten. `habitat/`, `studio/`, `simulation/` sind zusätzliche Entwicklerseiten, keine neue App-Architektur. |
+| Abhängigkeiten | Leaflet 1.9.4 bislang per unpkg-CDN; App-Build kopiert exakt diese Version samt CSS, Bildern und Lizenz aus dem gesperrten Paketstand lokal. Keine anderen externen Laufzeitbibliotheken in den untersuchten HTML-Seiten. |
+| GPS | `js/gps.js` nutzt `navigator.geolocation.watchPosition`/`clearWatch`, hohe Genauigkeit, 20 s Timeout, 35 m Genauigkeitsschwelle und Bewegungsregeln bei 12/20 km/h. Keine native Plugin-Anbindung, keine Hintergrundortung. Fehler setzt tracking=false, räumt aber den Watch nicht auf: vor Gerätefreigabe beheben. |
+| Speicherung | Viele direkte synchrone localStorage-Zugriffe, auch außerhalb `storage.js`: Profil, Tier, Items, XP, Fog, Touren, Studio-Daten und Diagnose. Versions- und Test-Resetmarker in `config.js`/`storage.js` beachten. Kein Backend und kein Account-Sync. Safari/PWA- und native App-Speicher sind getrennt; Spielstände wandern nicht automatisch mit. |
+| PWA | Manifest startet mit `view=player`. Service Worker `raven-app-v69` hält 32 lokale Shell-Ressourcen vor; externe CDN-Dateien/Kartenkacheln werden nicht gecacht. App-Bundle verwendet eigenen Startcode, keinen SW und keinen Installationsknopf. Web-PWA bleibt unverändert. |
+| Karte | Leaflet, OSM-Kacheln, lokale Fürstenberg-Geometrie, POIs, Fog und Radiuslogik. Nominatim für Ortsauflösung/Grenzen; reguläre Aufrufe werden auf 60 s und 100 m begrenzt. Bots verwenden öffentliche Fuß-/Auto-Routingdienste; Studio/Review zusätzlich Overpass. Diese Dienste bleiben netzabhängig. |
+| Studio-Abgleich | `shared-pois.js` liest zuerst `ravenSharedPoisLive`, sonst mitgeliefertes JSON. Das ist lokaler Austausch auf derselben Origin, kein geräteübergreifender Live-Sync. |
+| Geräteoberfläche | Keine systematische Safe-Area-Behandlung erkennbar. Tastatur, Notch, Querformat, Canvas-Gesten, Hintergrundwechsel und TXT-Downloads müssen auf iPhone geprüft werden. Download-Links sind noch kein nativer Teilen-Dialog. |
+
+## Bereits vorbereitet
+
+- Capacitor 8.5.2, gemeinsame Konfiguration, generierte Projekte `ios/` und `android/`.
+- Vorläufige Bundle-ID `com.giceed.raven0001`; vor Signierung verbindlich festlegen.
+- `tools/build-app.mjs` erzeugt ausschließlich `dist/`, verwendet eine feste
+  Asset-Liste und erhält Skriptreihenfolge, Daten und relative Unterseitenpfade.
+- App-Start setzt `view=player`, verwendet lokale Leaflet-Dateien, blendet den
+  Installationsknopf aus und erhält die Verbindungsanzeige. Native Assets werden
+  über Capacitor synchronisiert, nicht von einer entfernten Start-URL geladen.
+- Originale Webdateien, PWA, Spiellogik und Daten wurden nicht editiert.
+- Lockfile für reproduzierbare Installation. Generierte öffentliche Assets,
+  Abhängigkeiten und private Signierungsdateien werden nicht eingecheckt.
+
+## Ausführen
+
+Node 22 oder neuer und pnpm 11.19.0 verwenden:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm test
+pnpm run cap:sync
+```
+
+Die Plattformprojekte sind schon vorhanden; `cap add` nicht erneut ausführen.
+Die Webversion weiterhin wie bisher vom Repository-Stamm statisch ausliefern;
+`dist/` ist ausdrücklich der native Build ohne PWA-Installation.
+
+Auf einem Mac/Remote-Mac mit Xcode 26 oder neuer:
+
+```sh
+pnpm exec cap open ios
+```
+
+Swift Package Manager ist eingerichtet. Zuerst im iOS-Simulator bauen und
+prüfen. Danach mit der festgelegten Apple-Team-ID und Signierung ein Gerätebuild
+erstellen. Für einen Windows-basierten Ablauf ist ein macOS-CI-/Remote-Build
+sinnvoll; TestFlight ist ein möglicher Weg aufs iPhone. Apple-Entwicklerkonto,
+Signierung und konkreter Build-Dienst sind noch nicht eingerichtet. Hier wurde
+weder ein signiertes IPA noch ein Store-Upload erstellt. Android verwendet
+dieselbe Webbasis und wird nach dem ersten iPhone-Test mitgeprüft.
+
+## Nächste Schritte in sinnvoller Reihenfolge
+
+1. **Referenz klären und einfrieren.** Falls V4.8 existiert, dessen Dateien gegen
+   den genannten Commit vergleichen. Danach reproduzierbaren Referenzstand
+   festhalten. Keine Spielwerte, Features oder Kartendaten nebenbei ändern.
+2. **Native GPS-Grenze einziehen.** Kleine Plattform-Schnittstelle mit Browser-
+   und `@capacitor/geolocation`-Implementierung; bestehendes `handlePosition`
+   weiterverwenden. Native Watch-ID wird asynchron geliefert: Doppeltippen,
+   Stop vor Watch-Auflösung, Fehler und erneuten Start gezielt testen. iOS-
+   Usage-Descriptions und Android-Standortrechte nach Plugin-Vorgaben ergänzen.
+   Verweigerte/ungefähre Position und deaktivierte Ortungsdienste verständlich
+   anzeigen. Keine Berechtigungsabfrage allein beim Öffnen der App.
+3. **App-Lifecycle absichern.** `@capacitor/app`: beim Verlassen GPS pausieren,
+   Watch zuverlässig entfernen, Daten speichern. Beim Zurückkehren keine
+   Distanz über die Pause hinweg gutschreiben; letzten Fix zurücksetzen und
+   bewusst fortsetzen. Kein automatisches Tourende und keine verlorene
+   Tourzusammenfassung. V1 zunächst Vordergrundortung; Sperrbildschirm bedeutet
+   keine zugesicherte Aufzeichnung. Hintergrundortung wäre eine eigene Entscheidung.
+4. **Spielstand dauerhaft machen.** Direkte Zugriffe hinter einer gemeinsamen
+   Storage-Schnittstelle bündeln. Native Preferences für kleine Zustände;
+   größere Weg-/Fog-Daten hinsichtlich Dateispeicher/SQLite prüfen. Asynchrones
+   Laden muss vor `config.js` und seinen Resetmarkern fertig sein. Versioniertes
+   Schema, geordnete Schreibvorgänge, Fehleranzeige, Wiederanlauf und Export/Import
+   testen; nichts blind aus localStorage löschen. Migration nachprüfbar bestätigen.
+   Preferences braucht außerdem Apples Privacy-Manifest-Angaben.
+5. **Karte und Geräte-UI prüfen.** Alle HTTPS-Dienste unter echter Capacitor-
+   Origin testen (CORS, Ausfall, Wiederverbindung); Provider-Nutzungsbedingungen
+   und Identifikation vor breiter Nutzung prüfen. Keine pauschale Netzfreigabe,
+   kein Massen-Offlinekachelcache. Safe Areas, Tastatur und Canvas auf echtem
+   iPhone prüfen. Entwicklerexporte später über Filesystem/Share anbinden.
+6. **iPhone-Abnahme, dann Android.** Frischstart → Benennen → Habitat → Tour →
+   GPS → POI/Radius → Rubbeln/Items/XP → Rückkehrbericht → Neustart. Dazu
+   Rechteverweigerung, Flugmodus, Appwechsel/Sperrbildschirm, Prozessende,
+   Speicherfehler, schlechter Fix und schnelles Stop/Start testen. Simulator
+   ersetzt keinen echten Spaziergang in Fürstenberg.
+
+## Validierung und Grenzen
+
+Die sechs vorhandenen Node-Tests bestanden vor der Änderung. Danach bestehen
+acht Prüfungen einschließlich wiederholtem App-Build, unveränderten Webquellen,
+lokalen HTML-Abhängigkeiten und Verbindungsanzeige. Capacitor hat beide nativen
+Projekte erfolgreich erzeugt. Die vorhandenen Tests sind überwiegend statische
+Prüfungen; sie beweisen keine vollständige Gameplay- oder Gerätefunktion.
+
+Noch nicht geprüft: Xcode-/Gradle-Kompilierung, Browser-Visualvergleich, iPhone,
+Android-Gerät, Signierung, native GPS-Berechtigungen und Persistenz über
+OS-Prozessende. Diese Hülle ist ausdrücklich noch nicht für den GPS-Außentest
+freigegeben. Standard-Appicons und Splashscreens müssen vor Verteilung ersetzt
+werden. Keine neuen Gameplay-Features wurden ergänzt.
+
+## Technische Quellen
+
+- https://capacitorjs.com/docs/getting-started/environment-setup
+- https://capacitorjs.com/docs/getting-started/installation
+- https://capacitorjs.com/docs/apis/geolocation
+- https://capacitorjs.com/docs/apis/preferences
+- https://capacitorjs.com/docs/apis/app
+
+Die aktuellen Capacitor-Unterlagen wurden für Versionswahl und Buildumgebung
+abgeglichen. Konkrete Plugin-Konfiguration bei Umsetzung erneut gegen die
+gewählte Plugin-Version prüfen.
