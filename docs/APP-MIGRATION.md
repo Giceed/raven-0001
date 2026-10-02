@@ -1,17 +1,14 @@
 # Raven: gemeinsame App-Basis, iOS zuerst
 
-Stand: 21.09.2026. Untersucht wurde GitHub `Giceed/raven-0001`, Hauptzweig
-`main`, Commit `ec4a9c058e7804cca8b9296f4b78441378fa62d7`.
-Dies ist eine Analyse des GitHub-Stands, keine Synchronisierung mit dem separaten
-lokalen Raven-Projekt oder dessen Wissensdateien und Chats.
+Stand: 02.10.2026. Ausgangspunkt ist GitHub `Giceed/raven-0001`; die
+Capacitor-App wird im Zweig `codex/capacitor-ios-first` vorbereitet. Der
+Hauptzweig `main` und damit die veröffentlichte Webversion bleiben unberührt.
 
 ## Versionsbefund
 
-`index.html` nennt `4.7-habitat-animations` und V4.7; `PROJECT-LOG.md` endet
-bei V4.7. Die abgefragte Zweigliste enthält nur main, die Tag-Liste ist leer.
-Im Quellstand gibt es keinen V4.8-Nachweis. Eine gegebenenfalls außerhalb dieses
-Repositorys vorhandene V4.8 muss vor dem endgültigen Gameplay-Freeze verglichen
-werden. Diese App-Vorbereitung basiert ausdrücklich auf V4.7.
+Die lokal gesicherte V4.8 **„Deutschland erwacht“** wurde gefunden, geprüft und
+vollständig in den App-Zweig übernommen. Sie ist die eingefrorene
+Gameplay-Referenz für die App-Migration.
 
 ## Bestandsaufnahme
 
@@ -70,9 +67,9 @@ dieselbe Webbasis und wird nach dem ersten iPhone-Test mitgeprüft.
 
 ## Nächste Schritte in sinnvoller Reihenfolge
 
-1. **Referenz klären und einfrieren.** Falls V4.8 existiert, dessen Dateien gegen
-   den genannten Commit vergleichen. Danach reproduzierbaren Referenzstand
-   festhalten. Keine Spielwerte, Features oder Kartendaten nebenbei ändern.
+1. **Referenz eingefroren.** V4.8 „Deutschland erwacht“ ist die festgeschriebene
+   Gameplay-Basis. Während der Migration keine neuen Spielwerte, Features oder
+   Kartendaten nebenbei ändern.
 2. **Native GPS-Grenze einziehen.** Kleine Plattform-Schnittstelle mit Browser-
    und `@capacitor/geolocation`-Implementierung; bestehendes `handlePosition`
    weiterverwenden. Native Watch-ID wird asynchron geliefert: Doppeltippen,
@@ -129,3 +126,4 @@ werden. Keine neuen Gameplay-Features wurden ergänzt.
 Die aktuellen Capacitor-Unterlagen wurden für Versionswahl und Buildumgebung
 abgeglichen. Konkrete Plugin-Konfiguration bei Umsetzung erneut gegen die
 gewählte Plugin-Version prüfen.
+
