@@ -2,16 +2,27 @@
    KARTE
    ========================================================== */
 
-const BAD_WUENNENBERG_BOUNDS = L.latLngBounds(
-  [51.447216,8.709994],
-  [51.555537,8.837855]
+/* Deutschland ist jetzt die technische Spielwelt. Die etwas großzügigere
+   Box enthält Grenzorte und verhindert gleichzeitig, dass die mobile Karte
+   versehentlich endlos um den Globus gewischt wird. */
+const GERMANY_BOUNDS = L.latLngBounds(
+  [47.20,5.50],
+  [55.20,15.60]
+);
+
+/* Kompatibilität für die weiterhin bewusst auf Fürstenberg begrenzte
+   Bot-Testkarte. Die Hauptkarte verwendet ausschließlich GERMANY_BOUNDS. */
+const BAD_WUENNENBERG_BOUNDS=L.latLngBounds(
+  [51.492,8.713],
+  [51.538,8.774]
 );
 
 const map = L.map("map",{
   zoomControl:false,
-  minZoom:12,
-  maxBounds:BAD_WUENNENBERG_BOUNDS,
-  maxBoundsViscosity:1
+  minZoom:6,
+  maxBounds:GERMANY_BOUNDS,
+  maxBoundsViscosity:.82,
+  preferCanvas:true
 }).setView([51.5157,8.741],15);
 
 /* Marker liegen bewusst über dem Erkundungsnebel. */
@@ -27,7 +38,8 @@ map.createPane("ravenUserPane");
 map.getPane("ravenUserPane").style.zIndex="850";
 map.getPane("ravenUserPane").style.pointerEvents="none";
 
-/* Außerhalb der echten Stadtgrenze wird die Karte vollständig ausgeschnitten. */
+/* Die Ebene bleibt für spätere regionale Masken reserviert. Deutschland wird
+   nicht mehr auf den Fürstenberg-Umriss ausgeschnitten. */
 map.createPane("ravenTerritoryMaskPane");
 map.getPane("ravenTerritoryMaskPane").style.zIndex="800";
 map.getPane("ravenTerritoryMaskPane").style.pointerEvents="none";
@@ -58,27 +70,6 @@ function joinBoundaryLines(lines){
   if(ring.length&&key(ring[0])!==key(ring[ring.length-1])) ring.push(ring[0]);
   return ring;
 }
-
-async function cutMapToBadWuennenberg(){
-  try{
-    const response=await fetch("data/fuerstenberg-boundary.json?v=1");
-    const data=await response.json();
-    const coordinates=data.geojson.type==="Polygon"
-      ? data.geojson.coordinates[0]
-      : data.geojson.coordinates[0][0];
-    const cityRing=coordinates.map(point=>[point[1],point[0]]);
-    const outside=[[-85,-180],[-85,180],[85,180],[85,-180],[-85,-180]];
-    L.polygon([outside,cityRing],{
-      pane:"ravenTerritoryMaskPane",stroke:false,fillColor:"#05070b",fillOpacity:1,
-      fillRule:"evenodd",interactive:false
-    }).addTo(map);
-
-  }catch(error){
-    console.warn("Stadtgrenzen-Ausschnitt konnte nicht geladen werden.",error);
-  }
-}
-
-cutMapToBadWuennenberg();
 
 L.control.zoom({position:"topright"}).addTo(map);
 
@@ -197,7 +188,7 @@ function toggleGodMode(){
 
   if(godMode){
 
-    map.setMinZoom(11);
+    map.setMinZoom(6);
     setMapMode("travel");
 
     followUser = false;
@@ -212,8 +203,7 @@ function toggleGodMode(){
 
   }else{
 
-    map.setMinZoom(12);
-    if(map.getZoom()<12) map.setZoom(12);
+    map.setMinZoom(6);
     setMapMode("explore");
 
     disableGodModeView();
@@ -231,6 +221,7 @@ function toggleGodMode(){
   updateFollowUI();
   updateUserMarker();
   updateAllPointStates(currentLat??TEST_REGION.centerLat,currentLon??TEST_REGION.centerLon);
+  if(typeof updateRavenGermanyBoundaryVisibility==="function")updateRavenGermanyBoundaryVisibility();
   if(typeof updateRavenDevPanel==="function")updateRavenDevPanel();
 }
 
@@ -313,6 +304,10 @@ map.on("zoomstart",()=>{
   updateFollowUI();
 });
 
+map.on("zoomend",()=>{
+  updateAllPointStates(currentLat??TEST_REGION.centerLat,currentLon??TEST_REGION.centerLon);
+});
+
 function updateFollowUI(){
 
   document.getElementById("followState").textContent =
@@ -357,6 +352,7 @@ function setMapMode(mode){
   updateMapModeUI();
   updateAllPointStates(currentLat??TEST_REGION.centerLat,currentLon??TEST_REGION.centerLon);
   redrawFog();
+  if(typeof updateRavenGermanyBoundaryVisibility==="function")updateRavenGermanyBoundaryVisibility();
 }
 
 function updateMapModeUI(){
@@ -369,4 +365,3 @@ function updateMapModeUI(){
     .getElementById("exploreModeButton")
     .classList.toggle("active",mapMode==="explore");
 }
-

@@ -94,4 +94,3 @@ async function loadVisibleAdministrativeBoundaries(){
 }
 
 /* Der große 100-km-Grenzdatensatz bleibt im reduzierten Teststand deaktiviert. */
-

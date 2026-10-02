@@ -15,13 +15,9 @@ if(!Array.isArray(travelHistory))travelHistory=[];
 let discoveredPlaces = readRavenStorageJSON("ravenDiscoveredPlaces",[]);
 if(!Array.isArray(discoveredPlaces))discoveredPlaces=[];
 
-/* Alte Testreisen außerhalb des aktuellen Stadtgebiets entfernen. */
-const ravenAllowedDistricts=new Set([
-  "fürstenberg"
-]);
-discoveredPlaces=discoveredPlaces.filter(place=>
-  ravenAllowedDistricts.has(String(place.name||"").trim().toLowerCase())
-);
+/* Entdeckte Orte bleiben deutschlandweit erhalten. Frühere Versionen haben
+   hier alles außer Fürstenberg gelöscht; diese Testbegrenzung ist aufgehoben. */
+discoveredPlaces=discoveredPlaces.filter(place=>place&&place.name);
 
 /* Einmaliger Konzeptreset: Ortsnamen müssen neu durch GPS enthüllt werden. */
 if(!localStorage.getItem("ravenV27HiddenPlacesResetDone")){
@@ -54,4 +50,3 @@ if(!localStorage.getItem("ravenV27FuerstenbergFogResetDone")){
   localStorage.setItem("ravenMapMode","explore");
   localStorage.setItem("ravenV27FuerstenbergFogResetDone","1");
 }
-

@@ -16,4 +16,3 @@ window.addEventListener("unhandledrejection",event=>addRavenDiagnostic("error","
 window.addEventListener("online",()=>addRavenDiagnostic("info","Internetverbindung wiederhergestellt"));window.addEventListener("offline",()=>addRavenDiagnostic("warning","Internetverbindung unterbrochen"));
 window.reportRavenGpsProblem=(message,detail="")=>addRavenDiagnostic("error",message,detail);
 window.addEventListener("DOMContentLoaded",()=>{renderRavenFieldTest();document.getElementById("fieldChecklist")?.addEventListener("change",saveRavenFieldTest);});
-

@@ -223,4 +223,3 @@ setTimeout(()=>{
   redrawFog();
 
 },400);
-
