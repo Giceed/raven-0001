@@ -41,6 +41,12 @@ Gameplay-Referenz für die App-Migration.
   Schnittstelle für `@capacitor/geolocation` und `@capacitor/app` ist vorhanden;
   die Plugin-Pakete müssen vor dem Gerätebuild noch installiert und synchronisiert
   werden. Bis dahin übernimmt `visibilitychange` den Lifecycle-Fallback.
+- Der App-Build lädt vor der Spiellogik eine Speicherbrücke. Sie führt zwei
+  rotierende, mit Prüfsumme versehene Spielstand-Sicherungen und sichert beim
+  Hintergrundwechsel sofort. Import und Wiederherstellung wurden getestet.
+  Sobald `@capacitor/preferences` verfügbar ist, spiegelt dieselbe Brücke den
+  Snapshot zusätzlich in den nativen App-Speicher und stellt einen neueren
+  nativen Stand vor dem endgültigen Spielstart wieder her.
 - Originale Webdateien, PWA, Spiellogik und Daten wurden nicht editiert.
 - Lockfile für reproduzierbare Installation. Generierte öffentliche Assets,
   Abhängigkeiten und private Signierungsdateien werden nicht eingecheckt.
@@ -88,13 +94,11 @@ dieselbe Webbasis und wird nach dem ersten iPhone-Test mitgeprüft.
    Kein automatisches Tourende und keine verlorene
    Tourzusammenfassung. V1 zunächst Vordergrundortung; Sperrbildschirm bedeutet
    keine zugesicherte Aufzeichnung. Hintergrundortung wäre eine eigene Entscheidung.
-4. **Spielstand dauerhaft machen.** Direkte Zugriffe hinter einer gemeinsamen
-   Storage-Schnittstelle bündeln. Native Preferences für kleine Zustände;
-   größere Weg-/Fog-Daten hinsichtlich Dateispeicher/SQLite prüfen. Asynchrones
-   Laden muss vor `config.js` und seinen Resetmarkern fertig sein. Versioniertes
-   Schema, geordnete Schreibvorgänge, Fehleranzeige, Wiederanlauf und Export/Import
-   testen; nichts blind aus localStorage löschen. Migration nachprüfbar bestätigen.
-   Preferences braucht außerdem Apples Privacy-Manifest-Angaben.
+4. **Nativen Spielstand auf dem Gerät abnehmen.** `@capacitor/preferences`
+   installieren und synchronisieren; Wiederherstellung, Prozessende,
+   fehlerhafte Sicherung sowie Export/Import auf dem iPhone prüfen. Für größere
+   Weg-/Fog-Daten Dateispeicher oder SQLite erst nach echten Größenmessungen
+   entscheiden. Preferences braucht außerdem Apples Privacy-Manifest-Angaben.
 5. **Karte und Geräte-UI prüfen.** Alle HTTPS-Dienste unter echter Capacitor-
    Origin testen (CORS, Ausfall, Wiederverbindung); Provider-Nutzungsbedingungen
    und Identifikation vor breiter Nutzung prüfen. Keine pauschale Netzfreigabe,
@@ -108,9 +112,10 @@ dieselbe Webbasis und wird nach dem ersten iPhone-Test mitgeprüft.
 
 ## Validierung und Grenzen
 
-Inzwischen bestehen **14 Prüfungen** einschließlich wiederholtem App-Build,
+Inzwischen bestehen **16 Prüfungen** einschließlich wiederholtem App-Build,
 Deutschland-GPS, Standortrechten, asynchroner Watch-Absicherung, Lifecycle-
-Pause/Fortsetzung, lokalen HTML-Abhängigkeiten und Verbindungsanzeige. Capacitor
+Pause/Fortsetzung, rotierenden Speicher-Snapshots, Import/Wiederherstellung,
+lokalen HTML-Abhängigkeiten und Verbindungsanzeige. Capacitor
 hat beide nativen Projekte erfolgreich erzeugt. Die vorhandenen Tests sind überwiegend statische
 Prüfungen; sie beweisen keine vollständige Gameplay- oder Gerätefunktion.
 
