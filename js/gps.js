@@ -11,14 +11,57 @@ function toggleExploration(){
   }
 }
 
-function startExploration(){
+let ravenGpsStartToken=0;
+let ravenGpsLifecyclePaused=false;
+let ravenGpsResumeAfterLifecycle=false;
+
+function ravenLocationProvider(){
+  if(window.RavenNativeLocation)return window.RavenNativeLocation;
+  return{
+    async requestPermission(){return true;},
+    async watchPosition(options,callback){
+      if(!navigator.geolocation)throw Object.assign(new Error("GPS wird von diesem Gerät nicht unterstützt."),{code:2});
+      return navigator.geolocation.watchPosition(position=>callback(position),error=>callback(null,error),options);
+    },
+    async clearWatch(id){if(navigator.geolocation&&id!==null)navigator.geolocation.clearWatch(id);}
+  };
+}
+
+function showRavenGpsError(error){
+  tracking=false;
+  watchId=null;
+  document.getElementById("exploreButton").textContent="Erkundung starten";
+  document.getElementById("exploreButton").className="primary";
+  document.getElementById("statusText").textContent="Bereit";
+  document.getElementById("gpsInfo").textContent="GPS-Fehler";
+  const reasons={1:"Standortzugriff wurde nicht erlaubt.",2:"Das Gerät konnte gerade keine Position bestimmen.",3:"Die Standortsuche hat zu lange gedauert."};
+  const denied=String(error?.code||"").includes("0003")||String(error?.message||"").toLowerCase().includes("denied");
+  const reason=denied?reasons[1]:(reasons[error?.code]||error?.message||"Der Standort konnte nicht bestimmt werden.");
+  setMessage(`GPS-Fehler: ${reason} Prüfe Ortungsdienste und versuche es erneut.`);
+  if(typeof reportRavenGpsProblem==="function")reportRavenGpsProblem(reason,error?.message||"");
+  if(typeof logRavenEvent==="function")logRavenEvent("GPS-Fehler",reason);
+}
+
+async function beginRavenPositionWatch(token){
+  const provider=ravenLocationProvider();
+  await provider.requestPermission();
+  const id=await provider.watchPosition({enableHighAccuracy:true,maximumAge:0,timeout:20000,minimumUpdateInterval:1000},(position,error)=>{
+    if(token!==ravenGpsStartToken||!tracking||ravenGpsLifecyclePaused)return;
+    if(error){showRavenGpsError(error);return;}
+    if(position)handlePosition(position);
+  });
+  if(token!==ravenGpsStartToken||!tracking||ravenGpsLifecyclePaused){await provider.clearWatch(id);return;}
+  watchId=id;
+}
+
+async function startExploration(){
 
   if(typeof canRavenStartExploration==="function"){
     const readiness=canRavenStartExploration();
     if(!readiness.ok){setMessage(`🐦‍⬛ ${readiness.message}`);setRavenLifeMessage(readiness.message);return;}
   }
 
-  if(!navigator.geolocation){
+  if(!navigator.geolocation&&!window.RavenNativeLocation){
 
     setMessage("GPS wird von diesem Gerät nicht unterstützt.");
     return;
@@ -45,49 +88,22 @@ function startExploration(){
   setMessage("📡 Raven sucht deine Position …");
   if(typeof logRavenEvent==="function")logRavenEvent("Erkundung gestartet");
 
-  watchId=navigator.geolocation.watchPosition(
-
-    handlePosition,
-
-    error=>{
-
-      tracking=false;
-
-      document.getElementById("exploreButton").textContent =
-        "Erkundung starten";
-
-      document.getElementById("exploreButton").className =
-        "primary";
-
-      document.getElementById("statusText").textContent =
-        "Bereit";
-
-      document.getElementById("gpsInfo").textContent =
-        "GPS-Fehler";
-
-      const reasons={1:"Standortzugriff wurde nicht erlaubt.",2:"Das Gerät konnte gerade keine Position bestimmen.",3:"Die Standortsuche hat zu lange gedauert."};
-      const reason=reasons[error?.code]||"Der Standort konnte nicht bestimmt werden.";
-      setMessage(`GPS-Fehler: ${reason} Prüfe Ortungsdienste und versuche es erneut.`);
-      if(typeof reportRavenGpsProblem==="function")reportRavenGpsProblem(reason,error?.message||"");
-      if(typeof logRavenEvent==="function")logRavenEvent("GPS-Fehler",reason);
-    },
-
-    {
-      enableHighAccuracy:true,
-      maximumAge:0,
-      timeout:20000
-    }
-  );
+  ravenGpsLifecyclePaused=false;
+  const token=++ravenGpsStartToken;
+  try{await beginRavenPositionWatch(token);}catch(error){if(token===ravenGpsStartToken)showRavenGpsError(error);}
 }
 
-function stopExploration(){
+async function stopExploration(){
 
   tracking=false;
+  ravenGpsResumeAfterLifecycle=false;
+  ravenGpsLifecyclePaused=false;
+  ++ravenGpsStartToken;
 
   if(watchId!==null){
-
-    navigator.geolocation.clearWatch(watchId);
+    const id=watchId;
     watchId=null;
+    try{await ravenLocationProvider().clearWatch(id);}catch(error){if(typeof logRavenEvent==="function")logRavenEvent("GPS konnte nicht sauber beendet werden",error?.message||"");}
   }
 
   document.getElementById("statusText").textContent =
@@ -110,6 +126,26 @@ function stopExploration(){
 
   sessionDistance=0;
   updateUI();
+}
+
+async function pauseRavenExplorationForLifecycle(){
+  if(!tracking||ravenGpsLifecyclePaused)return;
+  ravenGpsLifecyclePaused=true;
+  ravenGpsResumeAfterLifecycle=true;
+  ++ravenGpsStartToken;
+  const id=watchId;watchId=null;lastPosition=null;
+  if(id!==null)try{await ravenLocationProvider().clearWatch(id);}catch{}
+  document.getElementById("gpsInfo").textContent="GPS pausiert · App im Hintergrund";
+}
+
+async function resumeRavenExplorationFromLifecycle(){
+  if(!tracking||!ravenGpsResumeAfterLifecycle||!ravenGpsLifecyclePaused)return;
+  ravenGpsLifecyclePaused=false;
+  ravenGpsResumeAfterLifecycle=false;
+  lastPosition=null;
+  document.getElementById("gpsInfo").textContent="GPS wird fortgesetzt …";
+  const token=++ravenGpsStartToken;
+  try{await beginRavenPositionWatch(token);}catch(error){if(token===ravenGpsStartToken)showRavenGpsError(error);}
 }
 
 const RAVEN_SPEED_PAUSE_KMH=12;
