@@ -46,4 +46,3 @@ window.addEventListener("DOMContentLoaded",()=>{
   const releaseCanvas=()=>{const direction=canvas.dataset.steer;if(direction)setJumperDirection(direction,false);delete canvas.dataset.steer;};
   canvas?.addEventListener("pointerdown",steerCanvas);["pointerup","pointercancel","pointerleave"].forEach(type=>canvas?.addEventListener(type,releaseCanvas));
 });
-

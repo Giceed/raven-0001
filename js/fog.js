@@ -43,7 +43,8 @@ function redrawFog(){
     point.type==="exploration"&&
     normalizePlaceName(point.district||"Fürstenberg")===normalizePlaceName(placeName)
   );
-  const placeFullyExplored=fuerstenbergMission.completed||(
+  const isFuerstenberg=normalizePlaceName(placeName)==="fürstenberg";
+  const placeFullyExplored=(isFuerstenberg&&fuerstenbergMission.completed)||(
     requiredExplorationPoints.length>0&&requiredExplorationPoints.every(point=>
       fuerstenbergMission.visitedPOIs.includes(point.id)
     )
@@ -267,4 +268,3 @@ function updateBoundaryOutline(){
     }
   ).addTo(map);
 }
-

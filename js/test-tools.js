@@ -60,4 +60,3 @@ setInterval(()=>{updateRavenDevPanel();updateCompletionBanner();},1000);
 setInterval(()=>{if(currentRavenDistrict)renderMainLists();},1000);
 updateRavenDevPanel();
 updateCompletionBanner();
-

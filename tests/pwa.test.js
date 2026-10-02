@@ -6,7 +6,7 @@ assert.equal(manifest.display,"standalone");
 assert.match(manifest.start_url,/view=player/);
 assert.ok(manifest.icons.some(icon=>icon.purpose==="maskable"));
 for(const icon of manifest.icons)assert.ok(fs.existsSync(icon.src),`Icon fehlt: ${icon.src}`);
-assert.match(worker,/raven-app-v69/);
+assert.match(worker,/raven-app-v76/);
 assert.match(worker,/request\.mode==="navigate"/);
 assert.doesNotMatch(worker,/tile\.openstreetmap|\/tile\//i,"Kartenkacheln dürfen den App-Cache nicht aufblasen.");
 const shellBlock=worker.match(/const RAVEN_SHELL=\[([\s\S]*?)\];/)[1];
@@ -20,4 +20,3 @@ assert.match(index,/apple-mobile-web-app-capable" content="yes"/,"iOS-Appmodus f
 assert.match(index,/apple-touch-icon" href="icons\/raven-192\.png"/,"iOS-Appsymbol fehlt.");
 assert.match(pwa,/iphone\|ipad\|ipod/i,"iOS-Installationsweg fehlt.");
 console.log(`✓ PWA-Test bestanden: Spielerstart, Icons, ${shellFiles.length} Offline-Dateien und begrenzter Cache`);
-

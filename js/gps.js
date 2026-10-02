@@ -297,4 +297,3 @@ function saveExploredPoint(lat,lon){
     JSON.stringify(exploredPoints)
   );
 }
-

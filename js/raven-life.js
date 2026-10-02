@@ -185,4 +185,3 @@ window.addEventListener("storage",event=>{
   if(event.key==="ravenSharedPoisLive")location.reload();
 });
 window.addEventListener("DOMContentLoaded",()=>{applyRavenTime();applyRavenPlayerView();renderRavenGamePanel();if(ravenPlayerLocked&&!ravenProfile.onboardingDone)openRavenNaming();setInterval(()=>{renderRavenGamePanel();if(typeof renderMainLists==="function")renderMainLists();},30000);setInterval(()=>{if(isRavenSleeping())renderRavenGamePanel();},1000);});
-
