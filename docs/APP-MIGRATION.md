@@ -33,6 +33,14 @@ Gameplay-Referenz für die App-Migration.
 - App-Start setzt `view=player`, verwendet lokale Leaflet-Dateien, blendet den
   Installationsknopf aus und erhält die Verbindungsanzeige. Native Assets werden
   über Capacitor synchronisiert, nicht von einer entfernten Start-URL geladen.
+- iOS- und Android-Standortberechtigungen sind eingetragen. Der GPS-Start ist
+  gegen doppelte und verspätete Watcher abgesichert. Beim Hintergrundwechsel
+  wird die Ortung pausiert; beim Fortsetzen wird die letzte Position verworfen,
+  damit keine falsche Distanz über die App-Pause entsteht.
+- Die App verwendet derzeit die Geolocation der nativen WebView. Eine Adapter-
+  Schnittstelle für `@capacitor/geolocation` und `@capacitor/app` ist vorhanden;
+  die Plugin-Pakete müssen vor dem Gerätebuild noch installiert und synchronisiert
+  werden. Bis dahin übernimmt `visibilitychange` den Lifecycle-Fallback.
 - Originale Webdateien, PWA, Spiellogik und Daten wurden nicht editiert.
 - Lockfile für reproduzierbare Installation. Generierte öffentliche Assets,
   Abhängigkeiten und private Signierungsdateien werden nicht eingecheckt.
@@ -70,17 +78,14 @@ dieselbe Webbasis und wird nach dem ersten iPhone-Test mitgeprüft.
 1. **Referenz eingefroren.** V4.8 „Deutschland erwacht“ ist die festgeschriebene
    Gameplay-Basis. Während der Migration keine neuen Spielwerte, Features oder
    Kartendaten nebenbei ändern.
-2. **Native GPS-Grenze einziehen.** Kleine Plattform-Schnittstelle mit Browser-
-   und `@capacitor/geolocation`-Implementierung; bestehendes `handlePosition`
-   weiterverwenden. Native Watch-ID wird asynchron geliefert: Doppeltippen,
-   Stop vor Watch-Auflösung, Fehler und erneuten Start gezielt testen. iOS-
-   Usage-Descriptions und Android-Standortrechte nach Plugin-Vorgaben ergänzen.
-   Verweigerte/ungefähre Position und deaktivierte Ortungsdienste verständlich
-   anzeigen. Keine Berechtigungsabfrage allein beim Öffnen der App.
-3. **App-Lifecycle absichern.** `@capacitor/app`: beim Verlassen GPS pausieren,
-   Watch zuverlässig entfernen, Daten speichern. Beim Zurückkehren keine
-   Distanz über die Pause hinweg gutschreiben; letzten Fix zurücksetzen und
-   bewusst fortsetzen. Kein automatisches Tourende und keine verlorene
+2. **Native Plugins synchronisieren.** `@capacitor/geolocation` und
+   `@capacitor/app` installieren, anschließend `cap sync` ausführen und die
+   vorbereitete Adapterschicht auf einem echten Gerät prüfen. Die Berechtigung
+   wird erst beim Start einer Erkundung angefragt.
+3. **App-Lifecycle auf dem Gerät abnehmen.** Beim Verlassen wird GPS pausiert und
+   der Watch zuverlässig entfernt. Beim Zurückkehren wird der letzte Fix
+   zurückgesetzt, damit keine Distanz über die Pause hinweg gutgeschrieben wird.
+   Kein automatisches Tourende und keine verlorene
    Tourzusammenfassung. V1 zunächst Vordergrundortung; Sperrbildschirm bedeutet
    keine zugesicherte Aufzeichnung. Hintergrundortung wäre eine eigene Entscheidung.
 4. **Spielstand dauerhaft machen.** Direkte Zugriffe hinter einer gemeinsamen
@@ -103,10 +108,10 @@ dieselbe Webbasis und wird nach dem ersten iPhone-Test mitgeprüft.
 
 ## Validierung und Grenzen
 
-Die sechs vorhandenen Node-Tests bestanden vor der Änderung. Danach bestehen
-acht Prüfungen einschließlich wiederholtem App-Build, unveränderten Webquellen,
-lokalen HTML-Abhängigkeiten und Verbindungsanzeige. Capacitor hat beide nativen
-Projekte erfolgreich erzeugt. Die vorhandenen Tests sind überwiegend statische
+Inzwischen bestehen **14 Prüfungen** einschließlich wiederholtem App-Build,
+Deutschland-GPS, Standortrechten, asynchroner Watch-Absicherung, Lifecycle-
+Pause/Fortsetzung, lokalen HTML-Abhängigkeiten und Verbindungsanzeige. Capacitor
+hat beide nativen Projekte erfolgreich erzeugt. Die vorhandenen Tests sind überwiegend statische
 Prüfungen; sie beweisen keine vollständige Gameplay- oder Gerätefunktion.
 
 Noch nicht geprüft: Xcode-/Gradle-Kompilierung, Browser-Visualvergleich, iPhone,
