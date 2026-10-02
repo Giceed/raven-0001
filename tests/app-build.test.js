@@ -38,6 +38,8 @@ test('native build preserves web sources and packages local page dependencies', 
   assert.ok(html.indexOf('searchParams.set') < html.indexOf('src="js/config.js'));
   assert.ok(!fs.existsSync(path.join(root, 'dist/service-worker.js')));
   assert.ok(!fs.existsSync(path.join(root, 'dist/js/pwa.js')));
+  assert.ok(fs.existsSync(path.join(root, 'dist/native-storage.js')));
+  assert.ok(html.indexOf('native-storage.js') < html.indexOf('js/config.js'));
   for (const file of ['leaflet.js', 'leaflet.css', 'images/marker-icon.png', 'LICENSE']) {
     assert.ok(fs.existsSync(path.join(root, 'dist/vendor/leaflet', file)));
   }

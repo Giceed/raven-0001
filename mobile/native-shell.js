@@ -3,6 +3,9 @@ const ravenCapacitor=window.Capacitor;
 const ravenNativePlugins=ravenCapacitor?.Plugins||{};
 const ravenGeolocation=ravenNativePlugins.Geolocation;
 const ravenAppPlugin=ravenNativePlugins.App;
+const ravenPreferences=ravenNativePlugins.Preferences;
+
+if(ravenPreferences&&window.RavenNativeStorage)void window.RavenNativeStorage.attach(ravenPreferences);
 
 if(ravenGeolocation){
   window.RavenNativeLocation={
@@ -19,6 +22,7 @@ if(ravenGeolocation){
 }
 
 function ravenHandleAppState(isActive){
+  if(!isActive&&window.RavenNativeStorage)void window.RavenNativeStorage.flush();
   const action=isActive?window.resumeRavenExplorationFromLifecycle:window.pauseRavenExplorationForLifecycle;
   if(typeof action==="function")void action();
 }
@@ -30,6 +34,7 @@ if(ravenAppPlugin?.addListener){
 }
 
 window.addEventListener("pagehide",()=>{
+  if(window.RavenNativeStorage)void window.RavenNativeStorage.flush();
   if(typeof window.pauseRavenExplorationForLifecycle==="function")void window.pauseRavenExplorationForLifecycle();
 });
 

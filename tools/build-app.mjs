@@ -23,10 +23,12 @@ for (const page of ['index.html', 'habitat/index.html', 'studio/index.html', 'si
     html = html.replace(/<script src="js\/pwa\.js[^\"]*"><\/script>/, '<script src="native-shell.js"></script>');
     // Lock the same player view used by the web manifest, before game scripts execute.
     html = html.replace('<head>', '<head>\n<script>const ravenAppURL=new URL(location.href);ravenAppURL.searchParams.set("view","player");history.replaceState(null,"",ravenAppURL);</script>');
+    html = html.replace('<script src="js/city-concept-points.js', '<script src="native-storage.js"></script>\n<script src="js/city-concept-points.js');
   }
   await writeFile(filename, html);
 }
 await cp(path.join(root, 'mobile/native-shell.js'), path.join(output, 'native-shell.js'));
+await cp(path.join(root, 'mobile/native-storage.js'), path.join(output, 'native-storage.js'));
 // Never ship an old PWA worker in the native asset bundle.
 await rm(path.join(output, 'js/pwa.js'));
 console.log('Raven app assets built in dist; original web files unchanged.');
