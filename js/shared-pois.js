@@ -1,0 +1,111 @@
+/* Gemeinsame POI-Quelle für Raven Studio und Spielkarte.
+   Das Studio exportiert dieselbe Datenstruktur. Nach dem Einspielen
+   der Exportdatei lädt die Spielkarte die Änderungen automatisch. */
+(async function loadSharedRavenPoints(){
+  try{
+    const localPayload=readRavenStorageJSON("ravenSharedPoisLive",null);
+    const usingStudioData=Array.isArray(localPayload?.points);
+    let payload=localPayload;
+    if(!usingStudioData){
+      const response=await fetch("data/bad-wuennenberg-pois.json?v=28sync1",{cache:"no-store"});
+      if(!response.ok) throw new Error("POI-Datei nicht verfügbar");
+      payload=await response.json();
+    }
+    const source=Array.isArray(payload.points)?payload.points:(payload.candidates||[]);
+    const curatedExplorations=new Set([
+      "osm-node-12779747489",
+      "osm-way-248558859"
+    ]);
+    const curatedActivities=new Set([
+      "osm-way-933203680",
+      "osm-way-711609936",
+      "osm-way-257138078",
+      "osm-way-815079785",
+      "osm-way-32636625",
+      "osm-way-249788369"
+    ]);
+    const idMap={
+      "raven-schloss":"schloss",
+      "raven-st-marien":"st_marien",
+      "raven-rathaus":"rathaus",
+      "raven-beerenstelle":"beerenstelle_dev",
+      "raven-spielplatz":"spielplatz_dev"
+    };
+    const shared=source
+      .filter(point=>
+        point.status!=="rejected" &&
+        (point.district||"Fürstenberg")==="Fürstenberg" &&
+        (usingStudioData ||
+          (point.category==="exploration"
+            ? curatedExplorations.has(point.id)
+            : curatedActivities.has(point.id)))
+      )
+      .map(point=>({
+        id:idMap[point.id]||"shared-"+point.id,
+        type:point.category==="activity"?"activity":"exploration",
+        name:point.name||"Unbekannter Punkt",
+        icon:point.category==="activity"?"◆":"?",
+        lat:Number(point.lat),
+        lon:Number(point.lon),
+        discoveryRadius:point.category==="activity"
+          ? (point.id==="osm-way-32636625"?120:80)
+          : (usingStudioData ? (Number(point.radius)||60) : 60),
+        access:"studio_review",
+        accessHint:point.access||"Vor Ort prüfen",
+        district:point.district,
+        conceptOnly:true,
+        studioStatus:point.status||"pending"
+      }))
+      .filter(point=>Number.isFinite(point.lat)&&Number.isFinite(point.lon));
+
+    if(!shared.length) return;
+    for(let index=ALL_POINTS.length-1;index>=0;index--){
+      const oldPoint=ALL_POINTS[index];
+      if(pointMarkers[oldPoint.id]){
+        map.removeLayer(pointMarkers[oldPoint.id]);
+        delete pointMarkers[oldPoint.id];
+      }
+      if(typeof removePointRadius==="function") removePointRadius(oldPoint.id);
+      ALL_POINTS.splice(index,1);
+    }
+    ALL_POINTS.push(...shared);
+    const explorationCount = shared.filter(point => point.type === "exploration").length;
+    const activityCount = shared.filter(point => point.type === "activity").length;
+    const explorationComplete=explorationCount>0&&shared
+      .filter(point=>point.type==="exploration")
+      .every(point=>fuerstenbergMission.visitedPOIs.includes(point.id));
+    fuerstenbergMission.completed=explorationComplete;
+    if(typeof saveMission==="function") saveMission();
+    const syncStatus = document.getElementById("poiSyncStatus");
+    if(syncStatus){
+      syncStatus.textContent = usingStudioData
+        ? `✓ Studio-Sync aktiv: ${explorationCount} Erkundung · ${activityCount} Aktivitäten`
+        : `Grunddaten geladen: ${explorationCount} Erkundung · ${activityCount} Aktivitäten`;
+      syncStatus.classList.toggle("live", usingStudioData);
+    }
+
+    if(currentLat!==null&&currentLon!==null) updateAllPointStates(currentLat,currentLon);
+    else shared.forEach(point=>renderPointMarker(point,isDiscovered(point),false,Infinity));
+    if(typeof renderMainLists==="function") renderMainLists();
+    if(typeof renderTravelBook==="function") renderTravelBook();
+    if(typeof renderRavenGamePanel==="function") renderRavenGamePanel();
+    if(typeof redrawFog==="function") redrawFog();
+    if(typeof syncRavenBotTargets==="function"){
+      syncRavenBotTargets();
+      if(typeof renderRavenBotCards==="function") renderRavenBotCards();
+      if(typeof drawRavenBotPois==="function") drawRavenBotPois();
+    }
+    if(explorationComplete&&fogCanvas){
+      fogCanvas.style.display="none";
+    }
+    console.info(`Raven: ${shared.length} gemeinsame Studio-Punkte geladen.`);
+  }catch(error){
+    const syncStatus = document.getElementById("poiSyncStatus");
+    if(syncStatus){
+      syncStatus.textContent = "⚠ Studio-Synchronisierung fehlgeschlagen";
+      syncStatus.classList.add("error");
+    }
+    console.warn("Raven nutzt die eingebaute POI-Liste als Rückfalllösung.",error);
+  }
+})();
+

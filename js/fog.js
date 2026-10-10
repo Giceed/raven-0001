@@ -3,113 +3,109 @@
    ========================================================== */
 
 const REVEAL_RADIUS_METERS=40;
+const RAVEN_FOG_CONNECTION_LIMIT_METERS=350;
+const RAVEN_FOG_CONNECTION_TIME_MS=30000;
 
-let fogSvg=null;
+function shouldConnectRevealPoints(from,to){
+  const distance=haversineDistance(from.lat,from.lon,to.lat,to.lon);
+  const timeGap=from.time&&to.time?Math.abs(to.time-from.time):0;
+  return distance<=RAVEN_FOG_CONNECTION_LIMIT_METERS&&(!timeGap||timeGap<=RAVEN_FOG_CONNECTION_TIME_MS);
+}
+
+let fogCanvas=null;
 
 function createFogLayer(){
 
-  if(fogSvg) fogSvg.remove();
+  if(fogCanvas) fogCanvas.remove();
 
-  fogSvg=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "svg"
-  );
+  fogCanvas=document.createElement("canvas");
+  fogCanvas.classList.add("raven-fog-svg");
 
-  fogSvg.classList.add("raven-fog-svg");
-
-  map.getPane("ravenFogPane").appendChild(fogSvg);
+  /* Der Fog liegt in einer echten Leaflet-Ebene: über der Karte,
+     aber unter Erkundungspunkten und Standortmarker. */
+  map.getPane("ravenFogPane").appendChild(fogCanvas);
 
   redrawFog();
 }
 
 function redrawFog(){
 
-  if(!fogSvg) return;
+  if(!fogCanvas) return;
 
   if(mapMode!=="explore"){
 
-    fogSvg.style.display="none";
+    fogCanvas.style.display="none";
     return;
   }
 
-  fogSvg.style.display="block";
-
-  const size=map.getSize();
-
-  /* Das SVG sitzt in einer Leaflet-Pane. Deren Koordinaten bewegen
-     sich beim Zoomen und Verschieben mit der Karte. Deshalb wird der
-     Nebel vor jedem Zeichnen wieder exakt auf die sichtbare linke
-     obere Ecke des Kartenfensters gesetzt. */
-  const viewportOrigin=
-    map.containerPointToLayerPoint([0,0]);
-
-  L.DomUtil.setPosition(
-    fogSvg,
-    viewportOrigin
+  const placeName=currentRavenDistrict||"Fürstenberg";
+  const requiredExplorationPoints=ALL_POINTS.filter(point=>
+    point.type==="exploration"&&
+    normalizePlaceName(point.district||"Fürstenberg")===normalizePlaceName(placeName)
+  );
+  const placeFullyExplored=fuerstenbergMission.completed||(
+    requiredExplorationPoints.length>0&&requiredExplorationPoints.every(point=>
+      fuerstenbergMission.visitedPOIs.includes(point.id)
+    )
   );
 
-  fogSvg.setAttribute("width",size.x);
-  fogSvg.setAttribute("height",size.y);
-  fogSvg.setAttribute("viewBox",`0 0 ${size.x} ${size.y}`);
-
-  fogSvg.innerHTML="";
-
-  const defs=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "defs"
-  );
-
-  const mask=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "mask"
-  );
-
-  mask.setAttribute("id","ravenFogMask");
-
-  const base=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "rect"
-  );
-
-  base.setAttribute("width","100%");
-  base.setAttribute("height","100%");
-  base.setAttribute("fill","white");
-
-  mask.appendChild(base);
-
-  exploredPoints.forEach(point=>{
-
-    appendRevealCircle(
-      mask,
-      point.lat,
-      point.lon,
-      REVEAL_RADIUS_METERS
-    );
-
-  });
-
-  if(fuerstenbergMission.completed && fuerstenbergBoundary){
-
-    appendGeoJSONGeometryToMask(
-      mask,
-      fuerstenbergBoundary.geometry
-    );
+  /* Sind alle Pflicht-Erkundungspunkte entdeckt, ist die gesamte
+     Ortskarte erkundet und der Fog verschwindet vollständig. */
+  if(placeFullyExplored){
+    fogCanvas.style.display="none";
+    return;
   }
 
-  defs.appendChild(mask);
-  fogSvg.appendChild(defs);
+  fogCanvas.style.display="block";
 
-  const darkness=document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "rect"
-  );
+  const size=map.getSize();
+  const dpr=window.devicePixelRatio||1;
+  fogCanvas.width=Math.round(size.x*dpr);
+  fogCanvas.height=Math.round(size.y*dpr);
+  fogCanvas.style.width=size.x+"px";
+  fogCanvas.style.height=size.y+"px";
+  const panePosition=map._getMapPanePos?.()||L.point(0,0);
+  fogCanvas.style.left=(-panePosition.x)+"px";
+  fogCanvas.style.top=(-panePosition.y)+"px";
+  const context=fogCanvas.getContext("2d");
+  context.setTransform(dpr,0,0,dpr,0,0);
+  context.globalCompositeOperation="source-over";
+  context.clearRect(0,0,size.x,size.y);
+  context.fillStyle="rgba(0,0,0,.94)";
+  context.fillRect(0,0,size.x,size.y);
+  context.globalCompositeOperation="destination-out";
 
-  darkness.setAttribute("width","100%");
-  darkness.setAttribute("height","100%");
-  darkness.setAttribute("fill","rgba(0,0,0,.94)");
-  darkness.setAttribute("mask","url(#ravenFogMask)");
+  function revealCircle(lat,lon,radiusMeters){
+    const center=map.latLngToContainerPoint([lat,lon]);
+    const edge=destinationPoint(lat,lon,radiusMeters,90);
+    const edgePoint=map.latLngToContainerPoint(edge);
+    const radius=Math.max(Math.abs(edgePoint.x-center.x),1);
+    context.beginPath();
+    context.arc(center.x,center.y,radius,0,Math.PI*2);
+    context.fill();
+  }
 
-  fogSvg.appendChild(darkness);
+  function revealConnection(from,to,radiusMeters){
+    if(!shouldConnectRevealPoints(from,to))return;
+    const start=map.latLngToContainerPoint([from.lat,from.lon]);
+    const end=map.latLngToContainerPoint([to.lat,to.lon]);
+    const edge=destinationPoint(from.lat,from.lon,radiusMeters,90);
+    const edgePoint=map.latLngToContainerPoint(edge);
+    context.lineWidth=Math.max(Math.abs(edgePoint.x-start.x)*2,2);
+    context.lineCap="round";
+    context.lineJoin="round";
+    context.beginPath();
+    context.moveTo(start.x,start.y);
+    context.lineTo(end.x,end.y);
+    context.stroke();
+  }
+
+  exploredPoints.forEach((point,index)=>{
+    if(index)revealConnection(exploredPoints[index-1],point,REVEAL_RADIUS_METERS);
+    revealCircle(point.lat,point.lon,REVEAL_RADIUS_METERS);
+  });
+
+  context.globalCompositeOperation="source-over";
 }
 
 function appendRevealCircle(mask,lat,lon,radiusMeters){
@@ -199,29 +195,19 @@ map.on("move zoom resize",redrawFog);
    ========================================================== */
 
 async function loadFuerstenbergBoundary(){
-
-  const crs=encodeURIComponent(
-    "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-  );
-
-  const url=
-    "https://ogc-api.nrw.de/lika/v1/collections/" +
-    "katasterbezirk/items/" +
-    FUERSTENBERG.boundaryObjectId +
-    "?f=json&crs=" + crs;
-
   try{
 
-    const response=await fetch(url);
+    const response=await fetch("data/fuerstenberg-boundary.json?v=1");
 
     if(!response.ok) throw new Error();
 
     const data=await response.json();
 
-    fuerstenbergBoundary =
-      data.type==="Feature"
-        ? data
-        : data.features?.[0];
+    fuerstenbergBoundary={
+      type:"Feature",
+      properties:{name:"Fürstenberg"},
+      geometry:data.geojson
+    };
 
     if(!fuerstenbergBoundary) throw new Error();
 
@@ -281,3 +267,4 @@ function updateBoundaryOutline(){
     }
   ).addTo(map);
 }
+

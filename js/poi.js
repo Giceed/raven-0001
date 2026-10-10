@@ -2,11 +2,71 @@
    POI MARKER
    ========================================================== */
 
+let activeGamePointType="all";
+const ACTIVITY_COOLDOWN_MS=60*1000;
+
+function getActivityCooldowns(now=Date.now()){
+  let saved={};try{saved=JSON.parse(localStorage.getItem("ravenActivityCooldowns")||"{}");}catch{return {};}
+  if(!saved||typeof saved!=="object"||Array.isArray(saved))return {};
+  return Object.fromEntries(Object.entries(saved).flatMap(([id,value])=>{const expires=Number(value);return Number.isFinite(expires)&&expires>now?[[id,Math.min(expires,now+ACTIVITY_COOLDOWN_MS)]]:[];}));
+}
+function getActivityCooldownRemaining(point,now=Date.now()){return Math.max(0,(getActivityCooldowns(now)[point.id]||0)-now);}
+function formatActivityCooldown(milliseconds){return `${Math.max(1,Math.ceil(milliseconds/1000))} Sek.`;}
+function collectActivityReward(point){
+  const remaining=getActivityCooldownRemaining(point);
+  if(remaining>0){
+    setTemporaryMessage(`⏳ ${point.name} ist in ${formatActivityCooldown(remaining)} wieder bereit.`);
+    if(typeof logRavenEvent==="function")logRavenEvent("Aktivität im Cooldown",point.name);
+    return false;
+  }
+  const reward=typeof createRavenActivityReward==="function"?createRavenActivityReward(point):{futter:1};
+  if(typeof addRavenItems==="function"&&!addRavenItems(reward)){
+    setTemporaryMessage("🎒 Dein Inventar ist voll. Verbrauche zuerst ein Item.",4000);
+    return false;
+  }
+  const cooldowns=getActivityCooldowns();cooldowns[point.id]=Date.now()+ACTIVITY_COOLDOWN_MS;
+  localStorage.setItem("ravenActivityCooldowns",JSON.stringify(cooldowns));
+  if(typeof addRavenItems!=="function"){
+    const items=readRavenStorageJSON("ravenItems",{futter:0});items.futter=(Number(items.futter)||0)+1;localStorage.setItem("ravenItems",JSON.stringify(items));
+  }
+  addXP(FUERSTENBERG.activityXP);
+  const rewardText=typeof ravenRewardText==="function"?ravenRewardText(reward):"1 Futter";
+  setTemporaryMessage(`🎒 ${point.name}: ${rewardText} · +${FUERSTENBERG.activityXP} XP`,4500);
+  if(typeof logRavenEvent==="function")logRavenEvent("Item gesammelt",`${point.name} · ${rewardText}`);
+  if(typeof recordDailyTask==="function")recordDailyTask("collect");
+  if(typeof renderRavenGamePanel==="function")renderRavenGamePanel();
+  return true;
+}
+
+function setGamePointTypeFilter(type){
+  activeGamePointType=type;
+  document.getElementById("allPointsButton")?.classList.toggle("active",type==="all");
+  document.getElementById("explorationPointsButton")?.classList.toggle("active",type==="exploration");
+  document.getElementById("activityPointsButton")?.classList.toggle("active",type==="activity");
+  updateAllPointStates(currentLat??TEST_REGION.centerLat,currentLon??TEST_REGION.centerLon);
+  setTemporaryMessage(type==="exploration"
+    ? "🟣 Erkundungspunkte farbig – Aktivitäten bleiben grau sichtbar."
+    : type==="activity"
+      ? "🟠 Aktivitätspunkte farbig – Erkundungspunkte bleiben grau sichtbar."
+      : "Alle Punktarten werden farbig angezeigt.");
+}
+
 function isDiscovered(point){
 
   return point.type==="activity"
     ? fuerstenbergMission.visitedActivities.includes(point.id)
     : fuerstenbergMission.visitedPOIs.includes(point.id);
+}
+
+function getDiscoveryRadius(point){
+  return point.discoveryRadius || FUERSTENBERG.visitRadius;
+}
+
+function getEffectiveDiscoveryRadius(point){
+  const gpsTolerance=!godMode&&Number.isFinite(currentAccuracy)
+    ? Math.min(Math.max(currentAccuracy,0),30)
+    : 0;
+  return getDiscoveryRadius(point)+gpsTolerance;
 }
 
 function updateAllPointStates(lat,lon){
@@ -21,7 +81,7 @@ function updateAllPointStates(lat,lon){
     );
 
     const discovered=isDiscovered(point);
-    const inRange=distance<=FUERSTENBERG.visitRadius;
+    const inRange=distance<=getEffectiveDiscoveryRadius(point);
 
     renderPointMarker(
       point,
@@ -36,10 +96,33 @@ function updateAllPointStates(lat,lon){
 
 function renderPointMarker(point,discovered,inRange,distance){
 
+  const district=point.district||(point.id.startsWith("concept-")?"":"Fürstenberg");
+  const districtActive=currentRavenDistrict&&normalizePlaceName(currentRavenDistrict)===normalizePlaceName(district);
+  const visibleBeforeGps=mapMode==="explore"&&!currentRavenDistrict&&point.type==="exploration";
+  const visibleInDiscoveredPlace=mapMode==="explore"&&districtActive;
+  const visibleInTravel=mapMode==="travel"&&point.type==="exploration";
+  const pointVisible=godMode||visibleBeforeGps||visibleInDiscoveredPlace||visibleInTravel;
+  if(!pointVisible){
+    if(pointMarkers[point.id]){
+      map.removeLayer(pointMarkers[point.id]);
+      delete pointMarkers[point.id];
+    }
+    removePointRadius(point.id);
+    return;
+  }
+
+  renderPointRadius(point);
+
   let css="poi-marker";
 
   if(point.type==="activity"){
     css+=" activity";
+  }else{
+    css+=" exploration";
+  }
+
+  if(activeGamePointType!=="all"&&point.type!==activeGamePointType){
+    css+=" muted-type";
   }
 
   if(discovered){
@@ -50,7 +133,7 @@ function renderPointMarker(point,discovered,inRange,distance){
 
   const content =
     discovered
-      ? point.icon
+      ? (point.type==="exploration" ? "✓" : point.icon)
       : "?";
 
   const icon=L.divIcon({
@@ -76,9 +159,58 @@ function renderPointMarker(point,discovered,inRange,distance){
   }
 }
 
+function removePointRadius(pointId){
+  if(!pointRadiusLayers[pointId]) return;
+  map.removeLayer(pointRadiusLayers[pointId]);
+  delete pointRadiusLayers[pointId];
+}
+
+function renderPointRadius(point){
+  if(!godMode){
+    removePointRadius(point.id);
+    return;
+  }
+
+  const color=point.type==="activity"?"#fb923c":"#a855f7";
+  const radius=getDiscoveryRadius(point);
+
+  removePointRadius(point.id);
+
+  const actualRadius=L.circle([point.lat,point.lon],{
+    pane:"ravenForegroundPane",
+    radius,
+    color,
+    weight:4,
+    opacity:1,
+    dashArray:"8 5",
+    fillColor:color,
+    fillOpacity:.2,
+    interactive:false
+  });
+
+  /* Der zusätzliche Halo bleibt auch herausgezoomt erkennbar. */
+  const visibleHalo=L.circleMarker([point.lat,point.lon],{
+    pane:"ravenForegroundPane",
+    radius:14,
+    color,
+    weight:2,
+    opacity:.9,
+    fill:false,
+    interactive:false
+  });
+
+  pointRadiusLayers[point.id]=L.layerGroup([actualRadius,visibleHalo]).addTo(map);
+  actualRadius.bindTooltip(`${radius} m`,{
+    permanent:true,
+    direction:"right",
+    className:"raven-radius-label",
+    offset:[12,0]
+  }).openTooltip();
+}
+
 function tryOpenPoint(point){
 
-  if(isDiscovered(point)){
+  if(isDiscovered(point)&&point.type!=="activity"){
 
     setTemporaryMessage(
       `${point.icon} ${point.name} wurde bereits entdeckt.`
@@ -103,17 +235,41 @@ function tryOpenPoint(point){
     point.lon
   );
 
-  if(distance>FUERSTENBERG.visitRadius){
+  const discoveryRadius=getEffectiveDiscoveryRadius(point);
+
+  if(window.ravenMovementLocked&&!godMode){
+    const state=window.ravenSpeedState;
+    const message=state==="blocked"
+      ? "🚗 Fahrsperre: Punkte sind über 20 km/h gesperrt."
+      : state==="cooldown"
+        ? "⏳ Raven wartet fünf ruhige Sekunden, bevor Punkte wieder freigegeben werden."
+        : "⚠️ Zu schnell: Punkte pausieren ab 12 km/h.";
+    setTemporaryMessage(message);
+    if(typeof logRavenEvent==="function")logRavenEvent("Punkt gesperrt",`${(window.currentSpeedKmh||0).toFixed(1)} km/h`);
+    return;
+  }
+
+  if(!isWithinRavenRadius(distance,discoveryRadius)){
 
     setTemporaryMessage(
-      `? Dieser Punkt ist noch ${Math.round(distance)} m entfernt.`
+      `? Dieser Punkt ist noch ${Math.round(distance)} m entfernt (Radius ${discoveryRadius} m).`
     );
 
     return;
   }
 
+  if(typeof logRavenEvent==="function")logRavenEvent("Punkt in Reichweite",`${point.name} · ${Math.round(distance)} m`);
+
+  if(point.type==="activity"&&isDiscovered(point)){
+    collectActivityReward(point);
+    renderMainLists();
+    return;
+  }
+
   openScratch(point);
 }
+
+function isWithinRavenRadius(distance,radius){return distance<=radius;}
 
 
 /* ==========================================================
@@ -121,16 +277,19 @@ function tryOpenPoint(point){
    ========================================================== */
 
 function renderMainLists(){
+  if(!currentRavenDistrict){
+    document.getElementById("explorationList").innerHTML="";
+    document.getElementById("activityList").innerHTML="";
+    updateMissionUI();
+    return;
+  }
 
-  renderPointList(
-    "explorationList",
-    FUERSTENBERG.explorationPOIs
+  const placePoints=ALL_POINTS.filter(point=>
+    normalizePlaceName(point.district||(point.id.startsWith("concept-")?"":"Fürstenberg"))===normalizePlaceName(currentRavenDistrict)
   );
 
-  renderPointList(
-    "activityList",
-    FUERSTENBERG.activityPOIs
-  );
+  renderPointList("explorationList",placePoints.filter(point=>point.type==="exploration"));
+  renderPointList("activityList",placePoints.filter(point=>point.type==="activity"));
 
   updateMissionUI();
 }
@@ -164,7 +323,11 @@ function renderPointList(elementId,points){
       </div>
 
       <div class="poi-state">
-        ${discovered ? "ENTDECKT ✓" : "UNBEKANNT"}
+        ${discovered
+          ? (point.type==="activity"&&getActivityCooldownRemaining(point)>0
+            ? `BEREIT IN ${formatActivityCooldown(getActivityCooldownRemaining(point)).toUpperCase()}`
+            : point.type==="activity" ? "SAMMELBEREIT" : "ENTDECKT ✓")
+          : "UNBEKANNT"}
       </div>
     `;
 
@@ -398,12 +561,7 @@ function discoverPoint(point){
       .visitedActivities
       .push(point.id);
 
-    addXP(FUERSTENBERG.activityXP);
-
-    setTemporaryMessage(
-      `✨ ${point.name} entdeckt! +${FUERSTENBERG.activityXP} XP`,
-      4500
-    );
+    collectActivityReward(point);
 
   }else{
 
@@ -412,9 +570,14 @@ function discoverPoint(point){
       .push(point.id);
 
     addXP(FUERSTENBERG.poiXP);
+    if(typeof logRavenEvent==="function")logRavenEvent("Erkundungspunkt entdeckt",point.name);
 
+    const requiredExplorationPoints=ALL_POINTS.filter(candidate=>
+      candidate.type==="exploration"&&
+      normalizePlaceName(candidate.district||"Fürstenberg")===normalizePlaceName(currentRavenDistrict||"Fürstenberg")
+    );
     const allDone=
-      FUERSTENBERG.explorationPOIs
+      requiredExplorationPoints.length>0&&requiredExplorationPoints
         .every(point =>
           fuerstenbergMission
             .visitedPOIs
@@ -432,10 +595,15 @@ function discoverPoint(point){
         FUERSTENBERG.completionXP
       );
 
+      const missionItemsGranted=typeof grantRavenMissionItems!=="function"||grantRavenMissionItems({futter:3});
+
       setTemporaryMessage(
-        `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP`,
+        missionItemsGranted
+          ? `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP · 3 Futter`
+          : `🏆 Fürstenberg vollständig erkundet! +${FUERSTENBERG.completionXP} XP · Inventar für 3 Futter leeren`,
         5000
       );
+      if(typeof logRavenEvent==="function")logRavenEvent("Ort abgeschlossen","Fürstenberg · Fog frei");
 
     }else{
 
@@ -465,6 +633,7 @@ function discoverPoint(point){
 
   updateBoundaryOutline();
   redrawFog();
+  if(typeof renderRavenGamePanel==="function")renderRavenGamePanel();
 }
 
 function saveMission(){
@@ -483,34 +652,20 @@ function isFuerstenbergDiscovered(){
 }
 
 function updateMissionUI(){
-
-  const placeKnown=isFuerstenbergDiscovered();
-
-  document.getElementById("missionTitle").textContent =
-    placeKnown ? "📍 Standort: Fürstenberg" : "📍 Standort";
-
-  const visited=
-    fuerstenbergMission.visitedPOIs.length;
-
-  const total=
-    FUERSTENBERG.explorationPOIs.length;
-
-  const activities=
-    fuerstenbergMission.visitedActivities.length;
-
-  const activityTotal=
-    FUERSTENBERG.activityPOIs.length;
-
-  document.getElementById("missionText").textContent =
-    !placeKnown
-
-      ? `${visited} / ${total} Erkundungspunkte vorbereitet · Aktivitäten ${activities}/${activityTotal} · Starte GPS, um den Ort zu entdecken.`
-
-      : fuerstenbergMission.completed
-
-        ? `Fürstenberg ist vollständig erkundet · ${visited}/${total} · Aktivitäten ${activities}/${activityTotal}.`
-
-        : `${visited} / ${total} Erkundungspunkte entdeckt · Aktivitäten ${activities}/${activityTotal}.`;
+  const title=document.getElementById("missionTitle");
+  const text=document.getElementById("missionText");
+  if(!currentRavenDistrict){
+    title.textContent="📍 Standort: unbekannt";
+    text.textContent="Starte die Erkundung, damit Raven deinen Ort erkennt und die zugehörigen Punkte lädt.";
+    return;
+  }
+  const points=ALL_POINTS.filter(point=>normalizePlaceName(point.district||(point.id.startsWith("concept-")?"":"Fürstenberg"))===normalizePlaceName(currentRavenDistrict));
+  const exploration=points.filter(point=>point.type==="exploration");
+  const activities=points.filter(point=>point.type==="activity");
+  const foundExploration=exploration.filter(isDiscovered).length;
+  const foundActivities=activities.filter(isDiscovered).length;
+  title.textContent=`📍 Standort: ${currentRavenDistrict}`;
+  text.textContent=`${foundExploration}/${exploration.length} Erkundungspunkte entdeckt · Aktivitäten ${foundActivities}/${activities.length}.`;
 }
 
 
@@ -540,3 +695,9 @@ function addXP(amount){
 
   updateUI();
 }
+
+/* Kurzer Prototyp-Cooldown: Countdown sichtbar sekündlich aktualisieren. */
+setInterval(()=>{
+  if(Object.values(getActivityCooldowns()).some(readyAt=>readyAt>Date.now()))renderMainLists();
+},1000);
+

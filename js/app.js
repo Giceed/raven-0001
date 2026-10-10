@@ -205,8 +205,6 @@ renderTravelBook();
 
 createFogLayer();
 
-drawTestRegion();
-
 loadFuerstenbergBoundary();
 
 /* Marker sofort erzeugen */
@@ -225,3 +223,4 @@ setTimeout(()=>{
   redrawFog();
 
 },400);
+

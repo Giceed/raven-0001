@@ -1,11 +1,49 @@
 /* ==========================================================
-   V2.4 TEST-RESET
+   V2.6 TESTSTAND
    - Fürstenberg ist als aktueller Standort und Reiseeintrag bekannt.
    - 2 Erkundungspunkte + 2 Aktivitäten sind für schnelle Tests
      bereits freigeschaltet.
    ========================================================== */
 
-if (!localStorage.getItem("ravenV24RegionResetDone2")) {
+function parseRavenJSONText(raw,fallback){try{const parsed=JSON.parse(raw);return parsed??fallback;}catch{return fallback;}}
+function readRavenStorageJSON(key,fallback){return parseRavenJSONText(localStorage.getItem(key),fallback);}
+
+/* Ein bewusst aufgerufener Frischstart setzt nur Spielerdaten zurück.
+   Studio-Punkte und die gemeinsame Kartenkonfiguration bleiben erhalten. */
+const RAVEN_FRESH_START_TOKEN="fieldtest1";
+function applyRavenFreshStart(search=location.search){
+  const params=new URLSearchParams(search);
+  if(params.get("fresh")!==RAVEN_FRESH_START_TOKEN)return false;
+  [
+    "ravenActivityCooldowns","ravenActivityVisited","ravenDiagnosticsV1","ravenDiscoveredPlaces",
+    "ravenDistance","ravenExploredPoints","ravenFieldTestV1","ravenFuerstenbergMission",
+    "ravenJumperHighscore","ravenMissionVisited","ravenPendingItems","ravenProfile",
+    "ravenTestEvents","ravenTourReportsV1","ravenTourStartV1","ravenTravelHistory"
+  ].forEach(key=>localStorage.removeItem(key));
+  localStorage.setItem("ravenXP","0");
+  localStorage.setItem("ravenLevel","1");
+  localStorage.setItem("ravenDistance","0");
+  localStorage.setItem("ravenMapMode","explore");
+  localStorage.setItem("ravenPlayerView","player");
+  localStorage.setItem("ravenExploredPoints","[]");
+  localStorage.setItem("ravenTravelHistory","[]");
+  localStorage.setItem("ravenDiscoveredPlaces","[]");
+  localStorage.setItem("ravenMissionVisited","[]");
+  localStorage.setItem("ravenActivityVisited","[]");
+  localStorage.setItem("ravenFuerstenbergMission",JSON.stringify({visitedPOIs:[],visitedActivities:[],completed:false,rewarded:false}));
+  localStorage.setItem("ravenItems",JSON.stringify({beeren:2,futter:3,lieblingsfutter:0,energiekorn:0,feder:0,glanzstein:0}));
+  localStorage.setItem("ravenPendingItems",JSON.stringify({beeren:0,futter:0,lieblingsfutter:0,energiekorn:0,feder:0,glanzstein:0}));
+  localStorage.setItem("ravenLife",JSON.stringify({hunger:78,energy:82,mood:76,movementMeters:0,updatedAt:Date.now(),sleepStartedAt:0,sleepUntil:0,sleepStartEnergy:0}));
+  localStorage.setItem("ravenProfile",JSON.stringify({name:"Raven",onboardingDone:false}));
+  localStorage.setItem("ravenDaily",JSON.stringify({date:new Date().toISOString().slice(0,10),feed:0,play:0,collect:0,rewarded:false}));
+  params.delete("fresh");
+  const cleanQuery=params.toString();
+  history.replaceState(null,"",`${location.pathname}${cleanQuery?`?${cleanQuery}`:""}${location.hash}`);
+  return true;
+}
+applyRavenFreshStart();
+
+if (!localStorage.getItem("ravenV25DistrictResetDone")) {
 
   localStorage.removeItem("ravenExploredPoints");
   localStorage.removeItem("ravenTravelHistory");
@@ -14,12 +52,7 @@ if (!localStorage.getItem("ravenV24RegionResetDone2")) {
 
   localStorage.setItem(
     "ravenDiscoveredPlaces",
-    JSON.stringify([{
-      name:"Fürstenberg",
-      region:"Nordrhein-Westfalen",
-      country:"Deutschland",
-      discoveredAt:Date.now()
-    }])
+    JSON.stringify([])
   );
 
   localStorage.setItem(
@@ -32,23 +65,98 @@ if (!localStorage.getItem("ravenV24RegionResetDone2")) {
   );
 
   localStorage.setItem("ravenMapMode","explore");
-  localStorage.setItem("ravenV24RegionResetDone2","1");
+  localStorage.setItem("ravenV25DistrictResetDone","1");
+}
+
+/* V2.6: Einen Pflichtpunkt für Radius- und God-Mode-Tests offenhalten. */
+if (!localStorage.getItem("ravenV26RadiusTestResetDone")) {
+  const mission = readRavenStorageJSON("ravenFuerstenbergMission",{});
+
+  mission.visitedPOIs = (mission.visitedPOIs || [])
+    .filter(id => id !== "rathaus");
+  mission.visitedActivities = mission.visitedActivities || [];
+  mission.completed = false;
+
+  localStorage.setItem(
+    "ravenFuerstenbergMission",
+    JSON.stringify(mission)
+  );
+  localStorage.setItem("ravenV26RadiusTestResetDone","1");
+}
+
+/* Zweiter V2.6-Testreset: Schloss und Rathaus bleiben offen. */
+if (!localStorage.getItem("ravenV26RadiusTestReset2Done")) {
+  const mission = readRavenStorageJSON("ravenFuerstenbergMission",{});
+
+  mission.visitedPOIs = (mission.visitedPOIs || [])
+    .filter(id => id !== "schloss" && id !== "rathaus");
+  mission.completed = false;
+
+  localStorage.setItem(
+    "ravenFuerstenbergMission",
+    JSON.stringify(mission)
+  );
+  localStorage.setItem("ravenV26RadiusTestReset2Done","1");
+}
+
+/* V2.6 r4: Teststand auch in getrennten Browser-Speichern herstellen. */
+if (!localStorage.getItem("ravenV26RadiusTestR4Done")) {
+  const mission = readRavenStorageJSON("ravenFuerstenbergMission",{});
+
+  mission.visitedPOIs = ["st_marien"];
+  mission.visitedActivities = mission.visitedActivities || [];
+  mission.completed = false;
+
+  localStorage.setItem(
+    "ravenFuerstenbergMission",
+    JSON.stringify(mission)
+  );
+  localStorage.setItem("ravenV26RadiusTestR4Done","1");
+}
+
+/* Fürstenberg-Konzeptstand: Alle Punkte beginnen wieder unbekannt. */
+if(!localStorage.getItem("ravenV27AllUnknownResetDone")){
+  localStorage.setItem("ravenFuerstenbergMission",JSON.stringify({
+    visitedPOIs:[],
+    visitedActivities:[],
+    completed:false
+  }));
+  localStorage.setItem("ravenV27AllUnknownResetDone","1");
+}
+
+/* Einmaliger Reset für die direkte Studio-Spiel-Synchronisierung. */
+if(!localStorage.getItem("ravenV28StudioSyncResetDone")){
+  localStorage.setItem("ravenFuerstenbergMission",JSON.stringify({
+    visitedPOIs:[],
+    visitedActivities:[],
+    completed:false
+  }));
+  localStorage.setItem("ravenV28StudioSyncResetDone","1");
+}
+
+if(!localStorage.getItem("ravenV28StudioSyncReset2Done")){
+  localStorage.setItem("ravenMissionVisited", JSON.stringify([]));
+  localStorage.setItem("ravenActivityVisited", JSON.stringify([]));
+  localStorage.setItem("ravenV28StudioSyncReset2Done", "1");
 }
 
 /* ==========================================================
    TESTGEBIET
    Ganz Deutschland bleibt auf der Karte erreichbar. Für die
-   erste Testphase werden Orte im 100-km-Kreis um Fürstenberg
-   automatisch erkannt und mit ihrer OSM-Ortsgrenze versehen.
+   erste Testphase gilt nur die Stadt Bad Wünnenberg mit ihren
+   sieben Ortschaften.
    ========================================================== */
 
 const TEST_REGION = {
-  name:"100 km um Fürstenberg",
+  name:"Stadt Bad Wünnenberg",
   centerLat:51.5157,
   centerLon:8.741,
-  radiusMeters:100000,
+  radiusMeters:20000,
   countryCode:"de"
 };
+
+/* Wird erst nach einer echten GPS- oder God-Mode-Ortserkennung gesetzt. */
+let currentRavenDistrict=null;
 
 /* ==========================================================
    FÜRSTENBERG
@@ -73,6 +181,9 @@ const FUERSTENBERG = {
       icon:"🏰",
       lat:51.5155802,
       lon:8.7367807,
+      discoveryRadius:160,
+      access:"view_only",
+      accessHint:"Betreten nicht erforderlich – die Nähe auf öffentlichen Wegen reicht.",
       devOnly:true
     },
 
@@ -82,7 +193,10 @@ const FUERSTENBERG = {
       name:"St. Marien / Sintfeld-Dom",
       icon:"⛪",
       lat:51.5157079,
-      lon:8.7397917
+      lon:8.7397917,
+      discoveryRadius:60,
+      access:"public_surroundings",
+      accessHint:"Vom öffentlichen Umfeld der Kirche aus entdeckbar."
     },
 
     {
@@ -91,7 +205,10 @@ const FUERSTENBERG = {
       name:"Rathaus",
       icon:"🏛️",
       lat:51.5164455,
-      lon:8.7449286
+      lon:8.7449286,
+      discoveryRadius:60,
+      access:"public_surroundings",
+      accessHint:"Vom öffentlichen Straßenraum aus entdeckbar."
     }
 
   ],
@@ -101,10 +218,12 @@ const FUERSTENBERG = {
     {
       id:"beerenstelle_dev",
       type:"activity",
-      name:"Beerenstelle",
-      icon:"🫐",
-      lat:51.51325,
-      lon:8.74215
+      name:"Brunnen-Sammelstelle",
+      icon:"⛲",
+      lat:51.514164328059515,
+      lon:8.741700053215029,
+      discoveryRadius:80,
+      access:"outdoor"
     },
 
     {
@@ -112,8 +231,10 @@ const FUERSTENBERG = {
       type:"activity",
       name:"Spielplatz",
       icon:"🛝",
-      lat:51.51845,
-      lon:8.74730
+      lat:51.51308183260237,
+      lon:8.745600332095771,
+      discoveryRadius:80,
+      access:"outdoor"
     }
 
   ]
@@ -122,24 +243,27 @@ const FUERSTENBERG = {
 
 const ALL_POINTS = [
   ...FUERSTENBERG.explorationPOIs,
-  ...FUERSTENBERG.activityPOIs
+  ...FUERSTENBERG.activityPOIs,
+  ...CITY_CONCEPT_POINTS
 ];
 
 let fuerstenbergMission =
-  JSON.parse(localStorage.getItem("ravenFuerstenbergMission")) || {
+  readRavenStorageJSON("ravenFuerstenbergMission",{
     visitedPOIs:[],
     visitedActivities:[],
     completed:false
-  };
+  });
+
+if(!fuerstenbergMission||typeof fuerstenbergMission!=="object"||Array.isArray(fuerstenbergMission))fuerstenbergMission={visitedPOIs:[],visitedActivities:[],completed:false};
 
 fuerstenbergMission.visitedPOIs =
   (fuerstenbergMission.visitedPOIs || []).filter(id =>
-    FUERSTENBERG.explorationPOIs.some(p => p.id === id)
+    ALL_POINTS.some(p => p.type === "exploration" && p.id === id)
   );
 
 fuerstenbergMission.visitedActivities =
   (fuerstenbergMission.visitedActivities || []).filter(id =>
-    FUERSTENBERG.activityPOIs.some(p => p.id === id)
+    ALL_POINTS.some(p => p.type === "activity" && p.id === id)
   );
 
 if (
@@ -149,3 +273,4 @@ if (
 ) {
   fuerstenbergMission.completed = true;
 }
+

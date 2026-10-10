@@ -41,13 +41,13 @@ async function maybeReverseGeocode(lat,lon,force=false){
 
   const testStatus=document.getElementById("testRegionStatus");
   testStatus.textContent=inTestRegion
-    ? `🧭 Im Testgebiet · ${Math.round(distanceFromCenter/1000)} km von Fürstenberg`
-    : `⚠ Außerhalb des Testgebiets · ${Math.round(distanceFromCenter/1000)} km von Fürstenberg`;
+    ? `🧭 Testgebiet Stadt Bad Wünnenberg`
+    : `⚠ Außerhalb des Testgebiets Bad Wünnenberg`;
   testStatus.className=`boundary-status test-region-status ${inTestRegion ? "ok" : "outside"}`;
 
   if(!inTestRegion){
     document.getElementById("boundaryStatus").textContent=
-      "Orte werden in V2.4 innerhalb des 100-km-Testgebiets gespeichert.";
+      "Orte werden derzeit nur im Testgebiet Bad Wünnenberg gespeichert.";
     document.getElementById("boundaryStatus").className="boundary-status outside";
     return;
   }
@@ -77,14 +77,39 @@ async function maybeReverseGeocode(lat,lon,force=false){
 
     const address=data.address || {};
 
-    const name=
+    const district=
       address.village ||
-      address.town ||
-      address.city ||
-      address.municipality ||
       address.suburb ||
       address.hamlet ||
+      address.quarter ||
+      address.neighbourhood ||
+      "";
+
+    const municipality=
+      address.city ||
+      address.town ||
+      address.municipality ||
+      address.county ||
       "Unbekannter Ort";
+
+    const allowedOrtschaften=new Set(["Fürstenberg"]);
+    const inBadWuennenberg=allowedOrtschaften.has(district);
+
+    if(!inBadWuennenberg){
+      testStatus.textContent="⚠ Außerhalb des Testgebiets Bad Wünnenberg";
+      testStatus.className="boundary-status test-region-status outside";
+      boundaryStatus.textContent=
+        "Dieser Ort wird im aktuellen Teststand nicht gespeichert.";
+      boundaryStatus.className="boundary-status outside";
+      return;
+    }
+
+    const detectedName=district || municipality;
+    const name=normalizePlaceName(detectedName)==="wünnenberg"
+      ? "Bad Wünnenberg"
+      : detectedName;
+
+    currentRavenDistrict=allowedOrtschaften.has(name)?name:null;
 
     const region=
       address.state || address.county || "";
@@ -141,7 +166,11 @@ async function maybeReverseGeocode(lat,lon,force=false){
       name;
 
     document.getElementById("locationRegion").textContent =
-      [region,country].filter(Boolean).join(" · ");
+      [district && municipality!==district ? municipality : "",region,country]
+        .filter(Boolean)
+        .join(" · ");
+
+    renderMainLists();
 
     const exists=discoveredPlaces.some(
       place =>
@@ -153,6 +182,8 @@ async function maybeReverseGeocode(lat,lon,force=false){
 
       discoveredPlaces.push({
         name,
+        district:district || name,
+        municipality,
         region,
         country,
         osmType:data.osm_type || "",
@@ -176,6 +207,7 @@ async function maybeReverseGeocode(lat,lon,force=false){
 
       renderTravelBook();
       updateMissionUI();
+      updateAllPointStates(lat,lon);
 
     }
 
@@ -193,62 +225,45 @@ async function maybeReverseGeocode(lat,lon,force=false){
    ========================================================== */
 
 function renderTravelBook(){
-
   const list=document.getElementById("travelList");
-
   list.innerHTML="";
+  const districtNames=["Fürstenberg"];
+  const knownPlaces=districtNames
+    .map(name=>discoveredPlaces.find(place=>normalizePlaceName(place.name)===normalizePlaceName(name)))
+    .filter(Boolean);
 
-  const countries=
-    new Set(
-      discoveredPlaces
-        .map(p=>p.country)
-        .filter(Boolean)
-    ).size;
+  document.getElementById("travelSummary").textContent=
+    `${knownPlaces.length} Orte entdeckt`;
 
-  const regions=
-    new Set(
-      discoveredPlaces
-        .map(p=>p.region)
-        .filter(Boolean)
-    ).size;
+  if(!knownPlaces.length){
+    list.innerHTML='<div class="message">Noch keine Reise entdeckt. Starte GPS, um dein erstes Gebiet freizuschalten.</div>';
+    return;
+  }
 
-  document.getElementById("travelSummary").textContent =
-    `${discoveredPlaces.length} Orte · ${regions} Regionen · ${countries} Länder`;
+  const group=document.createElement("div");
+  group.className="municipality-group";
+  const title=document.createElement("div");
+  title.className="municipality-title";
+  title.textContent="🏙️ Stadt Bad Wünnenberg";
+  group.appendChild(title);
 
-  [...discoveredPlaces]
-    .reverse()
-    .forEach(place=>{
+  knownPlaces.forEach(place=>{
+    const name=place.name;
+    const points=pointsForTravelPlace(name);
+    const found=points.filter(isDiscovered).length;
+    const element=document.createElement("div");
+    element.className="place";
+    element.innerHTML=`<div class="place-row"><div><div class="place-name district-indent">📍 ${escapeHTML(name)}</div><div class="place-meta">ORT ENTDECKT · ${found}/${points.length} Punkte entdeckt · ${points.length-found} unbekannt</div></div><div class="place-arrow">›</div></div>`;
+    element.onclick=()=>openPlaceDetail(place);
+    group.appendChild(element);
+  });
+  list.appendChild(group);
+}
 
-      const element=document.createElement("div");
-
-      element.className="place";
-
-      element.innerHTML=`
-        <div class="place-row">
-
-          <div>
-            <div class="place-name">
-              📍 ${escapeHTML(place.name)}
-            </div>
-
-            <div class="place-meta">
-              ${escapeHTML(
-                [place.region,place.country]
-                  .filter(Boolean)
-                  .join(" · ")
-              )}
-            </div>
-          </div>
-
-          <div class="place-arrow">›</div>
-
-        </div>
-      `;
-
-      element.onclick=()=>openPlaceDetail(place);
-
-      list.appendChild(element);
-    });
+function pointsForTravelPlace(name){
+  return ALL_POINTS.filter(point=>
+    normalizePlaceName(point.district||(point.id.startsWith("concept-")?"":"Fürstenberg"))===normalizePlaceName(name)
+  );
 }
 
 function openPlaceDetail(place){
@@ -262,76 +277,28 @@ function openPlaceDetail(place){
 
   detail.classList.add("active");
 
-  const isFuerstenberg =
-    normalizePlaceName(place.name)
-      .includes("fürstenberg");
-
-  if(!isFuerstenberg){
-
-    detail.innerHTML=`
-
-      <div class="detail-header">
-
-        <div class="detail-place-name">
-          📍 ${escapeHTML(place.name)}
-        </div>
-
-        <div class="detail-meta">
-          ${escapeHTML(
-            [place.region,place.country]
-              .filter(Boolean)
-              .join(" · ")
-          )}
-        </div>
-
-        <div class="detail-status">
-          ENTDECKT
-        </div>
-
-      </div>
-
-      <div class="message">
-        Die Ortsgrenze ist erfasst. Eigene Erkundungspunkte
-        folgen in einer späteren Version.
-      </div>
-
-      <button
-        class="secondary back-button"
-        onclick="closePlaceDetail()">
-        ← Zurück zu Ravens Reisen
-      </button>
-    `;
-
-    return;
-  }
-
-  const requiredRows=
-    FUERSTENBERG.explorationPOIs
-      .map(point=>detailPointHTML(point))
-      .join("");
-
-  const activityRows=
-    FUERSTENBERG.activityPOIs
-      .map(point=>detailPointHTML(point))
-      .join("");
+  const placePoints=pointsForTravelPlace(place.name);
+  const explorationPoints=placePoints.filter(point=>point.type==="exploration");
+  const activityPoints=placePoints.filter(point=>point.type==="activity");
+  const requiredRows=explorationPoints.map(point=>detailPointHTML(point)).join("");
+  const activityRows=activityPoints.map(point=>detailPointHTML(point)).join("");
+  const foundExploration=explorationPoints.filter(isDiscovered).length;
+  const foundActivities=activityPoints.filter(isDiscovered).length;
 
   detail.innerHTML=`
 
     <div class="detail-header">
 
       <div class="detail-place-name">
-        🏘️ Fürstenberg
+        ${place.unknown?"❔ Unbekannter Ortsteil":"📍 "+escapeHTML(place.name)}
       </div>
 
       <div class="detail-meta">
-        Nordrhein-Westfalen · Deutschland
+        ${place.unknown?"ORT NOCH UNBEKANNT · ":""}Nordrhein-Westfalen · Deutschland
       </div>
 
       <div class="detail-status">
-        ${fuerstenbergMission.completed
-          ? "ERKUNDET ✓"
-          : `${fuerstenbergMission.visitedPOIs.length}/${FUERSTENBERG.explorationPOIs.length} ERKUNDUNGSPUNKTE`
-        }
+        ${foundExploration}/${explorationPoints.length} ERKUNDUNGSPUNKTE · ${foundActivities}/${activityPoints.length} AKTIVITÄTEN
       </div>
 
     </div>
@@ -422,3 +389,4 @@ function normalizePlaceName(value){
     .trim()
     .toLowerCase();
 }
+

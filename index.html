@@ -3,11 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#6d28d9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Raven">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+  <meta name="raven-version" content="4.7-habitat-animations">
 <title>RAVEN #0001</title>
+
+<link rel="manifest" href="manifest.webmanifest?v=61-install-fix1">
+<link rel="icon" href="icons/raven-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/raven-192.png">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<link rel="stylesheet" href="css/raven.css">
+<link rel="stylesheet" href="css/raven.css?v=69-habitat-animations1">
 </head>
 
 <body>
@@ -16,14 +29,31 @@
 
 <div class="topbar">
   <div class="brand">RAVEN</div>
-  <div class="online">● ONLINE</div>
+  <div class="topbar-actions"><a class="habitat-link" href="habitat/?v=1">🐦‍⬛ HABITAT</a><button class="install-raven" id="installRavenButton" onclick="installRavenApp()">⬇ APP</button><button class="view-toggle" id="playerViewToggle" onclick="toggleRavenPlayerView()">🛠 ENTWICKLER</button><div class="online">● ONLINE</div></div>
 </div>
+
+<div class="hub-nav" id="hubNav">
+  <button id="habitatTab" onclick="showRavenHubView('habitat')">🏠 HABITAT</button>
+  <button id="explorationTab" onclick="showRavenHubView('exploration')">🗺️ KARTE</button>
+</div>
+
+<section class="raven-hub-view" id="habitatView">
 
 <div class="card">
 
-<div class="raven">🐦‍⬛</div>
-<h1>RAVEN #0001</h1>
+<div class="raven-habitat" id="ravenHabitat" data-state="content">
+  <div class="raven-sky"><i></i><i></i><i></i></div>
+  <div class="raven-reaction" id="ravenReaction" aria-live="polite"></div>
+  <div class="raven-food" aria-hidden="true">🫐</div>
+  <div class="raven-heart" aria-hidden="true">💜</div>
+  <div class="raven-zzz" aria-hidden="true"><i>Z</i><b>Z</b><em>Z</em></div>
+  <div class="raven" id="ravenAvatar">🐦‍⬛</div>
+  <div class="raven-perch"></div>
+</div>
+
+<h1 id="ravenTitle">RAVEN #0001</h1>
 <div class="generation">Generation 1</div>
+<div class="raven-state-line" id="ravenStateLine">Raven beobachtet neugierig seine Umgebung.</div>
 
 <div class="level-line">
   <span>Level <strong id="level">1</strong></span>
@@ -60,6 +90,51 @@
 
 </div>
 
+<div class="card home-journey-card">
+  <div class="panel-head"><div><span class="eyebrow">NÄCHSTES ABENTEUER</span><h2>🧭 Mit Raven losziehen</h2></div><span class="journey-ready" id="journeyReadiness">BEREIT</span></div>
+  <p>Bereite Raven vor und starte anschließend direkt von seinem Habitat aus eure Erkundung.</p>
+  <div class="home-journey-actions"><button class="primary" onclick="beginRavenJourney()">Erkundung starten</button><button class="secondary" onclick="showRavenHubView('exploration')">Nur Karte ansehen</button></div>
+  <div class="journey-summary" id="journeySummary">Noch keine abgeschlossene Tour in dieser Version.</div>
+</div>
+
+<div class="game-grid">
+  <div class="card raven-life-card">
+    <div class="panel-head"><div><span class="eyebrow">DEIN BEGLEITER</span><h2>🐦‍⬛ Raven</h2></div><span class="raven-mood" id="ravenMoodLabel">Zufrieden</span></div>
+    <div class="need-row"><span>🍖 Hunger</span><div class="need-bar"><i id="ravenHungerBar"></i></div><b id="ravenHungerValue">80</b></div>
+    <div class="need-row"><span>⚡ Energie</span><div class="need-bar energy"><i id="ravenEnergyBar"></i></div><b id="ravenEnergyValue">80</b></div>
+    <div class="need-row"><span>💜 Stimmung</span><div class="need-bar mood"><i id="ravenMoodBar"></i></div><b id="ravenMoodValue">80</b></div>
+    <div class="raven-actions"><button id="ravenFeedButton" onclick="feedRaven()">🍖 Füttern</button><button id="ravenRestButton" onclick="restRaven()">🌙 Schlafen</button><button id="ravenPlayButton" onclick="playWithRaven()">💜 Spielen</button></div>
+    <button class="rename-raven" onclick="openRavenNaming()">✏ Raven benennen</button>
+    <div class="raven-note" id="ravenLifeMessage">Raven ist bereit für sein erstes Abenteuer.</div>
+  </div>
+  <div class="card inventory-card">
+    <div class="panel-head"><div><span class="eyebrow">RUCKSACK</span><h2>🎒 Inventar</h2></div><strong id="inventoryCapacity">0 / 30</strong></div>
+    <div class="inventory-slots" id="inventorySlots"></div>
+    <div class="inventory-note">Aktivitätspunkte liefern neue Items und sind im Prototyp danach 1 Minute erschöpft.</div>
+  </div>
+</div>
+<div class="card minigame-card">
+  <div class="panel-head"><div><span class="eyebrow">MINISPIEL</span><h2>☁️ Raven Jumper</h2></div><strong id="jumperHighscore">Rekord 0</strong></div>
+  <p>Spring mit deinem Raven durch die Wolken. Tippe links oder rechts – oder benutze die Pfeiltasten.</p>
+  <button class="primary" onclick="openRavenJumper()">Spiel starten</button>
+  <div class="inventory-note">Eine Runde kostet 6 Energie und 3 Hunger. Gute Flüge heben die Stimmung.</div>
+</div>
+<div class="card daily-card">
+  <div class="panel-head"><div><span class="eyebrow">HEUTE</span><h2>☀️ Tagesaufgaben</h2></div><span id="dailyState">0/3</span></div>
+  <div class="daily-list" id="dailyList"></div>
+  <div class="story-reward">Tagesbelohnung: 1 Lieblingsfutter · 20 XP</div>
+</div>
+<div class="card story-mission-card">
+  <div class="panel-head"><div><span class="eyebrow">ERSTE MISSION</span><h2>Fürstenberg erwacht</h2></div><span id="storyMissionState">0 %</span></div>
+  <p id="storyMissionText">Entdecke alle Erkundungspunkte und vertreibe den Fog aus Fürstenberg.</p>
+  <div class="story-progress"><i id="storyMissionBar"></i></div>
+  <div class="story-reward">Belohnung: 100 XP · 3 Futter · Reisetagebuch-Abschluss</div>
+</div>
+
+</section>
+
+<section class="raven-hub-view" id="explorationView">
+
 <div class="card map-card">
 
 <div class="map-header">
@@ -79,11 +154,18 @@
   </button>
 </div>
 
+<div class="point-type-switch">
+  <button class="point-type-btn active" id="allPointsButton" onclick="setGamePointTypeFilter('all')">ALLE</button>
+  <button class="point-type-btn exploration" id="explorationPointsButton" onclick="setGamePointTypeFilter('exploration')">🟣 ERKUNDUNG</button>
+  <button class="point-type-btn activity" id="activityPointsButton" onclick="setGamePointTypeFilter('activity')">🟠 AKTIVITÄTEN</button>
+</div>
+
 <div class="location-box">
   <div class="location-label">AKTUELLER ORT</div>
-  <div class="location-name" id="locationName">Fürstenberg</div>
-  <div class="location-region" id="locationRegion">Nordrhein-Westfalen · Deutschland</div>
+  <div class="location-name" id="locationName">Unbekannt</div>
+  <div class="location-region" id="locationRegion">Standort noch nicht bestimmt</div>
 </div>
+<div class="poi-sync-status" id="poiSyncStatus">Studio-Synchronisierung wird geprüft …</div>
 
 </div>
 
@@ -91,6 +173,7 @@
 
   <div class="god-box" id="godBox">
     <button class="god-button" onclick="toggleGodMode()">🛠 GOD MODE</button>
+    <button class="god-view-button" id="godViewButton" onclick="event.stopPropagation();toggleGodModeView()">👁 GOD MODE VIEW</button>
     <div class="god-hint">Karte antippen = teleportieren</div>
   </div>
 
@@ -116,9 +199,18 @@
 
 </div>
 
+<div class="card finish-journey-card">
+  <button class="secondary" onclick="finishRavenJourney()">🏠 Tour abschließen und zum Habitat</button>
+</div>
+
+<div class="completion-banner" id="completionBanner">
+  <strong>✓ Fürstenberg vollständig erkundet</strong>
+  <span>Karte freigelegt · Ortsabschluss gespeichert</span>
+</div>
+
 <div class="card">
 
-<div class="mission-title" id="missionTitle">📍 Standort: Fürstenberg</div>
+<div class="mission-title" id="missionTitle">📍 Standort: unbekannt</div>
 
 <div class="mission-subtitle" id="missionText">
   Erkundungspunkte werden geladen …
@@ -135,7 +227,11 @@
 </div>
 
 <div class="boundary-status test-region-status" id="testRegionStatus">
-  🧭 Testgebiet: 100 km um Fürstenberg
+  🧭 Testgebiet: Stadt Bad Wünnenberg
+</div>
+
+<div class="boundary-status loading" id="areaBoundaryStatus">
+  Orts- und Ortsteilgrenzen werden vorbereitet …
 </div>
 
 </div>
@@ -155,10 +251,79 @@
 
 </div>
 
-<div class="version">
-RAVEN PROTOTYPE V2.4 · DEV
+</section>
+
+<div class="card dev-card" id="devCard">
+  <div class="dev-title">🧪 RAVEN TESTZENTRALE</div>
+  <div class="dev-grid" id="devGrid"></div>
+  <div class="dev-actions">
+    <button class="secondary" onclick="runRavenSelfTest()">Selbsttest starten</button>
+    <button class="secondary edge-run" onclick="runRavenEdgeTests()">10 Grenzfälle testen</button>
+    <button class="secondary life-test-run" onclick="runRavenLifeTests()">Raven-Stresstest</button>
+    <button class="danger" onclick="resetRavenTestProgress()">Testfortschritt zurücksetzen</button>
+  </div>
+  <div class="dev-test-result" id="devTestResult">Noch kein Selbsttest ausgeführt.</div>
+  <div class="edge-test-result" id="edgeTestResult">Grenzfalltest noch nicht ausgeführt.</div>
+  <div class="edge-test-result" id="lifeTestResult">Raven-Stresstest noch nicht ausgeführt.</div>
+  <div class="field-test-center">
+    <div class="field-test-head"><div><strong>🥾 AUSSENTEST-PROTOKOLL</strong><span>Für den echten Spieler-Test in Fürstenberg</span></div><b id="fieldTestProgress">0/6</b></div>
+    <div class="field-checklist" id="fieldChecklist"></div>
+    <label class="field-note-label" for="fieldTestNotes">Beobachtungen und Fehler</label>
+    <textarea id="fieldTestNotes" placeholder="Zum Beispiel: Standort sprang kurz, Punkt wurde bei 42 m geöffnet …"></textarea>
+    <div class="field-test-actions"><button onclick="saveRavenFieldTest()">Zwischenstand speichern</button><button onclick="downloadRavenFieldReport()">TXT-Protokoll herunterladen</button></div>
+    <div class="field-diagnostics" id="fieldDiagnostics">Diagnose wird vorbereitet …</div>
+  </div>
+  <div class="bot-test-center">
+    <div class="bot-test-head">
+      <div>
+        <strong>🤖 DIGITALE TESTER</strong>
+        <span>Erst Erkundung, danach Aktivitäten · Wege werden bevorzugt</span>
+      </div>
+      <div class="bot-test-actions">
+        <button class="bot-start" id="botStartButton" onclick="startRavenBots()">Alle starten</button>
+        <button class="bot-stop" id="botStopButton" onclick="stopRavenBots()">Alle stoppen</button>
+      </div>
+    </div>
+    <div class="bot-map-title"><strong id="botMapStatus">Fog-Ansicht: Mila</strong><span>Bot auswählen, um seinen Fortschritt zu sehen</span></div>
+    <div class="bot-map" id="botMap"></div>
+    <div class="bot-map-legend"><span>🟣 Erkundung</span><span>🟠 Aktivität</span><span>✓ geschafft</span><span>✕ Fehler</span></div>
+    <div class="bot-grid" id="botGrid"></div>
+    <div class="bot-summary" id="botSummary">Noch kein Bot-Test gestartet.</div>
+    <details class="bot-report" open>
+      <summary>📋 Automatischer Testbericht</summary>
+      <div class="bot-report-actions"><button onclick="renderRavenBotReport()">Aktualisieren</button><button onclick="downloadRavenBotReport()">TXT herunterladen</button></div>
+      <div id="botReport">Noch keine Testdaten vorhanden.</div>
+    </details>
+    <details class="bot-protocol" open><summary>Fehlerprotokoll <b id="botErrorCount">0</b></summary><div id="botProtocol">Noch keine Fehler gefunden.</div></details>
+  </div>
+  <div class="dev-log" id="devLog"></div>
 </div>
 
+<div class="version">
+      RAVEN PROTOTYPE V4.7 · HABITAT-ANIMATIONEN
+</div>
+
+<div class="jumper-overlay" id="jumperOverlay">
+  <div class="jumper-shell">
+    <div class="jumper-head"><button onclick="closeRavenJumper()">✕</button><strong>☁️ RAVEN JUMPER</strong><span id="jumperScore">0</span></div>
+    <canvas id="jumperCanvas" width="360" height="600" aria-label="Raven Jumper Spielfläche: links oder rechts gedrückt halten"></canvas>
+    <div class="jumper-help" id="jumperMessage">Tippe auf START und steuere links oder rechts.</div>
+    <div class="jumper-controls"><button data-jumper="left">◀ LINKS</button><button class="jumper-start" id="jumperStartButton" onclick="toggleRavenJumperRun()">START</button><button data-jumper="right">RECHTS ▶</button></div>
+  </div>
+</div>
+
+</div>
+
+<div class="onboarding-overlay" id="onboardingOverlay">
+  <div class="onboarding-card">
+    <div class="onboarding-raven">🐦‍⬛</div>
+    <span class="eyebrow">WILLKOMMEN BEI RAVEN</span>
+    <h2>Dein erster Begleiter wartet</h2>
+    <p>Gib deinem Raven einen Namen. Danach entdeckt ihr gemeinsam Fürstenberg, sammelt Items und vertreibt den Fog.</p>
+    <input id="ravenNameInput" maxlength="18" placeholder="Name deines Ravens">
+    <button class="primary" onclick="finishRavenOnboarding()">Abenteuer beginnen</button>
+    <button class="secondary" onclick="skipRavenOnboarding()">Später benennen</button>
+  </div>
 </div>
 
 <div class="scratch-overlay" id="scratchOverlay">
@@ -189,14 +354,26 @@ RAVEN PROTOTYPE V2.4 · DEV
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script src="js/config.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/map.js"></script>
-<script src="js/fog.js"></script>
-<script src="js/gps.js"></script>
-<script src="js/poi.js"></script>
-<script src="js/travelbook.js"></script>
-<script src="js/app.js"></script>
+<script src="js/city-concept-points.js?v=28cache1"></script>
+<script src="js/config.js?v=68-field-test-reset1"></script>
+<script src="js/storage.js?v=58-storage-hardening1"></script>
+<script src="js/map.js?v=66-god-zoom-fix1"></script>
+<script src="js/fog.js?v=41edge-tests1"></script>
+<script src="js/gps.js?v=48raven-readiness1"></script>
+<script src="js/raven-life.js?v=67-daily-activities1"></script>
+<script src="js/raven-jumper.js?v=51raven-sleep1"></script>
+<script src="js/poi.js?v=58-storage-hardening1"></script>
+<script src="js/travelbook.js?v=28cache1"></script>
+<script src="js/app.js?v=28cache1"></script>
+<script src="js/shared-pois.js?v=58-storage-hardening1"></script>
+<script src="js/test-tools.js?v=58-storage-hardening1"></script>
+<script src="js/bot-testers.js?v=56-hugo-balance1"></script>
+<script src="js/edge-tests.js?v=41edge-tests1"></script>
+<script src="js/game-tests.js?v=67-daily-activities1"></script>
+<script src="js/pwa.js?v=69-habitat-animations1"></script>
+<script src="js/hub-flow.js?v=65-field-test1"></script>
+<script src="js/field-test.js?v=65-field-test1"></script>
 
 </body>
 </html>
+

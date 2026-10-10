@@ -13,6 +13,11 @@ function toggleExploration(){
 
 function startExploration(){
 
+  if(typeof canRavenStartExploration==="function"){
+    const readiness=canRavenStartExploration();
+    if(!readiness.ok){setMessage(`🐦‍⬛ ${readiness.message}`);setRavenLifeMessage(readiness.message);return;}
+  }
+
   if(!navigator.geolocation){
 
     setMessage("GPS wird von diesem Gerät nicht unterstützt.");
@@ -22,6 +27,8 @@ function startExploration(){
   tracking=true;
   sessionDistance=0;
   lastPosition=null;
+  followUser=true;
+  updateFollowUI();
 
   document.getElementById("exploreButton").textContent =
     "Erkundung beenden";
@@ -36,12 +43,13 @@ function startExploration(){
     "GPS wird gestartet …";
 
   setMessage("📡 Raven sucht deine Position …");
+  if(typeof logRavenEvent==="function")logRavenEvent("Erkundung gestartet");
 
   watchId=navigator.geolocation.watchPosition(
 
     handlePosition,
 
-    ()=>{
+    error=>{
 
       tracking=false;
 
@@ -57,7 +65,11 @@ function startExploration(){
       document.getElementById("gpsInfo").textContent =
         "GPS-Fehler";
 
-      setMessage("GPS-Fehler. Standortzugriff prüfen.");
+      const reasons={1:"Standortzugriff wurde nicht erlaubt.",2:"Das Gerät konnte gerade keine Position bestimmen.",3:"Die Standortsuche hat zu lange gedauert."};
+      const reason=reasons[error?.code]||"Der Standort konnte nicht bestimmt werden.";
+      setMessage(`GPS-Fehler: ${reason} Prüfe Ortungsdienste und versuche es erneut.`);
+      if(typeof reportRavenGpsProblem==="function")reportRavenGpsProblem(reason,error?.message||"");
+      if(typeof logRavenEvent==="function")logRavenEvent("GPS-Fehler",reason);
     },
 
     {
@@ -100,6 +112,38 @@ function stopExploration(){
   updateUI();
 }
 
+const RAVEN_SPEED_PAUSE_KMH=12;
+const RAVEN_SPEED_BLOCK_KMH=20;
+const RAVEN_SPEED_RELEASE_MS=5000;
+const RAVEN_MAX_GPS_ACCURACY=35;
+const RAVEN_HISTORY_LIMIT=12000;
+let ravenSlowSince=0;
+window.ravenSpeedState="free";
+window.ravenMovementLocked=false;
+
+function updateRavenSpeedState(speed){
+  const previous=window.ravenSpeedState;
+  if(speed>RAVEN_SPEED_BLOCK_KMH){
+    window.ravenSpeedState="blocked";
+    ravenSlowSince=0;
+  }else if(speed>=RAVEN_SPEED_PAUSE_KMH){
+    window.ravenSpeedState="paused";
+    ravenSlowSince=0;
+  }else if(previous!=="free"){
+    if(!ravenSlowSince)ravenSlowSince=Date.now();
+    window.ravenSpeedState=Date.now()-ravenSlowSince>=RAVEN_SPEED_RELEASE_MS?"free":"cooldown";
+  }else{
+    window.ravenSpeedState="free";
+    ravenSlowSince=0;
+  }
+  window.ravenMovementLocked=window.ravenSpeedState!=="free";
+  if(previous!==window.ravenSpeedState&&typeof logRavenEvent==="function"){
+    const labels={blocked:"Fahrsperre",paused:"Bewegungspause",cooldown:"Warte auf Freigabe",free:"Bewegung freigegeben"};
+    logRavenEvent(labels[window.ravenSpeedState],`${speed.toFixed(1)} km/h`);
+  }
+  return window.ravenSpeedState;
+}
+
 function handlePosition(position){
 
   if(!tracking || godMode) return;
@@ -110,13 +154,25 @@ function handlePosition(position){
   const lon=coords.longitude;
   const accuracy=coords.accuracy;
 
-  if(accuracy && accuracy>35){
+  let measuredSpeed=Number.isFinite(coords.speed)?Math.max(0,coords.speed*3.6):0;
+  if(!measuredSpeed&&lastPosition?.time){
+    const seconds=(Date.now()-lastPosition.time)/1000;
+    if(seconds>0)measuredSpeed=haversineDistance(lastPosition.lat,lastPosition.lon,lat,lon)/seconds*3.6;
+  }
+  window.currentSpeedKmh=measuredSpeed;
+  const speedState=updateRavenSpeedState(measuredSpeed);
+
+  if(accuracy && accuracy>RAVEN_MAX_GPS_ACCURACY){
 
     document.getElementById("gpsInfo").textContent =
-      `GPS ungenau ±${Math.round(accuracy)} m`;
+      `Warte auf genaues GPS · aktuell ±${Math.round(accuracy)} m`;
 
+    setMessage("Grober Standort gefunden - Raven wartet auf deine genaue Position.");
+    if(typeof logRavenEvent==="function")logRavenEvent("GPS zu ungenau",`±${Math.round(accuracy)} m`);
     return;
   }
+
+  const locationZoom=16;
 
   currentLat=lat;
   currentLon=lon;
@@ -130,6 +186,12 @@ function handlePosition(position){
       "Aktiv";
 
     setMessage("📍 GPS aktiv – Raven folgt dir.");
+    if(typeof logRavenEvent==="function")logRavenEvent("Standort erkannt",`${lat.toFixed(5)}, ${lon.toFixed(5)}`);
+
+    /* Nach einem God-Mode-Test sofort zum echten Standort zurückkehren. */
+    internalMapMove=true;
+    map.setView([lat,lon],locationZoom,{animate:true});
+    setTimeout(()=>internalMapMove=false,500);
   }
 
   document.getElementById("gpsInfo").textContent =
@@ -145,7 +207,7 @@ function handlePosition(position){
 
     map.setView(
       [lat,lon],
-      Math.max(map.getZoom(),16),
+      locationZoom,
       {animate:true}
     );
 
@@ -165,6 +227,7 @@ function handlePosition(position){
 
       totalDistance+=moved;
       sessionDistance+=moved;
+      if(typeof applyRavenMovement==="function")applyRavenMovement(moved);
 
       localStorage.setItem(
         "ravenDistance",
@@ -177,8 +240,8 @@ function handlePosition(position){
         time:Date.now()
       });
 
-      if(travelHistory.length>12000){
-        travelHistory=travelHistory.slice(-12000);
+      if(travelHistory.length>RAVEN_HISTORY_LIMIT){
+        travelHistory=travelHistory.slice(-RAVEN_HISTORY_LIMIT);
       }
 
       localStorage.setItem(
@@ -188,10 +251,13 @@ function handlePosition(position){
     }
   }
 
-  lastPosition={lat,lon};
+  lastPosition={lat,lon,time:Date.now()};
 
+  /* Reisen deckt die Karte immer auf – auch im Auto. Nur POIs bleiben gesperrt. */
   saveExploredPoint(lat,lon);
-
+  if(speedState!=="free"&&typeof logRavenEvent==="function"){
+    logRavenEvent(speedState==="blocked"?"Autofahrt erkannt":"Bewegung zu schnell",`${measuredSpeed.toFixed(1)} km/h · Fog wird aufgedeckt, Punkte bleiben gesperrt`);
+  }
   updateAllPointStates(lat,lon);
 
   maybeReverseGeocode(lat,lon);
@@ -222,8 +288,8 @@ function saveExploredPoint(lat,lon){
     time:Date.now()
   });
 
-  if(exploredPoints.length>12000){
-    exploredPoints=exploredPoints.slice(-12000);
+  if(exploredPoints.length>RAVEN_HISTORY_LIMIT){
+    exploredPoints=exploredPoints.slice(-RAVEN_HISTORY_LIMIT);
   }
 
   localStorage.setItem(
@@ -231,3 +297,4 @@ function saveExploredPoint(lat,lon){
     JSON.stringify(exploredPoints)
   );
 }
+

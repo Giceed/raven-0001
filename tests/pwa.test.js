@@ -1,0 +1,23 @@
+const fs=require("node:fs");
+const assert=require("node:assert/strict");
+const manifest=JSON.parse(fs.readFileSync("manifest.webmanifest","utf8"));
+const worker=fs.readFileSync("service-worker.js","utf8");
+assert.equal(manifest.display,"standalone");
+assert.match(manifest.start_url,/view=player/);
+assert.ok(manifest.icons.some(icon=>icon.purpose==="maskable"));
+for(const icon of manifest.icons)assert.ok(fs.existsSync(icon.src),`Icon fehlt: ${icon.src}`);
+assert.match(worker,/raven-app-v69/);
+assert.match(worker,/request\.mode==="navigate"/);
+assert.doesNotMatch(worker,/tile\.openstreetmap|\/tile\//i,"Kartenkacheln dürfen den App-Cache nicht aufblasen.");
+const shellBlock=worker.match(/const RAVEN_SHELL=\[([\s\S]*?)\];/)[1];
+const shellFiles=[...shellBlock.matchAll(/"\.\/([^"?]+)(?:\?[^" ]*)?"/g)].map(match=>match[1]);
+for(const file of shellFiles)assert.ok(fs.existsSync(file),`Offline-Datei fehlt: ${file}`);
+assert.ok(shellFiles.length>=20,"Offline-Shell ist unvollständig.");
+const index=fs.readFileSync("index.html","utf8"),pwa=fs.readFileSync("js/pwa.js","utf8");
+assert.match(index,/id="installRavenButton"(?![^>]*hidden)/,"Der APP-Knopf muss sofort sichtbar sein.");
+assert.match(pwa,/Zum Startbildschirm hinzufügen/,"Android-Ausweichanleitung fehlt.");
+assert.match(index,/apple-mobile-web-app-capable" content="yes"/,"iOS-Appmodus fehlt.");
+assert.match(index,/apple-touch-icon" href="icons\/raven-192\.png"/,"iOS-Appsymbol fehlt.");
+assert.match(pwa,/iphone\|ipad\|ipod/i,"iOS-Installationsweg fehlt.");
+console.log(`✓ PWA-Test bestanden: Spielerstart, Icons, ${shellFiles.length} Offline-Dateien und begrenzter Cache`);
+
