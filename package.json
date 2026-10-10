@@ -1,0 +1,26 @@
+{
+  "name": "raven-0001",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Capacitor shell for the existing Raven web prototype",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node tools/build-app.mjs",
+    "test": "node --test tests/*.test.js",
+    "cap:add:ios": "cap add ios",
+    "cap:add:android": "cap add android",
+    "cap:sync": "node tools/build-app.mjs && cap sync"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.2",
+    "@capacitor/ios": "8.5.2",
+    "@capacitor/android": "8.5.2",
+    "leaflet": "1.9.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.2"
+  },
+  "packageManager": "pnpm@11.19.0"
+}

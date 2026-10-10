@@ -31,10 +31,23 @@
       "raven-beerenstelle":"beerenstelle_dev",
       "raven-spielplatz":"spielplatz_dev"
     };
+    /* Die Gemarkung Fürstenberg reicht weit über das bebaute Dorf hinaus.
+       Automatisch importierte Punkte müssen deshalb zusätzlich im Dorfkern
+       liegen. Eigene, bewusst gesetzte Studio-Punkte bleiben davon ausgenommen. */
+    const fuerstenbergCore={lat:51.5157,lon:8.741,maxMeters:1600};
+    const distanceFromFuerstenbergCore=point=>{
+      const toRad=value=>value*Math.PI/180;
+      const dLat=toRad(Number(point.lat)-fuerstenbergCore.lat);
+      const dLon=toRad(Number(point.lon)-fuerstenbergCore.lon);
+      const a=Math.sin(dLat/2)**2+Math.cos(toRad(fuerstenbergCore.lat))*Math.cos(toRad(Number(point.lat)))*Math.sin(dLon/2)**2;
+      return 6371000*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    };
+    const isOwnStudioPoint=point=>point.source==="Eigener Punkt"||String(point.id||"").startsWith("custom-");
     const shared=source
       .filter(point=>
         point.status!=="rejected" &&
         (point.district||"Fürstenberg")==="Fürstenberg" &&
+        (isOwnStudioPoint(point)||distanceFromFuerstenbergCore(point)<=fuerstenbergCore.maxMeters) &&
         (usingStudioData ||
           (point.category==="exploration"
             ? curatedExplorations.has(point.id)
@@ -108,4 +121,3 @@
     console.warn("Raven nutzt die eingebaute POI-Liste als Rückfalllösung.",error);
   }
 })();
-

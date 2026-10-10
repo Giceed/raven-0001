@@ -13,4 +13,3 @@ for(const action of ["eating","playing","sleeping"])assert.match(labCss,new RegE
 assert.match(gameCss,/prefers-reduced-motion/);
 assert.match(labCss,/prefers-reduced-motion/);
 console.log("✓ Habitat-Animationstest bestanden: Futter, Herz, Schlaf und reduzierte Bewegung vorhanden");
-

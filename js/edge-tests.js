@@ -37,4 +37,3 @@ async function runRavenEdgeTests(){
   output.innerHTML=`<strong>${passed===10?"✓":"⚠"} ${passed}/10 Grenzfälle bestanden</strong><div class="edge-test-grid">${results.map(result=>`<div class="edge-test-row ${result.ok?"ok":"error"}"><b>${result.ok?"✓":"✕"} ${escapeHTML(result.name)}</b><span>${escapeHTML(result.detail)}</span></div>`).join("")}</div>`;
   if(typeof logRavenEvent==="function")logRavenEvent("Grenzfalltest",`${passed}/10 bestanden`);
 }
-

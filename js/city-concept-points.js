@@ -469,4 +469,3 @@ const CITY_CONCEPT_POINTS=[
     "conceptOnly": true
   }
 ];
-

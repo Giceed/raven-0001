@@ -98,10 +98,11 @@ function renderPointMarker(point,discovered,inRange,distance){
 
   const district=point.district||(point.id.startsWith("concept-")?"":"Fürstenberg");
   const districtActive=currentRavenDistrict&&normalizePlaceName(currentRavenDistrict)===normalizePlaceName(district);
-  const visibleBeforeGps=mapMode==="explore"&&!currentRavenDistrict&&point.type==="exploration";
-  const visibleInDiscoveredPlace=mapMode==="explore"&&districtActive;
-  const visibleInTravel=mapMode==="travel"&&point.type==="exploration";
-  const pointVisible=godMode||visibleBeforeGps||visibleInDiscoveredPlace||visibleInTravel;
+  const detailZoomEnough=map.getZoom()>=11;
+  /* Spielpunkte gehören zum aktuellen Aufenthalt: Ohne erkannten Ort bleibt
+     die Karte leer; danach erscheinen ausschließlich Punkte dieses Orts.
+     God Mode folgt derselben Regel und wechselt den Ort per Teleport. */
+  const pointVisible=detailZoomEnough&&Boolean(districtActive);
   if(!pointVisible){
     if(pointMarkers[point.id]){
       map.removeLayer(pointMarkers[point.id]);
@@ -700,4 +701,3 @@ function addXP(amount){
 setInterval(()=>{
   if(Object.values(getActivityCooldowns()).some(readyAt=>readyAt>Date.now()))renderMainLists();
 },1000);
-

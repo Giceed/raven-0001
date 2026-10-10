@@ -273,4 +273,3 @@ if (
 ) {
   fuerstenbergMission.completed = true;
 }
-

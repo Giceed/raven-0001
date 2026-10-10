@@ -57,4 +57,3 @@ async function runRavenLifeTests(){
   output.innerHTML=`<strong>${passed===total?"✓":"⚠"} ${passed}/${total} Raven-Stresstests bestanden</strong><div class="edge-test-grid">${results.map(result=>`<div class="edge-test-row ${result.ok?"ok":"error"}"><b>${result.ok?"✓":"✕"} ${escapeHTML(result.name)}</b><span>${escapeHTML(result.detail)}</span></div>`).join("")}</div>`;
   if(typeof logRavenEvent==="function")logRavenEvent("Raven-Stresstest",`${passed}/${total} bestanden`);
 }
-

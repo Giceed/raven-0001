@@ -30,27 +30,9 @@ async function maybeReverseGeocode(lat,lon,force=false){
   lastGeocodeTime=now;
   lastGeocodePosition={lat,lon};
 
-  const distanceFromCenter=haversineDistance(
-    TEST_REGION.centerLat,
-    TEST_REGION.centerLon,
-    lat,
-    lon
-  );
-
-  const inTestRegion=distanceFromCenter<=TEST_REGION.radiusMeters;
-
   const testStatus=document.getElementById("testRegionStatus");
-  testStatus.textContent=inTestRegion
-    ? `🧭 Testgebiet Stadt Bad Wünnenberg`
-    : `⚠ Außerhalb des Testgebiets Bad Wünnenberg`;
-  testStatus.className=`boundary-status test-region-status ${inTestRegion ? "ok" : "outside"}`;
-
-  if(!inTestRegion){
-    document.getElementById("boundaryStatus").textContent=
-      "Orte werden derzeit nur im Testgebiet Bad Wünnenberg gespeichert.";
-    document.getElementById("boundaryStatus").className="boundary-status outside";
-    return;
-  }
+  testStatus.textContent="🇩🇪 Deutschlandweite Erkundung aktiv";
+  testStatus.className="boundary-status test-region-status ok";
 
   const boundaryStatus=document.getElementById("boundaryStatus");
   boundaryStatus.textContent="Ortsname und Ortsgrenze werden geladen …";
@@ -77,6 +59,14 @@ async function maybeReverseGeocode(lat,lon,force=false){
 
     const address=data.address || {};
 
+    if(String(address.country_code||"").toLowerCase()!=="de"){
+      testStatus.textContent="⚠ Raven Deutschland endet an der Landesgrenze";
+      testStatus.className="boundary-status test-region-status outside";
+      boundaryStatus.textContent="Dieser Standort liegt außerhalb der aktuellen Deutschland-Testwelt.";
+      boundaryStatus.className="boundary-status outside";
+      return;
+    }
+
     const district=
       address.village ||
       address.suburb ||
@@ -92,24 +82,12 @@ async function maybeReverseGeocode(lat,lon,force=false){
       address.county ||
       "Unbekannter Ort";
 
-    const allowedOrtschaften=new Set(["Fürstenberg"]);
-    const inBadWuennenberg=allowedOrtschaften.has(district);
-
-    if(!inBadWuennenberg){
-      testStatus.textContent="⚠ Außerhalb des Testgebiets Bad Wünnenberg";
-      testStatus.className="boundary-status test-region-status outside";
-      boundaryStatus.textContent=
-        "Dieser Ort wird im aktuellen Teststand nicht gespeichert.";
-      boundaryStatus.className="boundary-status outside";
-      return;
-    }
-
     const detectedName=district || municipality;
     const name=normalizePlaceName(detectedName)==="wünnenberg"
       ? "Bad Wünnenberg"
       : detectedName;
 
-    currentRavenDistrict=allowedOrtschaften.has(name)?name:null;
+    currentRavenDistrict=name||null;
 
     const region=
       address.state || address.county || "";
@@ -153,6 +131,10 @@ async function maybeReverseGeocode(lat,lon,force=false){
     }
     const boundaryShown=showCurrentPlaceBoundary(geometry);
 
+    if(boundaryShown&&typeof registerRavenPlaceBoundary==="function"){
+      registerRavenPlaceBoundary({name,municipality,region,country},geometry);
+    }
+
     if(boundaryShown){
       placeBoundaryCache.set(placeKey,geometry);
       boundaryStatus.textContent="✓ Ortsgrenze von OpenStreetMap geladen";
@@ -171,6 +153,14 @@ async function maybeReverseGeocode(lat,lon,force=false){
         .join(" · ");
 
     renderMainLists();
+
+    if(typeof loadRavenPlacePoints==="function"){
+      loadRavenPlacePoints({
+        name,district:district||name,municipality,region,country,
+        placeType:address.city?"city":address.town?"town":address.village?"village":"hamlet",
+        lat,lon
+      });
+    }
 
     const exists=discoveredPlaces.some(
       place =>
@@ -227,10 +217,9 @@ async function maybeReverseGeocode(lat,lon,force=false){
 function renderTravelBook(){
   const list=document.getElementById("travelList");
   list.innerHTML="";
-  const districtNames=["Fürstenberg"];
-  const knownPlaces=districtNames
-    .map(name=>discoveredPlaces.find(place=>normalizePlaceName(place.name)===normalizePlaceName(name)))
-    .filter(Boolean);
+  const knownPlaces=discoveredPlaces
+    .filter(place=>place&&place.name)
+    .sort((a,b)=>(b.discoveredAt||0)-(a.discoveredAt||0));
 
   document.getElementById("travelSummary").textContent=
     `${knownPlaces.length} Orte entdeckt`;
@@ -240,14 +229,21 @@ function renderTravelBook(){
     return;
   }
 
-  const group=document.createElement("div");
-  group.className="municipality-group";
-  const title=document.createElement("div");
-  title.className="municipality-title";
-  title.textContent="🏙️ Stadt Bad Wünnenberg";
-  group.appendChild(title);
-
+  const groups=new Map();
   knownPlaces.forEach(place=>{
+    const groupName=place.municipality||place.region||"Deutschland";
+    if(!groups.has(groupName))groups.set(groupName,[]);
+    groups.get(groupName).push(place);
+  });
+
+  groups.forEach((places,groupName)=>{
+    const group=document.createElement("div");
+    group.className="municipality-group";
+    const title=document.createElement("div");
+    title.className="municipality-title";
+    title.textContent=`🏙️ ${groupName}`;
+    group.appendChild(title);
+    places.forEach(place=>{
     const name=place.name;
     const points=pointsForTravelPlace(name);
     const found=points.filter(isDiscovered).length;
@@ -255,9 +251,10 @@ function renderTravelBook(){
     element.className="place";
     element.innerHTML=`<div class="place-row"><div><div class="place-name district-indent">📍 ${escapeHTML(name)}</div><div class="place-meta">ORT ENTDECKT · ${found}/${points.length} Punkte entdeckt · ${points.length-found} unbekannt</div></div><div class="place-arrow">›</div></div>`;
     element.onclick=()=>openPlaceDetail(place);
-    group.appendChild(element);
+      group.appendChild(element);
+    });
+    list.appendChild(group);
   });
-  list.appendChild(group);
 }
 
 function pointsForTravelPlace(name){
@@ -294,7 +291,7 @@ function openPlaceDetail(place){
       </div>
 
       <div class="detail-meta">
-        ${place.unknown?"ORT NOCH UNBEKANNT · ":""}Nordrhein-Westfalen · Deutschland
+        ${place.unknown?"ORT NOCH UNBEKANNT · ":""}${escapeHTML(place.region||"")} · ${escapeHTML(place.country||"Deutschland")}
       </div>
 
       <div class="detail-status">
@@ -389,4 +386,3 @@ function normalizePlaceName(value){
     .trim()
     .toLowerCase();
 }
-

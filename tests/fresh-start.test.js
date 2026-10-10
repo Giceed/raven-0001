@@ -32,4 +32,3 @@ assert.equal(JSON.parse(values.get("ravenProfile")).onboardingDone,false);
 assert.equal(JSON.parse(values.get("ravenStudioPoisV1"))[0].id,"studio-punkt");
 assert.equal(replaced,"/raven-0001/?view=player");
 console.log("✓ Frischstart-Test bestanden: Spielerfortschritt leer, Startitems gesetzt, Studio erhalten");
-

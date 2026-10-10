@@ -193,4 +193,3 @@ function updateReviewSummary(){
   const rejected=poiReviewCandidates.filter(item=>item.status==="rejected").length;
   setReviewStatus(`${pending} zu prüfen · ${approved} behalten · ${rejected} gelöscht`);
 }
-

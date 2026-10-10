@@ -143,4 +143,3 @@ function startRavenBots(){ensureRavenBotMap();ravenBots.forEach(bot=>startRavenB
 function stopRavenBots(){ravenBots.forEach(bot=>stopRavenBot(bot.id));}
 
 ravenBots=RAVEN_BOT_DEFS.map(makeRavenBot);renderRavenBotCards();renderRavenBotProtocol();updateRavenBotSummary();renderRavenBotReport();loadRavenBotBoundary();
-

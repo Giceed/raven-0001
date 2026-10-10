@@ -1,5 +1,14 @@
 # Raven – Entwicklungs-Log
 
+## V4.8 – Deutschland erwacht
+
+- Die harte Fürstenberg-Kartengrenze und die schwarze Außenmaske wurden entfernt. Die technische Spielwelt umfasst nun Deutschland; mobiles Verschieben bleibt auf eine großzügige Deutschland-Box begrenzt.
+- GPS-Ortserkennung speichert jetzt deutsche Orte auch außerhalb Bad Wünnenbergs, lädt ihre Ortsgrenze und führt sie dynamisch in Ravens Reisen.
+- Neue Orte laden nur bei Bedarf eine begrenzte Auswahl geeigneter OpenStreetMap-Vorschläge. Dörfer erhalten weniger, Städte mehr Erkundungs- und Aktivitätspunkte. Dadurch wird nicht ganz Deutschland auf einmal in den Browser geladen.
+- Automatische Punkte sind ausdrücklich Rohvorschläge mit Hinweis zur Prüfung der öffentlichen Erreichbarkeit. Fürstenberg bleibt das handgepflegte Referenzgebiet.
+- Ortsvorschläge werden lokal zwischengespeichert. Spiel, Fog und Reisebuch können sie nach einem Neuladen wiederverwenden.
+- GPS-Prüfungen decken Fürstenberg und einen zweiten deutschen Standort außerhalb des bisherigen Testgebiets ab.
+
 ## Aktueller Stand
 
 - Raven V3.5 begrenzt den passiven Werteverlust bei geschlossener App auf höchstens 24 Stunden. Eine längere Pause bestraft den Spieler nicht mehrfach; der neue Abwesenheitstest erweitert den Raven-Stresstest auf 13/13 Fälle.
@@ -151,4 +160,3 @@ Der zusätzliche Raven-Stresstest besteht 10/10 Fälle: Füttern, Spielen, Ersch
 - Spielen kombiniert Hüpfen/Flattern mit einem aufsteigenden Herz.
 - Schlaf zeigt dauerhaft animierte Zzz, solange der Schlafzustand aktiv ist.
 - Mobile Größen und `prefers-reduced-motion` werden berücksichtigt.
-
